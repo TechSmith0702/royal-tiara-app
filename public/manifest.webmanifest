@@ -1,0 +1,12 @@
+{
+  "name": "Royal Tiara Trade Portal",
+  "short_name": "Royal Tiara",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5ead8",
+  "theme_color": "#f5ead8",
+  "icons": [
+    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
