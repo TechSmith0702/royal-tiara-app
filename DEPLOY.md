@@ -17,12 +17,22 @@ Where things live:
 
 Netlify rebuilds the site whenever the code changes, so it needs a copy.
 
+The code is already committed locally, so this only sends it up.
+
+1. github.com → **New repository** → name it `royal-tiara-app` → **Private** →
+   create it, with no README or licence.
+2. Then, in the app folder:
+
 ```bash
-gh repo create royal-tiara-app --private --source . --push
+git remote add origin https://github.com/YOUR-USERNAME/royal-tiara-app.git
+git branch -M main
+git push -u origin main
 ```
 
+GitHub will ask you to sign in the first time.
+
 If you would rather not use GitHub, skip this and drag the `dist` folder onto
-Netlify by hand each time instead.
+netlify.com by hand each time instead.
 
 ---
 
@@ -74,12 +84,13 @@ by hand until now.
 Run the database part first — Supabase → **SQL Editor** → paste
 `supabase/migration-payfast-itn.sql` → Run.
 
-Then deploy the function (needs the Supabase CLI: `npm i -g supabase`):
+Then deploy the function. The Supabase CLI is already available through
+`npx`, so run these in the app folder:
 
 ```bash
-supabase login
-supabase link --project-ref zfeqbhoqdcrrcxfwrctb
-supabase functions deploy payfast-notify --no-verify-jwt
+npx supabase login
+npx supabase link --project-ref zfeqbhoqdcrrcxfwrctb
+npx supabase functions deploy payfast-notify --no-verify-jwt
 ```
 
 `--no-verify-jwt` matters: PayFast is not signed in to anything, so the
@@ -90,7 +101,7 @@ confirmation of the message, and the amount against the order total.
 Then set the secrets it needs:
 
 ```bash
-supabase secrets set PAYFAST_MODE=sandbox PAYFAST_PASSPHRASE=
+npx supabase secrets set PAYFAST_MODE=sandbox PAYFAST_PASSPHRASE=
 ```
 
 The function's address is:
@@ -142,7 +153,7 @@ Only when she is happy with everything:
    **passphrase**.
 2. In Netlify: `VITE_PAYFAST_MODE=live`, her merchant details, and
    `VITE_PAYFAST_PASSPHRASE` set to the same passphrase.
-3. `supabase secrets set PAYFAST_MODE=live PAYFAST_PASSPHRASE=her-passphrase`
+3. `npx supabase secrets set PAYFAST_MODE=live PAYFAST_PASSPHRASE=her-passphrase`
 4. Redeploy the site, then make one small real payment (R5) and refund it.
 
 ---
