@@ -101,12 +101,18 @@ export async function signUp(form) {
   return { needsEmailConfirmation: !data.session }
 }
 
+/** Used by the "forgot password" link, and by Account later on. */
+export async function setNewPassword(password) {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throw new Error(friendly(error.message))
+}
+
 export async function signOut() {
   await supabase.auth.signOut()
 }
 
 export async function sendPasswordReset(email) {
-  const redirectTo = window.location.origin + '/signin'
+  const redirectTo = window.location.origin + '/new-password'
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
   if (error) throw new Error(friendly(error.message))
 }

@@ -3,6 +3,7 @@ import { useAuth } from './lib/auth.jsx'
 import { isSupabaseConfigured } from './lib/supabase.js'
 import SignIn from './screens/SignIn.jsx'
 import Apply from './screens/Apply.jsx'
+import NewPassword from './screens/NewPassword.jsx'
 import Pending from './screens/Pending.jsx'
 import Home from './screens/Home.jsx'
 import Catalogue from './screens/Catalogue.jsx'
@@ -83,6 +84,7 @@ export default function App() {
         <Route path="/" element={<Navigate to={home} replace />} />
         <Route path="/signin" element={user ? <Navigate to={home} replace /> : <SignIn />} />
         <Route path="/apply" element={user ? <Navigate to={home} replace /> : <Apply />} />
+        <Route path="/new-password" element={<NewPassword />} />
         <Route path="/pending" element={user ? <Pending /> : <Navigate to="/signin" replace />} />
 
         <Route element={<RequireSignedIn />}>

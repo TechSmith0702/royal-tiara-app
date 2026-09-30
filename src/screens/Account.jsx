@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { signOut, useAuth } from '../lib/auth.jsx'
 import { fetchOrders } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
@@ -10,6 +10,8 @@ import AppMenu from '../components/AppMenu.jsx'
 
 export default function Account() {
   const { user } = useAuth()
+  const [params] = useSearchParams()
+  const savedPassword = params.get('saved') === 'password'
   const { data: orders } = useLive(fetchOrders, ['orders'], [])
   const count = (orders || []).length
 
@@ -17,6 +19,7 @@ export default function Account() {
     <div className="screen">
       <div className="page-top row between center"><h2 className="title">Account</h2><AppMenu /></div>
       <div className="scroll px-22 pt-8 pb-18 stack gap-14">
+        {savedPassword && <p className="form-note" role="status">Your new password is saved.</p>}
         <section className="profile-card">
           <Avatar name={user.name} size={58} />
           <div className="min0">

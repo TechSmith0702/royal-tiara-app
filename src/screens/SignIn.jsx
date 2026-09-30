@@ -33,7 +33,7 @@ export default function SignIn() {
     }
     try {
       await sendPasswordReset(email)
-      setNote('Check your email for a link to set a new password.')
+      setNote('Check your email. The link opens a page where you choose a new password.')
     } catch (err) {
       setError(err.message)
     }
