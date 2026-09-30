@@ -122,6 +122,11 @@ export default function Apply() {
 
             {error && <p className="form-error" role="alert">{error}</p>}
 
+            <p className="hint mb-0">
+              Royal Tiara uses these details to check your application, price your orders and deliver them. They are
+              not sold or shared with anyone else. Ask us on WhatsApp any time to see or delete them.
+            </p>
+
             <button type="submit" className="btn btn-primary mt-4" disabled={busy}>
               {busy ? 'Sending...' : 'Submit application'}
             </button>

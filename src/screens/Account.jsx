@@ -61,6 +61,8 @@ export default function Account() {
           </a>
         </nav>
 
+        <Link to="/new-password" className="btn btn-outline btn-50">Change password</Link>
+
         <button type="button" className="btn btn-outline btn-50" onClick={signOut}>Sign out</button>
       </div>
       <TabBar />

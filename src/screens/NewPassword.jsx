@@ -17,8 +17,8 @@ export default function NewPassword() {
   const save = async e => {
     e.preventDefault()
     setError('')
-    if (password.length < 8) {
-      setError('Use at least 8 characters.')
+    if (password.length < 6) {
+      setError('Use at least 6 characters.')
       return
     }
     if (password !== again) {
@@ -66,7 +66,7 @@ export default function NewPassword() {
                 autoComplete="new-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
               />
             </label>
 
