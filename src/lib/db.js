@@ -1,8 +1,21 @@
 import { supabase } from './supabase.js'
 import { R } from './format.js'
 
+// Used only until the saved fees arrive, and if the database cannot be reached.
 export const DELIVERY_FEE = 90
 export const JOINING_FEE = 200
+
+/** The fees the admin last saved. Everyone reads the same row. */
+export async function fetchFees() {
+  const { data, error } = await supabase.from('settings').select('delivery_fee, joining_fee').eq('id', true).single()
+  if (error) fail(error)
+  return { delivery: Number(data.delivery_fee), joining: Number(data.joining_fee) }
+}
+
+export async function adminSaveFees(delivery, joining) {
+  const { error } = await supabase.rpc('admin_save_fees', { p_delivery: Number(delivery), p_joining: Number(joining) })
+  if (error) fail(error)
+}
 
 /* ---------- shaping rows from the database ---------- */
 

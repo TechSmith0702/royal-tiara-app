@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { signUp } from '../lib/auth.jsx'
-import { JOINING_FEE } from '../lib/db.js'
+import { JOINING_FEE, fetchFees } from '../lib/db.js'
+import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { BackButton, Segmented } from '../components/ui.jsx'
 
@@ -19,6 +20,8 @@ const FIELDS = [
 const EMPTY = { name: '', business: '', address: '', town: '', postal: '', phone: '', email: '', password: '' }
 
 export default function Apply() {
+  const { data: fees } = useLive(fetchFees, ['settings'], [])
+  const joiningFee = fees ? fees.joining : JOINING_FEE
   const [form, setForm] = useState(EMPTY)
   const [joinPay, setJoinPay] = useState('card')
   const [busy, setBusy] = useState(false)
@@ -77,8 +80,8 @@ export default function Apply() {
             </p>
             <p className="success-text">
               {done.joinPay === 'card'
-                ? 'Your ' + R(JOINING_FEE) + ' joining fee is payable once your account is approved.'
-                : 'Send your ' + R(JOINING_FEE) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
+                ? 'Your ' + R(joiningFee) + ' joining fee is payable once your account is approved.'
+                : 'Send your ' + R(joiningFee) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
             </p>
             <Link to="/signin" className="btn btn-sage">Back to sign in</Link>
           </div>
@@ -102,7 +105,7 @@ export default function Apply() {
             <div className="card-dark stack gap-12 mt-4">
               <div className="row between baseline gap-12">
                 <span className="kicker on-dark">Once-off joining fee</span>
-                <span className="fee">{R(JOINING_FEE)}</span>
+                <span className="fee">{R(joiningFee)}</span>
               </div>
               <p className="on-dark-text">
                 Activates your distributor account and unlocks ordering. Paid once - no monthly fees.

@@ -5,6 +5,7 @@ import { useLive } from '../../lib/live.js'
 import { fmtDate, R } from '../../lib/format.js'
 import { orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
+import Fees from './Fees.jsx'
 
 export default function Sales() {
   const { data, loading, error, refresh } = useLive(fetchOrders, ['orders'], [])
@@ -27,6 +28,8 @@ export default function Sales() {
           <div className="stat-sub">to verify</div>
         </div>
       </div>
+
+      <Fees />
 
       {loading && <Loading label="Loading sales..." />}
       <ErrorNote message={error} onRetry={refresh} />

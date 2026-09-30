@@ -48,7 +48,7 @@ export function changeCartQty(userId, index, delta) {
 export const clearCart = userId => write(userId, [])
 export const replaceCart = (userId, lines) => write(userId, lines)
 
-export function useCart(userId, products) {
+export function useCart(userId, products, deliveryFee = DELIVERY_FEE) {
   useSyncExternalStore(subscribe, () => version)
   return useMemo(() => {
     const lines = read(userId).map((line, index) => {
@@ -67,7 +67,7 @@ export function useCart(userId, products) {
 
     const subtotal = lines.reduce((t, l) => t + l.total, 0)
     const units = lines.reduce((t, l) => t + l.qty, 0)
-    const delivery = lines.length ? DELIVERY_FEE : 0
+    const delivery = lines.length ? deliveryFee : 0
 
     return {
       lines,
@@ -79,7 +79,7 @@ export function useCart(userId, products) {
       items: lines.map(l => ({ productId: l.productId, variant: l.variant, qty: l.qty })),
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, products, version])
+  }, [userId, products, version, deliveryFee])
 }
 
 /** Just the number of items, for the tab bar badge. */

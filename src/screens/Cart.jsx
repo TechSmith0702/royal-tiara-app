@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { changeCartQty, useCart } from '../lib/cart.js'
-import { fetchActiveProducts } from '../lib/db.js'
+import { DELIVERY_FEE, fetchActiveProducts, fetchFees } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import { BackButton, Loading, ProductImage, Stepper } from '../components/ui.jsx'
@@ -9,7 +9,8 @@ import { BackButton, Loading, ProductImage, Stepper } from '../components/ui.jsx
 export default function Cart() {
   const { user } = useAuth()
   const { data: products, loading } = useLive(fetchActiveProducts, ['products'], [])
-  const cart = useCart(user.id, products)
+  const { data: fees } = useLive(fetchFees, ['settings'], [])
+  const cart = useCart(user.id, products, fees ? fees.delivery : DELIVERY_FEE)
   const empty = !loading && cart.lines.length === 0
 
   return (

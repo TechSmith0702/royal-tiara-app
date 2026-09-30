@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { clearCart, useCart } from '../lib/cart.js'
-import { fetchActiveProducts, placeOrder } from '../lib/db.js'
+import { DELIVERY_FEE, fetchActiveProducts, fetchFees, placeOrder } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { goToPayfast, isPayfastConfigured, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
@@ -14,7 +14,8 @@ export default function Checkout() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { data: products, loading } = useLive(fetchActiveProducts, ['products'], [])
-  const cart = useCart(user.id, products)
+  const { data: fees } = useLive(fetchFees, ['settings'], [])
+  const cart = useCart(user.id, products, fees ? fees.delivery : DELIVERY_FEE)
   const placed = useRef(false)
   const [method, setMethod] = useState('eft')
   const [proof, setProof] = useState(null)
