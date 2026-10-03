@@ -12,18 +12,14 @@ export default function DangerZone() {
   const [done, setDone] = useState(null)
   const [error, setError] = useState('')
 
+  const [typed, setTyped] = useState('')
+  const confirmed = typed.trim().toUpperCase() === 'RESET'
+
+  // Confirmed on the page rather than with window.prompt, which some browsers
+  // and in-app web views block without a word.
   const reset = async () => {
     setError('')
-    const typed = window.prompt(
-      'This permanently deletes ALL orders, invoices, chat messages, notifications and uploaded proof files.\n\n' +
-      'Accounts, products and prices are kept.\n\n' +
-      'Type RESET to confirm:',
-    )
-    if (typed === null) return
-    if (typed.trim().toUpperCase() !== 'RESET') {
-      setError('Nothing was deleted - you did not type RESET.')
-      return
-    }
+    if (!confirmed) return
 
     setBusy(true)
     setDone(null)
@@ -36,6 +32,7 @@ export default function DangerZone() {
         setError('Data cleared, but the proof files could not be removed: ' + e.message)
       }
       setDone({ ...counts, files })
+      setTyped('')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -67,7 +64,19 @@ export default function DangerZone() {
           )}
           {error && <p className="form-error" role="alert">{error}</p>}
 
-          <button type="button" className="btn btn-danger btn-46" onClick={reset} disabled={busy}>
+          <label className="field-label">
+            Type RESET to confirm
+            <input
+              className="field"
+              value={typed}
+              onChange={e => setTyped(e.target.value)}
+              autoCapitalize="characters"
+              autoComplete="off"
+              aria-label="Type RESET to confirm"
+            />
+          </label>
+
+          <button type="button" className="btn btn-danger btn-46" onClick={reset} disabled={busy || !confirmed}>
             {busy ? 'Clearing...' : 'Clear all test data'}
           </button>
         </div>
