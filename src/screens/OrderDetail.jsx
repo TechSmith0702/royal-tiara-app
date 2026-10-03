@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
-import { attachProof, confirmReceipt, fetchOrders } from '../lib/db.js'
+import { attachProof, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
+import { goToPayfast, isPayfastConfigured } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 
 export default function OrderDetail() {
@@ -41,6 +42,28 @@ export default function OrderDetail() {
     setBusy(true)
     try {
       await confirmReceipt(order.id)
+      refresh()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const payByCard = () => {
+    setError('')
+    try {
+      goToPayfast(order, user)   // leaves the app for PayFast
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  const payByEft = async () => {
+    setError('')
+    setBusy(true)
+    try {
+      await switchToEft(order.id)
       refresh()
     } catch (e) {
       setError(e.message)
@@ -89,6 +112,25 @@ export default function OrderDetail() {
               <span className="upload-title">Upload proof of payment</span>
               <span className="upload-sub">Photo or PDF</span>
             </FilePicker>
+            {error && <p className="form-error" role="alert">{error}</p>}
+          </section>
+        )}
+
+        {st.byCard && !st.verified && (
+          <section className="card card-pad stack gap-12">
+            <div className="kicker muted">Payment</div>
+            <p className="body-muted">
+              We have not received your card payment yet. If you have just paid, this updates by itself in a
+              few minutes. If the payment was cancelled or did not go through, try again or pay by bank transfer.
+            </p>
+            {isPayfastConfigured && (
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={payByCard}>
+                Pay {R(order.total)} by card
+              </button>
+            )}
+            <button type="button" className="btn btn-outline" disabled={busy} onClick={payByEft}>
+              {busy ? 'Switching...' : 'Pay by bank transfer instead'}
+            </button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
         )}

@@ -18,6 +18,7 @@ export function orderState(order, audience) {
     : collected ? 'In transit'
     : packed ? 'Packed & ready'
     : verified ? 'Payment verified'
+    : byCard ? 'Awaiting card payment'
     : hasProof ? 'Payment under review'
     : 'Awaiting payment'
 
@@ -25,22 +26,29 @@ export function orderState(order, audience) {
     : collected ? 'Collected by courier - on the way to you'
     : packed ? 'Packed & ready for collection'
     : verified ? 'Payment verified - being packed'
-    : byCard ? 'Card payment - being confirmed'
+    : byCard ? 'Waiting for the card payment to be confirmed'
     : hasProof ? 'Payment under review'
     : 'Awaiting proof of payment'
 
   const steps = [
     { label: 'Order placed', done: true, when: fmtDate(order.createdAt) },
-    {
-      // Royal Tiara can verify a payment that was sent on WhatsApp instead of uploaded.
-      label: byCard ? 'Paid by card' : hasProof || !verified ? 'Proof of payment received' : 'Payment received',
-      done: hasProof || verified,
-      when: hasProof
-        ? fmtDate(order.events.proof || order.createdAt)
-        : verified
-          ? 'Confirmed by Royal Tiara'
-          : 'Awaiting upload',
-    },
+    byCard
+      ? {
+        // A card order is only paid once PayFast (or Royal Tiara) confirms it.
+        label: verified ? 'Paid by card' : 'Card payment',
+        done: verified,
+        when: verified ? fmtDate(order.events.verified || order.createdAt) : 'Not confirmed yet',
+      }
+      : {
+        // Royal Tiara can verify a payment that was sent on WhatsApp instead of uploaded.
+        label: hasProof || !verified ? 'Proof of payment received' : 'Payment received',
+        done: hasProof || verified,
+        when: hasProof
+          ? fmtDate(order.events.proof || order.createdAt)
+          : verified
+            ? 'Confirmed by Royal Tiara'
+            : 'Awaiting upload',
+      },
     { label: 'Payment verified', done: verified, when: verified ? 'Confirmed' : 'Pending review' },
     { label: 'Packed & ready', done: packed, when: packed ? 'Ready to collect' : '-' },
     {

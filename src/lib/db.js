@@ -19,6 +19,11 @@ export async function adminSaveFees(delivery, joining) {
 
 /* ---------- shaping rows from the database ---------- */
 
+// The bundled photos in /products were converted from PNG/JPG to WebP (about
+// 24 times smaller). The database may still hold the old names; photos the
+// admin uploaded live in Supabase storage and are left alone.
+const bundledPhoto = path => (path || '').replace(/^(\/products\/[^/]+)\.(png|jpe?g)$/i, '$1.webp')
+
 const mapProduct = row => ({
   id: row.id,
   name: row.name,
@@ -30,8 +35,8 @@ const mapProduct = row => ({
     : null,
   sku: row.sku,
   blurb: row.blurb,
-  image: row.image,
-  images: (row.images && row.images.length ? row.images : row.image ? [row.image] : []),
+  image: bundledPhoto(row.image),
+  images: (row.images && row.images.length ? row.images : row.image ? [row.image] : []).map(bundledPhoto),
   inStock: row.in_stock,
   archived: Boolean(row.archived),
 })
@@ -164,6 +169,12 @@ export async function placeOrder(items, payMethod, proof) {
 
 export async function attachProof(orderId, proof) {
   const { error } = await supabase.rpc('attach_proof', { p_order_id: orderId, p_proof: proof })
+  if (error) fail(error)
+}
+
+/** An unpaid card order becomes a bank transfer, so a proof can be uploaded. */
+export async function switchToEft(orderId) {
+  const { error } = await supabase.rpc('switch_to_eft', { p_order_id: orderId })
   if (error) fail(error)
 }
 

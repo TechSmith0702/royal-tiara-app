@@ -4,15 +4,15 @@
 // Product photos are served from public/products (resized copies of the brand's own images).
 // Products without an entry show their initial on a dark tile instead.
 const IMGFILE = {
-  bcond: 'batana-conditioner.png', bmask: 'batana-hair-mask.png', bhf: 'batana-hairfood.png', bo: 'batana-oil.png', bsh: 'batana-shampoo.png',
-  ehgo: 'extreme-hairgrower-oil.png', hgc: 'hair-growth-conditioner.png', hgm: 'hair-growth-mask.png', hgo: 'hair-growth-oil.png', hgsh: 'hair-growth-shampoo.png',
-  hgt: 'hair-growth-tonic.jpg', hmoist: 'hair-moisturiser.png', hgser: 'hairgrower-serum.png', hlser: 'hairline-serum.png', hlt: 'hairline-therapy.png',
-  bbut: 'beard-butter.jpg', bgs: 'beard-grower-serum.png', beo: 'beard-oil.png',
-  kcond: 'kids-conditioner.png', kmist: 'kids-detangling-mist.png', koil: 'kids-hair-oil.png', kmoist: 'kids-moisturiser.png', ksham: 'kids-shampoo.png',
-  rbc: 'repairboost-conditioner.png', rbsh: 'repairboost-shampoo.png',
-  bco: 'black-castor-oil.jpg', drm: 'deep-repair-mask.png', hps: 'heat-protection-spray.jpg', shf: 'sheabutter-hairfood.jpg',
-  bfs: 'batana-full-set.png', bws: 'batana-wash-set.png', hgfs: 'hair-growth-full-set.png', hgws: 'hair-growth-wash-set.png',
-  kset: 'kids-hair-care-set.png', kwds: 'kids-washday-set.png', kcs: 'kings-care-set.png', rbfs: 'repairboost-full-set.png', rbws: 'repairboost-wash-set.jpg',
+  bcond: 'batana-conditioner.webp', bmask: 'batana-hair-mask.webp', bhf: 'batana-hairfood.webp', bo: 'batana-oil.webp', bsh: 'batana-shampoo.webp',
+  ehgo: 'extreme-hairgrower-oil.webp', hgc: 'hair-growth-conditioner.webp', hgm: 'hair-growth-mask.webp', hgo: 'hair-growth-oil.webp', hgsh: 'hair-growth-shampoo.webp',
+  hgt: 'hair-growth-tonic.webp', hmoist: 'hair-moisturiser.webp', hgser: 'hairgrower-serum.webp', hlser: 'hairline-serum.webp', hlt: 'hairline-therapy.webp',
+  bbut: 'beard-butter.webp', bgs: 'beard-grower-serum.webp', beo: 'beard-oil.webp',
+  kcond: 'kids-conditioner.webp', kmist: 'kids-detangling-mist.webp', koil: 'kids-hair-oil.webp', kmoist: 'kids-moisturiser.webp', ksham: 'kids-shampoo.webp',
+  rbc: 'repairboost-conditioner.webp', rbsh: 'repairboost-shampoo.webp',
+  bco: 'black-castor-oil.webp', drm: 'deep-repair-mask.webp', hps: 'heat-protection-spray.webp', shf: 'sheabutter-hairfood.webp',
+  bfs: 'batana-full-set.webp', bws: 'batana-wash-set.webp', hgfs: 'hair-growth-full-set.webp', hgws: 'hair-growth-wash-set.webp',
+  kset: 'kids-hair-care-set.webp', kwds: 'kids-washday-set.webp', kcs: 'kings-care-set.webp', rbfs: 'repairboost-full-set.webp', rbws: 'repairboost-wash-set.webp',
 }
 const imageFor = id => (IMGFILE[id] ? `/products/${IMGFILE[id]}` : '')
 

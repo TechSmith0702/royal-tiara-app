@@ -38,7 +38,7 @@ export default function NewPassword() {
   return (
     <div className="screen signin">
       <div className="signin-logo">
-        <img className="logo-img" src="/logo.png" alt="Royal Tiara" width="640" height="351" />
+        <img className="logo-img" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
       </div>
 
       <div className="signin-body">

@@ -32,7 +32,7 @@ const homeFor = user => {
 function Splash() {
   return (
     <div className="screen splash">
-      <img className="logo-img logo-sm" src="/logo.png" alt="Royal Tiara" width="640" height="351" />
+      <img className="logo-img logo-sm" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
       <p className="lede">Loading your trade portal...</p>
     </div>
   )
@@ -41,7 +41,7 @@ function Splash() {
 function NotConfigured() {
   return (
     <div className="screen splash">
-      <img className="logo-img logo-sm" src="/logo.png" alt="Royal Tiara" width="640" height="351" />
+      <img className="logo-img logo-sm" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
       <h2 className="title">Not connected yet</h2>
       <p className="lede center">
         Add your Supabase project URL and publishable key to the .env file, then restart the app.

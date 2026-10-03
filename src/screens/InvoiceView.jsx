@@ -29,7 +29,7 @@ export default function InvoiceView() {
         <article className="invoice-doc">
           <header className="row between start gap-12">
             <div className="stack gap-6 min0">
-              <img className="inv-logo" src="/logo.png" alt="Royal Tiara" width="640" height="351" />
+              <img className="inv-logo" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
               <div className="muted-sm">Where beauty begins within &middot; WhatsApp {WHATSAPP_DISPLAY}</div>
             </div>
             <div className="right">

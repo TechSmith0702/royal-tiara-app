@@ -9,7 +9,7 @@ export default function Pending() {
   return (
     <div className="screen">
       <div className="scroll page stack gap-18">
-        <div className="signin-logo"><img className="logo-img logo-sm" src="/logo.png" alt="Royal Tiara" width="640" height="351" /></div>
+        <div className="signin-logo"><img className="logo-img logo-sm" src="/logo.webp" alt="Royal Tiara" width="640" height="351" /></div>
 
         <div className={declined ? 'card card-pad stack gap-12' : 'success-card stack gap-12'}>
           <h2 className="h3">{declined ? 'Application not approved' : 'Application under review'}</h2>
