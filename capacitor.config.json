@@ -1,0 +1,11 @@
+{
+  "appId": "za.co.royaltiara.trade",
+  "appName": "Royal Tiara",
+  "webDir": "dist",
+  "server": {
+    "allowNavigation": ["sandbox.payfast.co.za", "www.payfast.co.za"]
+  },
+  "android": {
+    "backgroundColor": "#f5ead8"
+  }
+}

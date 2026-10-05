@@ -6,9 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android:build": "vite build --mode android && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "@supabase/supabase-js": "^2.116.0",
     "blueimp-md5": "^2.19.0",
     "react": "^19.3.0",
@@ -16,6 +20,7 @@
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.3.0"
   }

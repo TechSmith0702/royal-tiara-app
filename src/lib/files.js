@@ -1,3 +1,4 @@
+import { isNativeApp } from './platform.js'
 import { supabase } from './supabase.js'
 
 // Proof-of-payment files go into a private bucket, in a folder named after the
@@ -44,6 +45,11 @@ export async function proofUrl(path) {
 }
 
 export async function openProof(path) {
+  // The app has no second window: leaving for the file opens the phone's browser.
+  if (isNativeApp) {
+    window.location.href = await proofUrl(path)
+    return
+  }
   const win = window.open('', '_blank')
   try {
     const url = await proofUrl(path)

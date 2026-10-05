@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { publicUrl } from './platform.js'
 import { supabase } from './supabase.js'
 
 const AuthContext = createContext({ session: null, user: null, ready: false })
@@ -112,7 +113,7 @@ export async function signOut() {
 }
 
 export async function sendPasswordReset(email) {
-  const redirectTo = window.location.origin + '/new-password'
+  const redirectTo = publicUrl('/new-password')
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
   if (error) throw new Error(friendly(error.message))
 }

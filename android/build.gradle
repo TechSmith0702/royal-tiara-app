@@ -1,0 +1,35 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'com.google.gms:google-services:4.4.4'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    // The project sits in OneDrive, which locks and uploads build files while
+    // Gradle writes them. Build outside it, in the local app-data folder.
+    def localAppData = System.getenv('LOCALAPPDATA')
+    if (localAppData) {
+        layout.buildDirectory = file("${localAppData}/royal-tiara-android-build/${project.name}")
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

@@ -3,6 +3,7 @@ import { fetchOrders } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { fmtDate, R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
+import { isNativeApp } from '../lib/platform.js'
 import { BackButton, Loading } from '../components/ui.jsx'
 
 export default function InvoiceView() {
@@ -20,9 +21,12 @@ export default function InvoiceView() {
     <div className="screen">
       <div className="page-top row between center no-print">
         <BackButton to="/invoices" />
-        <button type="button" className="btn btn-dark btn-sm btn-inline" onClick={() => window.print()}>
-          Save as PDF / Print
-        </button>
+        {/* Android's in-app browser has no print dialog, so the button would do nothing there. */}
+        {!isNativeApp && (
+          <button type="button" className="btn btn-dark btn-sm btn-inline" onClick={() => window.print()}>
+            Save as PDF / Print
+          </button>
+        )}
       </div>
 
       <div className="scroll px-22 pb-24">
