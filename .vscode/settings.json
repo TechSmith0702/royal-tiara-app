@@ -1,0 +1,9 @@
+{
+  // The android folder is opened in Android Studio. Stop VS Code's Java and
+  // Gradle extensions from importing it, which only causes noise and errors here.
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.import.exclusions": ["**/android/**", "**/node_modules/**"],
+  "gradle.autoDetect": "off",
+  "java.configuration.checkProjectSettingsExclusions": false
+}
