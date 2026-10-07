@@ -3,9 +3,12 @@
   "appName": "Royal Tiara",
   "webDir": "dist",
   "server": {
-    "allowNavigation": ["sandbox.payfast.co.za", "www.payfast.co.za"]
+    "allowNavigation": ["sandbox.payfast.co.za", "www.payfast.co.za", "royaltiara.netlify.app"]
   },
   "android": {
+    "backgroundColor": "#f5ead8"
+  },
+  "ios": {
     "backgroundColor": "#f5ead8"
   }
 }

@@ -1,6 +1,6 @@
-# Builds the Android app icons and splash screens from the brand artwork.
+# Builds the Android and iPhone app icons and splash screens from the brand artwork.
 #
-#   python scripts/generate-android-icons.py
+#   python scripts/generate-app-icons.py
 #
 # Needs Pillow (pip install pillow). Re-run it if public/app-icon.png or
 # public/logo.png change, then rebuild the app.
@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / 'android' / 'app' / 'src' / 'main' / 'res'
 STORE = ROOT / 'android' / 'play-store'
+IOS_ASSETS = ROOT / 'ios' / 'App' / 'App' / 'Assets.xcassets'
 CREAM = (0xF5, 0xEA, 0xD8, 255)
 
 DENSITIES = {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}
@@ -82,4 +83,12 @@ for path in RES.glob('drawable*/splash.png'):
 STORE.mkdir(exist_ok=True)
 place(crown, (512, 512), 0.74, CREAM).convert('RGB').save(STORE / 'icon-512.png')
 
-print('Android icons and splash screens written.')
+# iPhone: one 1024px icon (Apple rounds the corners and refuses transparency)
+# and a 2732px square splash that is cropped to fit each screen.
+if IOS_ASSETS.exists():
+    place(crown, (1024, 1024), 0.72, CREAM).convert('RGB').save(IOS_ASSETS / 'AppIcon.appiconset' / 'AppIcon-512@2x.png')
+    splash = place(logo, (2732, 2732), 0.25, CREAM).convert('RGB')
+    for path in (IOS_ASSETS / 'Splash.imageset').glob('*.png'):
+        splash.save(path)
+
+print('App icons and splash screens written.')

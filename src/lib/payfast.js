@@ -1,4 +1,5 @@
 import md5 from 'blueimp-md5'
+import { paymentReturnUrl } from './platform.js'
 
 // PayFast redirect (sandbox by default).
 //
@@ -37,8 +38,8 @@ export function payfastFields(order, user) {
   const fields = {
     merchant_id: MERCHANT_ID,
     merchant_key: MERCHANT_KEY,
-    return_url: origin + '/payment/return?order=' + order.id,
-    cancel_url: origin + '/payment/cancel?order=' + order.id,
+    return_url: paymentReturnUrl('/payment/return?order=' + order.id),
+    cancel_url: paymentReturnUrl('/payment/cancel?order=' + order.id),
     notify_url: NOTIFY_URL || origin + '/payfast-notify',
     name_first: firstName,
     name_last: lastName,
