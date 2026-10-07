@@ -1,0 +1,42 @@
+# Codemagic builds the iPhone app on a Mac in the cloud (codemagic.io).
+# Start a build from the Codemagic dashboard: Start new build -> pick the workflow.
+
+workflows:
+  # Checks that the iPhone app compiles. No Apple account needed: it builds for
+  # the iPhone simulator, which does not need signing.
+  ios-check:
+    name: iPhone build check (no signing)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      node: 22
+      xcode: latest
+      vars:
+        # The same public values the website uses. The publishable key is meant
+        # to ship inside the app; the database security rules protect the data.
+        VITE_SUPABASE_URL: https://zfeqbhoqdcrrcxfwrctb.supabase.co
+        VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_w6HyULBcrgrbF7Uf2ape5w_V4XedmCO
+        # PayFast's shared sandbox account: no real money moves.
+        VITE_PAYFAST_MODE: sandbox
+        VITE_PAYFAST_MERCHANT_ID: "10000100"
+        VITE_PAYFAST_MERCHANT_KEY: 46f0cd694581a
+    scripts:
+      - name: Install packages
+        script: npm ci
+      - name: Build the app and copy it into the iPhone project
+        script: npm run ios:build
+      - name: Compile for the iPhone simulator
+        script: |
+          cd ios/App
+          xcodebuild -list -project App.xcodeproj
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+    artifacts:
+      - build/Build/Products/Debug-iphonesimulator/*.app
