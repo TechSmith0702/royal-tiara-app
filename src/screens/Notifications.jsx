@@ -6,6 +6,7 @@ import { useLive } from '../lib/live.js'
 import { timeAgo } from '../lib/format.js'
 import { ErrorNote, Loading } from '../components/ui.jsx'
 import TabBar from '../components/TabBar.jsx'
+import PushCard from '../components/PushCard.jsx'
 
 const ICONS = {
   order: '\u{1F4E6}',
@@ -39,6 +40,7 @@ export default function Notifications() {
       </div>
 
       <div className="scroll list pt-8">
+        <PushCard audience={user.role === 'admin' ? 'admin' : 'distributor'} />
         {loading && <Loading label="Loading notifications..." />}
         <ErrorNote message={error} onRetry={refresh} />
 

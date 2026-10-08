@@ -91,4 +91,10 @@ if IOS_ASSETS.exists():
     for path in (IOS_ASSETS / 'Splash.imageset').glob('*.png'):
         splash.save(path)
 
+# Notification badge: Android shows a small white silhouette in the status bar.
+badge = place(crown, (96, 96), 0.86)
+white = Image.new('RGBA', badge.size, (255, 255, 255, 0))
+white.putalpha(badge.getchannel('A').point(lambda v: 255 if v > 96 else 0))
+white.save(ROOT / 'public' / 'badge.png')
+
 print('App icons and splash screens written.')

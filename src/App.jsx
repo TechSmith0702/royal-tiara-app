@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { useAuth } from './lib/auth.jsx'
+import { resumePush } from './lib/push.js'
 import { isSupabaseConfigured } from './lib/supabase.js'
 import SignIn from './screens/SignIn.jsx'
 import Apply from './screens/Apply.jsx'
@@ -72,6 +74,12 @@ function RequireSignedIn() {
 
 export default function App() {
   const { user, ready } = useAuth()
+  const userId = user ? user.id : null
+
+  // A phone that already allows notifications is linked to whoever signs in.
+  useEffect(() => {
+    if (userId) resumePush().catch(() => {})
+  }, [userId])
 
   if (!isSupabaseConfigured) return <div className="app"><NotConfigured /></div>
   if (!ready) return <div className="app"><Splash /></div>

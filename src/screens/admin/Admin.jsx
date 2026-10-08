@@ -12,6 +12,7 @@ import Sales from './Sales.jsx'
 import CatalogueAdmin from './CatalogueAdmin.jsx'
 import AdminChat from './AdminChat.jsx'
 import DangerZone from './DangerZone.jsx'
+import PushCard from '../../components/PushCard.jsx'
 
 // The reset tool wipes every order, invoice and chat. It stays off on the
 // live site unless VITE_TEST_TOOLS is turned on.
@@ -58,6 +59,8 @@ export default function Admin() {
           <div className="admin-name">{user.name}</div>
           <div className="accent-line">Admin controller &middot; manages accounts &amp; payments</div>
         </section>
+
+        <PushCard audience="admin" />
 
         {tab === 'apps' && <Applications />}
         {tab === 'sales' && <Sales />}

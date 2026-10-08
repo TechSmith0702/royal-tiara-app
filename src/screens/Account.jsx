@@ -7,6 +7,7 @@ import AddressCard from '../components/AddressCard.jsx'
 import { ActiveDot, Avatar } from '../components/ui.jsx'
 import TabBar from '../components/TabBar.jsx'
 import AppMenu from '../components/AppMenu.jsx'
+import PushCard from '../components/PushCard.jsx'
 
 export default function Account() {
   const { user } = useAuth()
@@ -41,6 +42,8 @@ export default function Account() {
         </section>
 
         <AddressCard user={user} title="Delivery address" />
+
+        <PushCard />
 
         <nav className="menu">
           <Link to="/orders" className="menu-row">

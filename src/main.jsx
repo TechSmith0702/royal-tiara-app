@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AuthProvider } from './lib/auth.jsx'
+import { registerServiceWorker } from './lib/push.js'
 import './styles.css'
+
+registerServiceWorker()
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

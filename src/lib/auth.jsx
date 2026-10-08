@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { publicUrl } from './platform.js'
+import { disablePush } from './push.js'
 import { supabase } from './supabase.js'
 
 const AuthContext = createContext({ session: null, user: null, ready: false })
@@ -109,6 +110,9 @@ export async function setNewPassword(password) {
 }
 
 export async function signOut() {
+  // Stop this phone's notifications first, so the next person to sign in here
+  // does not receive the previous account's orders and messages.
+  await disablePush().catch(() => {})
   await supabase.auth.signOut()
 }
 
