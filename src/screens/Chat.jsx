@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchThread, markThreadRead, sendMessage } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
@@ -18,10 +18,7 @@ export default function Chat() {
     ['messages'],
     [user.id],
   )
-  // Opened from an order's "Ask about this order": start the message with its number.
-  const [params] = useSearchParams()
-  const about = /^RT-\d+$/.test(params.get('about') || '') ? params.get('about') : ''
-  const [text, setText] = useState(about ? 'About order ' + about + ': ' : '')
+  const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [problem, setProblem] = useState('')
   const marked = useRef(false)
@@ -86,7 +83,6 @@ export default function Chat() {
             onChange={e => setText(e.target.value)}
             placeholder="Write a message..."
             aria-label="Message"
-            autoFocus={Boolean(about)}
             maxLength={2000}
           />
           <button type="submit" className="send-btn" disabled={sending || !text.trim()} aria-label="Send message">

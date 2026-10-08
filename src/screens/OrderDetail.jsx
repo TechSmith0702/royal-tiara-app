@@ -169,18 +169,15 @@ export default function OrderDetail() {
           <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
         </section>
 
-        {st.delivered ? (
-          <div className="row gap-10">
+        <div className="row gap-10">
+          {st.delivered ? (
             <button type="button" className="btn btn-primary btn-52 grow" onClick={reorder}>Reorder</button>
-            <Link to={'/invoices/' + order.id} className="btn btn-outline btn-52 grow">Invoice</Link>
-          </div>
-        ) : (
-          // Still on its way: a question about it is more useful than reordering.
-          <div className="stack gap-10">
-            <Link to={'/chat?about=' + order.id} className="btn btn-primary btn-52">Ask about this order</Link>
-            <Link to={'/invoices/' + order.id} className="btn btn-outline btn-52">Invoice</Link>
-          </div>
-        )}
+          ) : (
+            // Still on its way: reordering makes no sense yet, so offer the way back.
+            <Link to="/home" className="btn btn-primary btn-52 grow">Back to home</Link>
+          )}
+          <Link to={'/invoices/' + order.id} className="btn btn-outline btn-52 grow">Invoice</Link>
+        </div>
       </div>
     </div>
   )
