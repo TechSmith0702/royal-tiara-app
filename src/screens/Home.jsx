@@ -8,6 +8,7 @@ import { ActiveDot, Avatar, ErrorNote, Loading, ProductImage } from '../componen
 import NotificationBell from '../components/NotificationBell.jsx'
 import TabBar from '../components/TabBar.jsx'
 import AppMenu from '../components/AppMenu.jsx'
+import InstallCard from '../components/InstallCard.jsx'
 
 export default function Home() {
   const { user } = useAuth()
@@ -64,6 +65,8 @@ export default function Home() {
             <div className="stat-sub">in progress</div>
           </div>
         </div>
+
+        <InstallCard />
 
         <Link to="/chat" className="wa-banner">
           <span className="wa-icon" aria-hidden="true">&#9993;</span>

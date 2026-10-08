@@ -4,9 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AuthProvider } from './lib/auth.jsx'
 import { registerServiceWorker } from './lib/push.js'
+import { captureInstallPrompt } from './lib/install.js'
 import './styles.css'
 
 registerServiceWorker()
+captureInstallPrompt()
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

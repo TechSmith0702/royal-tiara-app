@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { sendPasswordReset, signIn } from '../lib/auth.jsx'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
+import InstallCard from '../components/InstallCard.jsx'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -83,6 +84,8 @@ export default function SignIn() {
         </form>
 
         <Link to="/apply" className="btn btn-sage">Apply for a trade account</Link>
+
+        <InstallCard />
       </div>
 
       <a className="help-line" href={waLink()} target="_blank" rel="noreferrer">

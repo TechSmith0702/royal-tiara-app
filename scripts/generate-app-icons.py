@@ -91,6 +91,11 @@ if IOS_ASSETS.exists():
     for path in (IOS_ASSETS / 'Splash.imageset').glob('*.png'):
         splash.save(path)
 
+# Website / installed app (WebAPK): a 192px icon, and a "maskable" one that
+# Android crops to a circle or squircle, so the crown keeps a wide margin.
+place(crown, (192, 192), 0.74, CREAM).convert('RGB').save(ROOT / 'public' / 'app-icon-192.png')
+place(crown, (512, 512), 0.56, CREAM).convert('RGB').save(ROOT / 'public' / 'icon-maskable-512.png')
+
 # Notification badge: Android shows a small white silhouette in the status bar.
 badge = place(crown, (96, 96), 0.86)
 white = Image.new('RGBA', badge.size, (255, 255, 255, 0))

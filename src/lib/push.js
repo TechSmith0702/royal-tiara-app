@@ -1,4 +1,4 @@
-import { isNativeApp } from './platform.js'
+import { isInstalledWebApp, isIos, isNativeApp } from './platform.js'
 import { supabase } from './supabase.js'
 
 // Lock-screen notifications for the website and the installed (home-screen)
@@ -11,12 +11,8 @@ const VAPID_PUBLIC_KEY = 'BORDwv3PfOQ6OPblNXJ34Ev8uEyM37PkHsIqNmfG89qSYOexHGCESg
 export const pushSupported =
   !isNativeApp && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 
-const isIos =
-  /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-const isInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
-
 /** iPhones only allow notifications once the site is added to the home screen. */
-export const needsHomeScreen = isIos && !isInstalled && !isNativeApp
+export const needsHomeScreen = isIos && !isInstalledWebApp && !isNativeApp
 
 export function registerServiceWorker() {
   if (isNativeApp || !('serviceWorker' in navigator)) return

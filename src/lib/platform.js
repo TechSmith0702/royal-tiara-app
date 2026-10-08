@@ -4,6 +4,14 @@ import { Capacitor } from '@capacitor/core'
 export const isNativeApp = Capacitor.isNativePlatform()
 const isIosApp = Capacitor.getPlatform() === 'ios'
 
+/** An iPhone or iPad (iPads report themselves as a Mac with a touch screen). */
+export const isIos =
+  /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+/** Opened from a home-screen icon (installed web app), not a browser tab. */
+export const isInstalledWebApp =
+  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+
 // Inside the app the page address is the phone's own (https://localhost on
 // Android, capacitor://localhost on iPhone), which means nothing in an email.
 // Links that leave the app point at the website.
