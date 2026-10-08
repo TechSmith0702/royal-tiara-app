@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
@@ -10,6 +10,10 @@ import { orderState } from '../lib/orders.js'
 import { goToPayfast, isPayfastConfigured } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 
+// PayFast confirms a card payment within seconds. If nothing has arrived after
+// this long, the payment most likely failed and the options to pay again show.
+const CONFIRM_WINDOW_MS = 5 * 60 * 1000
+
 export default function OrderDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -20,16 +24,25 @@ export default function OrderDetail() {
   // Coming from "Payment cancelled" we know the payment did not happen.
   const [params] = useSearchParams()
   const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
+  const [now, setNow] = useState(() => Date.now())
+  const order = (orders || []).find(o => o.id === id)
+  const waitLeft = order ? new Date(order.createdAt).getTime() + CONFIRM_WINDOW_MS - now : 0
+
+  // Re-check when the waiting window ends, so the page moves on by itself.
+  useEffect(() => {
+    if (waitLeft <= 0) return
+    const timer = setTimeout(() => setNow(Date.now()), waitLeft + 500)
+    return () => clearTimeout(timer)
+  }, [waitLeft])
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
 
-  const order = (orders || []).find(o => o.id === id)
   if (!order) return <Navigate to="/orders" replace />
 
   const st = orderState(order)
   // PayFast confirms a card payment a few seconds after the distributor comes
   // back. Until then, offering "Pay by card" again would invite paying twice.
-  const confirming = st.byCard && !st.verified && !showRetry && Date.now() - new Date(order.createdAt) < 15 * 60 * 1000
+  const confirming = st.byCard && !st.verified && !showRetry && waitLeft > 0
 
   const attach = async file => {
     setError('')
