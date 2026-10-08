@@ -17,7 +17,6 @@
     "@capacitor/ios": "^8.5.2",
     "@supabase/supabase-js": "^2.116.0",
     "blueimp-md5": "^2.19.0",
-    "qrcode": "^1.5.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.3"

@@ -12,15 +12,26 @@ function wasDismissed() {
 }
 
 /**
- * Suggests installing Royal Tiara as an app on this phone or computer. Hidden
- * once it is installed, inside the store apps, or after "Not now".
+ * Installing Royal Tiara as an app on this phone or computer.
+ * - On the sign-in screen it is a suggestion: hidden once installed or after "Not now".
+ * - On the "Install the app" screen (onScreen) it is always shown, and says so
+ *   when the app is already installed.
  */
-export default function InstallCard() {
+export default function InstallCard({ onScreen = false }) {
   const state = useInstallState()
   const [dismissed, setDismissed] = useState(wasDismissed)
   const [busy, setBusy] = useState(false)
 
-  if (state === 'installed' || dismissed) return null
+  if (!onScreen && (state === 'installed' || dismissed)) return null
+
+  if (state === 'installed') {
+    return (
+      <section className="card card-pad stack gap-10">
+        <div className="kicker muted">Get the app</div>
+        <p className="body-muted mb-0">Royal Tiara is installed on this device. Open it from its icon on your home screen.</p>
+      </section>
+    )
+  }
 
   const dismiss = () => {
     setDismissed(true)
@@ -44,7 +55,7 @@ export default function InstallCard() {
     <section className="card card-pad stack gap-10">
       <div className="row between center">
         <div className="kicker muted">Get the app</div>
-        <button type="button" className="text-btn" onClick={dismiss}>Not now</button>
+        {!onScreen && <button type="button" className="text-btn" onClick={dismiss}>Not now</button>}
       </div>
 
       {state === 'prompt' && (

@@ -7,14 +7,14 @@ import { fetchThread } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { Avatar } from './ui.jsx'
-import { BagIcon, BoxIcon, ChatIcon, HomeIcon, QrIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
+import { isNativeApp } from '../lib/platform.js'
+import { BagIcon, BoxIcon, ChatIcon, DownloadIcon, HomeIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
 
 const ADMIN_LINKS = [
   { to: '/admin', tab: 'apps', label: 'Applications', Icon: UserIcon },
   { to: '/admin?tab=sales', tab: 'sales', label: 'Sales', Icon: ReceiptIcon },
   { to: '/admin?tab=catalogue', tab: 'catalogue', label: 'Catalogue', Icon: BagIcon },
   { to: '/admin?tab=chat', tab: 'chat', label: 'Chat', Icon: ChatIcon },
-  { to: '/admin/share', label: 'Share the app', Icon: QrIcon },
 ]
 
 const LINKS = [
@@ -50,7 +50,9 @@ export default function AppMenu() {
   if (!user) return null
 
   const admin = user.role === 'admin'
-  const links = admin ? ADMIN_LINKS : LINKS
+  // The store apps are already installed, so they don't offer it.
+  const install = isNativeApp ? [] : [{ to: '/install', label: 'Install the app', Icon: DownloadIcon }]
+  const links = [...(admin ? ADMIN_LINKS : LINKS), ...install]
   const unread = (messages || []).filter(m => m.sender_id !== user.id && !m.read_at).length
   const badgeFor = key => (key === 'cart' ? cartCount : key === 'chat' ? unread : 0)
   const tabNow = new URLSearchParams(search).get('tab') || 'apps'
