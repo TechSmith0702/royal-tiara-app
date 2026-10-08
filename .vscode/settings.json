@@ -5,5 +5,8 @@
   "java.import.maven.enabled": false,
   "java.import.exclusions": ["**/android/**", "**/node_modules/**"],
   "gradle.autoDetect": "off",
+  // The Gradle extension's build server ignores the import settings above and
+  // kept starting Gradle copies until the PC ran out of memory. Off here.
+  "java.gradle.buildServer.enabled": "off",
   "java.configuration.checkProjectSettingsExclusions": false
 }
