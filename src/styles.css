@@ -88,6 +88,7 @@ p { margin: 0; }
 .link-btn { font-weight: 600; font-size: 13.5px; color: var(--accent-deep); padding: 8px 0; }
 .link-inline { color: var(--accent-deep); text-decoration: underline; text-underline-offset: 3px; }
 .text-btn { border: 0; background: none; font-weight: 700; font-size: 13px; color: var(--sage-deep); padding: 6px; }
+.retry-link { align-self: flex-start; border: 0; background: none; }
 .form-error { font-size: 13.5px; color: var(--oos-fg); background: var(--oos-bg); border-radius: 16px; padding: 10px 14px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .chev { font-size: 20px; color: rgba(32, 30, 29, .35); line-height: 1; }

@@ -4,16 +4,15 @@ import { paymentReturnUrl } from './platform.js'
 // PayFast redirect (sandbox by default).
 //
 // The distributor is sent to PayFast, pays, and comes back to the app. PayFast
-// also calls a "notify_url" server-to-server to confirm the payment, but that
-// cannot reach a laptop on localhost - so until the app is hosted, Royal Tiara
-// still verifies card payments by hand in the admin console.
+// also calls a "notify_url" server-to-server to confirm the payment: the
+// payfast-notify Supabase function, which marks the order paid.
 
 const MODE = import.meta.env.VITE_PAYFAST_MODE || 'sandbox'
 const MERCHANT_ID = import.meta.env.VITE_PAYFAST_MERCHANT_ID
 const MERCHANT_KEY = import.meta.env.VITE_PAYFAST_MERCHANT_KEY
 const PASSPHRASE = import.meta.env.VITE_PAYFAST_PASSPHRASE || ''
-// Where PayFast confirms the payment server-to-server. Empty on a laptop:
-// PayFast cannot reach localhost, so the admin verifies card orders by hand.
+// Where PayFast confirms the payment server-to-server (the Supabase function).
+// If it is not set, the admin verifies card orders by hand.
 const NOTIFY_URL = import.meta.env.VITE_PAYFAST_NOTIFY_URL || ''
 
 const PROCESS_URL = {

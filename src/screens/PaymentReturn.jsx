@@ -21,7 +21,7 @@ export default function PaymentReturn({ outcome }) {
             transfer and upload a proof of payment.
           </p>
           <div className="stack gap-10">
-            {orderId && <Link to={'/orders/' + orderId} className="btn btn-primary">Open the order</Link>}
+            {orderId && <Link to={'/orders/' + orderId + '?retry=1'} className="btn btn-primary">Open the order</Link>}
             <Link to="/shop" className="btn btn-outline">Back to the shop</Link>
           </div>
         </div>

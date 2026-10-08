@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
 import { attachProof, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
@@ -17,6 +17,9 @@ export default function OrderDetail() {
   const { data: orders, loading, refresh } = useLive(fetchOrders, ['orders'], [])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // Coming from "Payment cancelled" we know the payment did not happen.
+  const [params] = useSearchParams()
+  const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
 
@@ -24,6 +27,9 @@ export default function OrderDetail() {
   if (!order) return <Navigate to="/orders" replace />
 
   const st = orderState(order)
+  // PayFast confirms a card payment a few seconds after the distributor comes
+  // back. Until then, offering "Pay by card" again would invite paying twice.
+  const confirming = st.byCard && !st.verified && !showRetry && Date.now() - new Date(order.createdAt) < 15 * 60 * 1000
 
   const attach = async file => {
     setError('')
@@ -116,7 +122,23 @@ export default function OrderDetail() {
           </section>
         )}
 
-        {st.byCard && !st.verified && (
+        {confirming && (
+          <section className="card card-pad stack gap-12">
+            <div className="kicker muted">Payment</div>
+            <div className="row center gap-10">
+              <span className="spinner" aria-hidden="true" />
+              <strong>Confirming your card payment...</strong>
+            </div>
+            <p className="body-muted mb-0">
+              PayFast usually confirms within a minute. This page updates by itself, so there is no need to pay again.
+            </p>
+            <button type="button" className="link-inline link-btn retry-link" onClick={() => setShowRetry(true)}>
+              Payment didn't go through?
+            </button>
+          </section>
+        )}
+
+        {st.byCard && !st.verified && !confirming && (
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
