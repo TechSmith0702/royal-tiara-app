@@ -24,6 +24,7 @@ import PaymentReturn from './screens/PaymentReturn.jsx'
 import Admin from './screens/admin/Admin.jsx'
 import Person from './screens/admin/Person.jsx'
 import ProductEditor from './screens/admin/ProductEditor.jsx'
+import ShareApp from './screens/admin/ShareApp.jsx'
 
 const homeFor = user => {
   if (!user) return '/signin'
@@ -124,6 +125,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/product/:id" element={<ProductEditor />} />
           <Route path="/admin/person/:id" element={<Person />} />
+          <Route path="/admin/share" element={<ShareApp />} />
         </Route>
 
         <Route path="*" element={<Navigate to={home} replace />} />

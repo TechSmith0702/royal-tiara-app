@@ -7,13 +7,14 @@ import { fetchThread } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { Avatar } from './ui.jsx'
-import { BagIcon, BoxIcon, ChatIcon, HomeIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
+import { BagIcon, BoxIcon, ChatIcon, HomeIcon, QrIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
 
 const ADMIN_LINKS = [
   { to: '/admin', tab: 'apps', label: 'Applications', Icon: UserIcon },
   { to: '/admin?tab=sales', tab: 'sales', label: 'Sales', Icon: ReceiptIcon },
   { to: '/admin?tab=catalogue', tab: 'catalogue', label: 'Catalogue', Icon: BagIcon },
   { to: '/admin?tab=chat', tab: 'chat', label: 'Chat', Icon: ChatIcon },
+  { to: '/admin/share', label: 'Share the app', Icon: QrIcon },
 ]
 
 const LINKS = [
@@ -87,7 +88,7 @@ export default function AppMenu() {
             <div className="drawer-links">
               {links.map(({ to, tab, label, Icon, badge }) => {
                 const count = badgeFor(badge)
-                const here = admin ? pathname === '/admin' && tab === tabNow : pathname.startsWith(to)
+                const here = tab ? pathname === '/admin' && tab === tabNow : pathname.startsWith(to)
                 return (
                   <Link
                     key={to}

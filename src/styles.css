@@ -617,3 +617,4 @@ button.tab { border: 0; background: transparent; font-family: inherit; cursor: p
 .qr-box { display: grid; place-items: center; min-height: 224px; padding: 12px; border-radius: 18px; background: #fff; }
 .qr-box img { width: 200px; height: 200px; }
 .qr-url { text-align: center; word-break: break-all; }
+.icon-btn-on { background: var(--ink); color: var(--cream); border-color: var(--ink); }

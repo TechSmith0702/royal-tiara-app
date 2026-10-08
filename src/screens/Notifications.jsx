@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchNotifications, markNotificationsRead } from '../lib/db.js'
@@ -6,6 +6,7 @@ import { useLive } from '../lib/live.js'
 import { timeAgo } from '../lib/format.js'
 import { ErrorNote, Loading } from '../components/ui.jsx'
 import TabBar from '../components/TabBar.jsx'
+import { GearIcon } from '../components/Icons.jsx'
 import PushCard from '../components/PushCard.jsx'
 
 const ICONS = {
@@ -20,6 +21,7 @@ export default function Notifications() {
   const navigate = useNavigate()
   const { data, loading, error, refresh } = useLive(fetchNotifications, ['notifications'], [])
   const marked = useRef(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const items = data || []
   const unread = items.filter(n => !n.read_at).length
@@ -36,11 +38,22 @@ export default function Notifications() {
     <div className="screen">
       <div className="page-top row between center">
         <h2 className="title">Notifications</h2>
-        <button type="button" className="btn btn-outline btn-sm btn-inline" onClick={() => navigate(-1)}>Back</button>
+        <div className="row center gap-10">
+          <button
+            type="button"
+            className={'icon-btn' + (settingsOpen ? ' icon-btn-on' : '')}
+            aria-label="Notification settings"
+            aria-expanded={settingsOpen}
+            onClick={() => setSettingsOpen(open => !open)}
+          >
+            <GearIcon />
+          </button>
+          <button type="button" className="btn btn-outline btn-sm btn-inline" onClick={() => navigate(-1)}>Back</button>
+        </div>
       </div>
 
       <div className="scroll list pt-8">
-        <PushCard audience={user.role === 'admin' ? 'admin' : 'distributor'} />
+        {settingsOpen && <PushCard audience={user.role === 'admin' ? 'admin' : 'distributor'} />}
         {loading && <Loading label="Loading notifications..." />}
         <ErrorNote message={error} onRetry={refresh} />
 
