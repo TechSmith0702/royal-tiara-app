@@ -97,7 +97,7 @@ as members so the business never depends on one person.**
 | Royal Tiara's domain and email | Webway (cPanel), `royaltiara.co.za` | Mail server `mail.royaltiara.co.za` |
 | Emails the app sends (sign-up, password reset) | Supabase → Authentication → Emails → SMTP Settings | Check which mailbox it sends from |
 
-**Settings the website needs** (Netlify → Site configuration → Environment
+**Settings the website needs** (Netlify → Project configuration → Environment
 variables; the same names go in a local `.env` file, see `.env.example`):
 
 | Name | What |
@@ -171,8 +171,9 @@ are skipped automatically (the `ignore` line in `netlify.toml`).
 - **Rebuild the latest code:** Deploys → **Trigger deploy** → **Deploy site**.
   Needed after changing an environment variable. If a build seems stuck on old
   files: **Clear cache and deploy site**.
-- **Only deploy when you choose:** Site configuration → Build & deploy →
-  Continuous deployment → Build settings → Configure → builds **Stopped**.
+- **Only deploy when you choose:** Project configuration → Build & deploy →
+  Continuous deployment → Build settings → Configure → Build status
+  **Stopped builds**.
   Pushes then wait on GitHub until you use Trigger deploy. Set back to
   **Active** for automatic builds.
 - **Freeze the live version:** Deploys → **Lock to stop auto publishing**; new
