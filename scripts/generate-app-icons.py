@@ -96,6 +96,10 @@ if IOS_ASSETS.exists():
 place(crown, (192, 192), 0.74, CREAM).convert('RGB').save(ROOT / 'public' / 'app-icon-192.png')
 place(crown, (512, 512), 0.56, CREAM).convert('RGB').save(ROOT / 'public' / 'icon-maskable-512.png')
 
+# Installed web app splash screen: Chrome draws the "any" icon on the cream
+# background, so this one is the full logo (crown and name) on transparency.
+place(logo, (512, 512), 0.92).save(ROOT / 'public' / 'splash-logo-512.png')
+
 # Notification badge: Android shows a small white silhouette in the status bar.
 badge = place(crown, (96, 96), 0.86)
 white = Image.new('RGBA', badge.size, (255, 255, 255, 0))

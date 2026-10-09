@@ -32,11 +32,13 @@ const homeFor = user => {
   return user.status === 'approved' ? '/home' : '/pending'
 }
 
+// Shown while signing in is checked. It matches Android's own splash screen for
+// the installed app (the logo on cream), so one flows into the other.
 function Splash() {
   return (
-    <div className="screen splash">
-      <img className="logo-img logo-sm" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
-      <p className="lede">Loading your trade portal...</p>
+    <div className="screen splash" role="status" aria-label="Loading Royal Tiara">
+      <img className="logo-img logo-splash" src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
+      <span className="spinner" aria-hidden="true" />
     </div>
   )
 }

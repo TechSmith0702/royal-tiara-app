@@ -510,6 +510,7 @@ p { margin: 0; }
 /* ---------- brand logo ---------- */
 .logo-img { width: min(320px, 84vw); height: auto; display: block; }
 .logo-sm { width: min(180px, 50vw); }
+.logo-splash { width: 132px; }
 .signin-logo { padding: 0 0 34px; }
 
 /* ---------- invoice logo ---------- */
