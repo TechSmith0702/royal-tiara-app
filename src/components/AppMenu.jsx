@@ -7,7 +7,7 @@ import { fetchThread } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { Avatar } from './ui.jsx'
-import { isNativeApp } from '../lib/platform.js'
+import { useInstallState } from '../lib/install.js'
 import { BagIcon, BoxIcon, ChatIcon, DownloadIcon, HomeIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
 
 const ADMIN_LINKS = [
@@ -31,6 +31,7 @@ export default function AppMenu() {
   const { user } = useAuth()
   const { pathname, search } = useLocation()
   const [open, setOpen] = useState(false)
+  const installState = useInstallState()
   const cartCount = useCartCount(user && user.id)
   const { data: messages } = useLive(
     () => (user && user.role !== 'admin' ? fetchThread(user.id) : []),
@@ -50,8 +51,9 @@ export default function AppMenu() {
   if (!user) return null
 
   const admin = user.role === 'admin'
-  // The store apps are already installed, so they don't offer it.
-  const install = isNativeApp ? [] : [{ to: '/install', label: 'Install the app', Icon: DownloadIcon }]
+  // Hidden once installed: in the store apps, when opened from the home-screen
+  // icon, and straight after installing from this browser.
+  const install = installState === 'installed' ? [] : [{ to: '/install', label: 'Install the app', Icon: DownloadIcon }]
   const links = [...(admin ? ADMIN_LINKS : LINKS), ...install]
   const unread = (messages || []).filter(m => m.sender_id !== user.id && !m.read_at).length
   const badgeFor = key => (key === 'cart' ? cartCount : key === 'chat' ? unread : 0)
