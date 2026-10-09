@@ -5,7 +5,7 @@
   publish = "dist"
   # Skip the build (and its credits) when a push only touches the Android app.
   # Exit code 0 tells Netlify there is nothing to rebuild.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)android' ':(exclude)ios' ':(exclude)capacitor.config.json' ':(exclude).env.native' ':(exclude)codemagic.yaml' ':(exclude)scripts/generate-app-icons.py'"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)android' ':(exclude)ios' ':(exclude)capacitor.config.json' ':(exclude).env.native' ':(exclude)codemagic.yaml' ':(exclude)*.md' ':(exclude)scripts/generate-app-icons.py'"
 
 [build.environment]
   NODE_VERSION = "22"
