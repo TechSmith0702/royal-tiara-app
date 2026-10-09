@@ -1,5 +1,7 @@
 # Royal Tiara — Trade Portal
 
+> **Looking after the app?** Start with [HANDBOOK.md](HANDBOOK.md): how it all fits together, everyday recipes, accounts and keys, and what to do when something goes wrong.
+
 A mobile web app where approved distributors order Royal Tiara products, and the admin (Dinah) approves trade applications, verifies payments, moves orders through fulfilment and manages prices and stock.
 
 Built with React and Vite from the Claude Design handoff (`design_handoff_royal_tiara_b2b`).
