@@ -166,9 +166,24 @@ push instead of pushing each fix. Pushes that only touch `android/`, `ios/`,
 `capacitor.config.json`, `.env.native`, `codemagic.yaml` or the icon script
 are skipped automatically (the `ignore` line in `netlify.toml`).
 
+**Deploying by hand** (app.netlify.com → the `royaltiara` site):
+
+- **Rebuild the latest code:** Deploys → **Trigger deploy** → **Deploy site**.
+  Needed after changing an environment variable. If a build seems stuck on old
+  files: **Clear cache and deploy site**.
+- **Only deploy when you choose:** Site configuration → Build & deploy →
+  Continuous deployment → Build settings → Configure → builds **Stopped**.
+  Pushes then wait on GitHub until you use Trigger deploy. Set back to
+  **Active** for automatic builds.
+- **Freeze the live version:** Deploys → **Lock to stop auto publishing**; new
+  builds wait until you publish them.
+- **Status:** each deploy shows Published, Building, Failed or Skipped. Open a
+  failed one for its log (the red lines near the end say what went wrong).
+
 **Undoing a bad release:** Netlify → Deploys → pick the previous good deploy →
-**Publish deploy**. That restores the old site instantly (no build). Then fix
-the code, or undo the commit with `git revert <commit>` and push.
+**Publish deploy**. That restores the old site instantly (no build, no
+credits). Then fix the code, or undo the commit with `git revert <commit>` and
+push.
 
 ---
 
