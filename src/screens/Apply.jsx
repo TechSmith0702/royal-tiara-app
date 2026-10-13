@@ -127,7 +127,7 @@ export default function Apply() {
 
             <p className="hint mb-0">
               Royal Tiara uses these details to check your application, price your orders and deliver them. They are
-              not sold or shared with anyone else. Ask us on WhatsApp any time to see or delete them.
+              never sold. You can delete your account at any time. <Link to="/privacy" className="link-inline">Privacy policy</Link>
             </p>
 
             <button type="submit" className="btn btn-primary mt-4" disabled={busy}>

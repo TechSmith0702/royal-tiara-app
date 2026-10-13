@@ -116,6 +116,34 @@ export async function signOut() {
   await supabase.auth.signOut()
 }
 
+// Set when an account is deleted, read once by the sign-in screen to confirm it.
+const DELETED_FLAG = 'rt-account-deleted'
+
+/**
+ * After the account has been deleted on the server: forget it on this device.
+ * The sign-out is local only, because the login no longer exists to sign out of.
+ */
+export async function forgetDeletedAccount() {
+  try {
+    sessionStorage.setItem(DELETED_FLAG, '1')
+  } catch {
+    // private browsing: the sign-in screen just shows no confirmation
+  }
+  await disablePush().catch(() => {})
+  await supabase.auth.signOut({ scope: 'local' })
+}
+
+/** True once, straight after an account was deleted on this device. */
+export function wasJustDeleted() {
+  try {
+    if (sessionStorage.getItem(DELETED_FLAG) !== '1') return false
+    sessionStorage.removeItem(DELETED_FLAG)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function sendPasswordReset(email) {
   const redirectTo = publicUrl('/new-password')
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })

@@ -266,6 +266,15 @@ export async function updateProfile(userId, patch) {
   if (error) fail(error)
 }
 
+/**
+ * Deletes the signed-in person's own account for good. Their orders are kept
+ * as sales records but no longer point at an account (migration-delete-account.sql).
+ */
+export async function deleteMyAccount() {
+  const { error } = await supabase.rpc('delete_my_account')
+  if (error) fail(error)
+}
+
 export async function sendMessage(distributorId, senderId, body) {
   const text = body.trim()
   if (!text) return

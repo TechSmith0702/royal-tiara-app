@@ -4,7 +4,7 @@ How the app works, how to look after it, and what to do when something goes
 wrong. Written for whoever maintains it next: Thando, Royal Tiara's web
 developer, or an AI assistant you paste this file into.
 
-Last updated: 9 October 2026.
+Last updated: 13 October 2026.
 
 ---
 
@@ -209,6 +209,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 11. `migration-fees.sql`
 12. `migration-card-retry.sql`
 13. `migration-push.sql`
+14. `migration-delete-account.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:
@@ -317,8 +318,10 @@ because PayFast only accepts `https://` return addresses.
 **Icons and splash screens:** `python scripts/generate-app-icons.py`
 (needs Pillow) after changing `public/app-icon.png` or `public/logo.png`.
 
-**Before either store:** add "Delete my account", a privacy policy page, and a
-reviewer test account (both stores require these).
+**Before either store:** create a reviewer test account. The stores also ask
+for two web links, which exist: the privacy policy
+(`https://royaltiara.netlify.app/privacy`) and how to delete an account
+(`https://royaltiara.netlify.app/delete-account`).
 
 ---
 
@@ -330,9 +333,22 @@ notifications and proof files, restarts order numbers at RT-2001, and puts
 every product back in stock. Accounts, products, prices and fees are kept.
 **It clears the live database**, so only use it before real trading.
 
-**Removing an account:** Supabase → Authentication → Users → ⋮ → **Delete
-user**. Not from the `profiles` table (that leaves the login behind). It is
-refused if the person still has orders.
+**Deleting accounts.** Distributors and applicants delete their own account in
+the app: Account → **Delete my account** (also on the waiting screen). It
+removes the login, profile, chat, notifications and notification devices.
+**Orders and invoices are kept** as sales records, with the customer name and
+address saved on each order, but no longer linked to an account. Admin
+accounts cannot be deleted from the app.
+
+To remove someone yourself: Supabase → Authentication → Users → ⋮ → **Delete
+user**. Not from the `profiles` table (that leaves the login behind). Their
+orders are kept in the same way.
+
+**Privacy policy:** the public pages `/privacy` and `/delete-account` (the
+links the app stores ask for) are in `src/screens/Privacy.jsx`. The business
+details at the top of that file (contact email, Information Officer, address,
+effective date) must be kept correct, and the policy should be reviewed by
+someone qualified before real trading.
 
 ---
 
@@ -367,8 +383,8 @@ refused if the person still has orders.
 
 ## 15. What's next (roadmap)
 
-1. **"Delete my account"** and a **privacy policy** page (POPIA; required by
-   both app stores).
+1. ~~"Delete my account" and a privacy policy page~~ Done (13 Oct 2026). Still
+   to do: have the policy wording checked, and fill in the business address.
 2. **Android APK / Google Play** via a Trusted Web Activity (keeps
    notifications and automatic updates), or the Capacitor app plus Firebase.
 3. **Own address** `app.royaltiara.co.za` (Netlify domain + a DNS record at

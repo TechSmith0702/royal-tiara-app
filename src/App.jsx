@@ -25,6 +25,8 @@ import Admin from './screens/admin/Admin.jsx'
 import Person from './screens/admin/Person.jsx'
 import ProductEditor from './screens/admin/ProductEditor.jsx'
 import InstallApp from './screens/InstallApp.jsx'
+import DeleteAccount from './screens/DeleteAccount.jsx'
+import Privacy, { DeleteAccountHelp } from './screens/Privacy.jsx'
 
 const homeFor = user => {
   if (!user) return '/signin'
@@ -96,6 +98,9 @@ export default function App() {
         <Route path="/signin" element={user ? <Navigate to={home} replace /> : <SignIn />} />
         <Route path="/apply" element={user ? <Navigate to={home} replace /> : <Apply />} />
         <Route path="/new-password" element={<NewPassword />} />
+        {/* Public: the app stores and new applicants open these without signing in. */}
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/delete-account" element={<DeleteAccountHelp />} />
         <Route path="/pending" element={user ? <Pending /> : <Navigate to="/signin" replace />} />
 
         <Route element={<RequireSignedIn />}>
@@ -106,6 +111,7 @@ export default function App() {
           />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/install" element={<InstallApp />} />
+          <Route path="/account/delete" element={<DeleteAccount />} />
         </Route>
 
         <Route element={<RequireDistributor />}>

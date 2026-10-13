@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { sendPasswordReset, signIn } from '../lib/auth.jsx'
+import { sendPasswordReset, signIn, wasJustDeleted } from '../lib/auth.jsx'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import InstallCard from '../components/InstallCard.jsx'
 
@@ -9,7 +9,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(() => (wasJustDeleted() ? 'Your account has been deleted.' : ''))
 
   const submit = async e => {
     e.preventDefault()
@@ -91,6 +91,7 @@ export default function SignIn() {
       <a className="help-line" href={waLink()} target="_blank" rel="noreferrer">
         <span className="dot" />Need help? WhatsApp {WHATSAPP_DISPLAY}
       </a>
+      <Link to="/privacy" className="link-inline foot-link">Privacy policy</Link>
     </div>
   )
 }

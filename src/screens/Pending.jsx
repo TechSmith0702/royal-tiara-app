@@ -29,6 +29,11 @@ export default function Pending() {
         </div>
 
         <button type="button" className="btn btn-outline btn-50" onClick={signOut}>Sign out</button>
+
+        <div className="row center gap-18 foot-links">
+          <Link to="/privacy" className="link-inline">Privacy policy</Link>
+          <Link to="/account/delete" className="link-danger">Delete my account</Link>
+        </div>
       </div>
     </div>
   )

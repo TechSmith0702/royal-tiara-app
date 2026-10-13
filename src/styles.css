@@ -614,3 +614,16 @@ button.tab { border: 0; background: transparent; font-family: inherit; cursor: p
 .drawer-foot { padding-top: 12px; border-top: 1px solid var(--line); }
 .drawer-foot .help-line { justify-content: flex-start; }
 .icon-btn-on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+/* Privacy policy and account deletion */
+.policy h3 { font-family: var(--display); font-size: 17px; margin: 22px 0 6px; }
+.policy h3:first-of-type { margin-top: 14px; }
+.policy p, .policy li { font-size: 14.5px; line-height: 1.6; color: rgba(32, 30, 29, .78); }
+.policy p { margin: 0 0 10px; }
+.policy ul, .policy ol { margin: 0 0 10px; padding-left: 20px; }
+.policy li { margin-bottom: 6px; }
+.plain-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: rgba(32, 30, 29, .72); }
+.link-danger { align-self: center; padding: 8px; font-size: 13.5px; font-weight: 600; color: var(--oos-fg); text-decoration: underline; text-underline-offset: 3px; }
+.foot-link { align-self: center; font-size: 12.5px; }
+.foot-links { justify-content: center; }
+.help-line + .foot-link { margin-top: 8px; }

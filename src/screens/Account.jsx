@@ -59,11 +59,16 @@ export default function Account() {
             <span>WhatsApp Royal Tiara</span>
             <span className="menu-val">{WHATSAPP_DISPLAY}<span className="chev">&rsaquo;</span></span>
           </a>
+          <Link to="/privacy" className="menu-row">
+            <span>Privacy policy</span><span className="menu-val"><span className="chev">&rsaquo;</span></span>
+          </Link>
         </nav>
 
         <Link to="/new-password" className="btn btn-outline btn-50">Change password</Link>
 
         <button type="button" className="btn btn-outline btn-50" onClick={signOut}>Sign out</button>
+
+        <Link to="/account/delete" className="link-danger">Delete my account</Link>
       </div>
       <TabBar />
     </div>
