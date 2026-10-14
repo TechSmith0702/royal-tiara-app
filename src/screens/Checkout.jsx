@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { clearCart, useCart } from '../lib/cart.js'
 import { DELIVERY_FEE, fetchActiveProducts, fetchFees, placeOrder } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
-import { goToPayfast, isPayfastConfigured, isPayfastSandbox } from '../lib/payfast.js'
+import { goToPayfast, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import AddressCard from '../components/AddressCard.jsx'
@@ -40,8 +40,13 @@ export default function Checkout() {
       const order = await placeOrder(cart.items, method, method === 'eft' ? proof : null)
       placed.current = true
       clearCart(user.id)
-      if (method === 'card' && isPayfastConfigured) {
-        goToPayfast(order, user)   // leaves the app for PayFast
+      if (method === 'card') {
+        try {
+          await goToPayfast(order)   // leaves the app for PayFast
+        } catch {
+          // The order is saved: its page offers to pay again or switch to bank transfer.
+          navigate('/orders/' + order.id + '?retry=1', { replace: true })
+        }
         return
       }
       navigate('/success/' + order.id, { replace: true })
@@ -90,15 +95,9 @@ export default function Checkout() {
             <div className="payfast-note">
               <span className="payfast-badge">Pay<span>Fast</span></span>
               <span className="grow">
-                {isPayfastConfigured ? (
-                  <>
-                    You will be taken to PayFast's secure page to pay, then brought straight back.
-                    {isPayfastSandbox && (
-                      <em className="demo-note">Test mode - use PayFast's test card, no real money moves.</em>
-                    )}
-                  </>
-                ) : (
-                  'Card payments are not switched on yet. Place the order and Royal Tiara will confirm payment with you.'
+                You will be taken to PayFast's secure page to pay, then brought straight back.
+                {isPayfastSandbox && (
+                  <em className="demo-note">Test mode - use PayFast's test card, no real money moves.</em>
                 )}
               </span>
             </div>
@@ -119,7 +118,7 @@ export default function Checkout() {
         <button type="button" className="btn btn-primary" onClick={place} disabled={busy}>
           {busy
             ? 'Placing order...'
-            : method === 'card' && isPayfastConfigured
+            : method === 'card'
               ? 'Pay ' + R(cart.total) + ' with card'
               : 'Place order'}
         </button>

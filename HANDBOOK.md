@@ -60,8 +60,9 @@ All four use the same code (`src/`) and the same database.
         +--> Supabase: database, logins, file storage (proof of payment,
         |    product photos), live updates (orders, chat), and two
         |    "Edge Functions":
-        |       payfast-notify  - PayFast calls it to confirm card payments
-        |       push-send       - sends lock-screen notifications
+        |       payfast-checkout - prepares and signs each card payment
+        |       payfast-notify   - PayFast calls it to confirm card payments
+        |       push-send        - sends lock-screen notifications
         |
         +--> PayFast: card payments (the browser goes there and comes back;
              PayFast separately tells payfast-notify the payment went through)
@@ -103,10 +104,11 @@ variables; the same names go in a local `.env` file, see `.env.example`):
 | Name | What |
 |---|---|
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | Connection to Supabase. The publishable key is meant to be public |
-| `VITE_PAYFAST_MODE` | `sandbox` (test) or `live` |
-| `VITE_PAYFAST_MERCHANT_ID`, `VITE_PAYFAST_MERCHANT_KEY`, `VITE_PAYFAST_PASSPHRASE` | PayFast account details (sandbox: public test values; passphrase blank) |
-| `VITE_PAYFAST_NOTIFY_URL` | `https://zfeqbhoqdcrrcxfwrctb.supabase.co/functions/v1/payfast-notify` |
+| `VITE_PAYFAST_MODE` | `sandbox` or `live`. Only switches the "test mode" notes in the app |
 | `VITE_TEST_TOOLS` | `off` on the live site |
+
+PayFast's merchant details are **not** website settings (anything starting
+`VITE_` is readable by anyone). They are Supabase secrets, below.
 
 **Secrets kept inside Supabase** (Edge Functions → Secrets, or
 `npx.cmd supabase secrets list --project-ref zfeqbhoqdcrrcxfwrctb`):
@@ -114,7 +116,9 @@ variables; the same names go in a local `.env` file, see `.env.example`):
 | Name | What |
 |---|---|
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notification keys. The public key is also written in `src/lib/push.js` |
-| `PAYFAST_MODE`, `PAYFAST_PASSPHRASE` | Only needed for live payments (defaults: sandbox, no passphrase) |
+| `PAYFAST_MODE` | `sandbox` (default) or `live` |
+| `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY` | Royal Tiara's PayFast account. Without them, sandbox uses PayFast's public test account |
+| `PAYFAST_PASSPHRASE` | The "Salt Passphrase" set in the PayFast dashboard. Signs every payment |
 
 **Never put a secret key in the app's code or in a `VITE_` setting.** Anything
 starting `VITE_` ends up in the website for anyone to read.
@@ -232,8 +236,11 @@ npx.cmd supabase db query --linked --project-ref zfeqbhoqdcrrcxfwrctb "select co
 
 ## 8. Supabase Edge Functions
 
-Two small server programs in `supabase/functions/`:
+Three small server programs in `supabase/functions/`:
 
+- **`payfast-checkout`**: prepares each card payment. It checks the order
+  belongs to the person paying, takes the amount from the database, and signs
+  it with the merchant details and passphrase from the secrets.
 - **`payfast-notify`**: receives PayFast's payment confirmations and marks the
   order paid (calls the database function `payfast_mark_paid`).
 - **`push-send`**: sends lock-screen notifications for new notifications and
@@ -243,13 +250,14 @@ After changing either one:
 
 ```
 npx.cmd supabase login
+npx.cmd supabase functions deploy payfast-checkout --no-verify-jwt --use-api --project-ref zfeqbhoqdcrrcxfwrctb
 npx.cmd supabase functions deploy payfast-notify --no-verify-jwt --use-api --project-ref zfeqbhoqdcrrcxfwrctb
 npx.cmd supabase functions deploy push-send --no-verify-jwt --use-api --project-ref zfeqbhoqdcrrcxfwrctb
 ```
 
 `--no-verify-jwt` is required: PayFast and the database call these functions
-without signing in. Neither function trusts its input (see the comments at the
-top of each file).
+without signing in, and `payfast-checkout` checks the person's sign-in itself.
+None of them trusts its input (see the comments at the top of each file).
 
 **Logs:** Supabase → Edge Functions → pick the function → **Logs**. This is
 the first place to look when card payments are not confirming or
@@ -281,15 +289,27 @@ switch to bank transfer.
 **Bank transfer:** the distributor uploads a proof of payment; the admin
 checks the bank account and taps **Verify** in Sales.
 
-**Going live with real money** (see also `DEPLOY.md` section 7):
+**Going live with real money:**
 
-1. Royal Tiara's own PayFast merchant account: merchant ID, merchant key, and
-   a passphrase set in the PayFast dashboard.
-2. Recommended first: move the payment signing into a Supabase function so the
-   passphrase never appears in the website's code.
-3. Netlify: `VITE_PAYFAST_MODE=live` and her merchant details.
-4. Supabase secrets: `PAYFAST_MODE=live`, `PAYFAST_PASSPHRASE=<passphrase>`.
-5. Redeploy, make one small real payment (R5) and refund it.
+1. Your mum's PayFast dashboard → Settings → Developer settings: set a
+   **Salt Passphrase**. Keep it, the merchant ID and the merchant key in a
+   password manager.
+2. **Push the latest code first** (the website must already be using
+   `payfast-checkout`), and let Netlify finish.
+3. Supabase → Edge Functions → **Secrets** → add, typing the values yourself:
+   `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, and
+   set `PAYFAST_MODE` to `live`. Both PayFast functions use them straight away.
+4. Netlify → Environment variables: `VITE_PAYFAST_MODE=live` (removes the
+   "test mode" notes), then **Trigger deploy**. The old
+   `VITE_PAYFAST_MERCHANT_ID`, `_MERCHANT_KEY`, `_PASSPHRASE` and
+   `_NOTIFY_URL` settings are no longer used and can be deleted.
+5. Test with a real card: the cheapest order is a R40 product plus delivery.
+   To keep it small, set the delivery fee to R0 in Admin → Sales → Fees for
+   the test, then put it back. Check the order turns "Payment verified" by
+   itself, then refund it from the PayFast dashboard.
+
+**Back to test mode:** set `PAYFAST_MODE` to `sandbox` (and the Netlify
+label back), then Trigger deploy.
 
 ---
 

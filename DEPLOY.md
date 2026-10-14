@@ -147,16 +147,8 @@ If a card order stays unverified: Supabase → **Edge Functions → payfast-noti
 
 ## 7. Going from test money to real money
 
-Only when she is happy with everything:
-
-1. PayFast dashboard → her own **merchant ID** and **merchant key**, and set a
-   **passphrase**.
-2. In Netlify: `VITE_PAYFAST_MODE=live`, her merchant details, and
-   `VITE_PAYFAST_PASSPHRASE` set to the same passphrase.
-3. `npx supabase secrets set PAYFAST_MODE=live PAYFAST_PASSPHRASE=her-passphrase`
-4. Redeploy the site, then make one small real payment (R5) and refund it.
-
----
+Card payments are signed on the server, so the merchant details never go into
+Netlify. Follow **HANDBOOK.md, section 10 ("Going live with real money")**.
 
 ## Everyday, afterwards
 

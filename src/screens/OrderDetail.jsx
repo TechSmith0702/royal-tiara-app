@@ -7,7 +7,7 @@ import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
-import { goToPayfast, isPayfastConfigured } from '../lib/payfast.js'
+import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 
 // PayFast confirms a card payment within seconds. If nothing has arrived after
@@ -69,12 +69,14 @@ export default function OrderDetail() {
     }
   }
 
-  const payByCard = () => {
+  const payByCard = async () => {
     setError('')
+    setBusy(true)
     try {
-      goToPayfast(order, user)   // leaves the app for PayFast
+      await goToPayfast(order)   // leaves the app for PayFast
     } catch (e) {
       setError(e.message)
+      setBusy(false)
     }
   }
 
@@ -158,11 +160,9 @@ export default function OrderDetail() {
               We have not received your card payment yet. If you have just paid, this updates by itself in a
               few minutes. If the payment was cancelled or did not go through, try again or pay by bank transfer.
             </p>
-            {isPayfastConfigured && (
-              <button type="button" className="btn btn-primary" disabled={busy} onClick={payByCard}>
-                Pay {R(order.total)} by card
-              </button>
-            )}
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={payByCard}>
+              Pay {R(order.total)} by card
+            </button>
             <button type="button" className="btn btn-outline" disabled={busy} onClick={payByEft}>
               {busy ? 'Switching...' : 'Pay by bank transfer instead'}
             </button>

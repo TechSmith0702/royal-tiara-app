@@ -16,10 +16,8 @@ workflows:
         # to ship inside the app; the database security rules protect the data.
         VITE_SUPABASE_URL: https://zfeqbhoqdcrrcxfwrctb.supabase.co
         VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_w6HyULBcrgrbF7Uf2ape5w_V4XedmCO
-        # PayFast's shared sandbox account: no real money moves.
+        # Only the "test mode" notes; payments are signed on the server.
         VITE_PAYFAST_MODE: sandbox
-        VITE_PAYFAST_MERCHANT_ID: "10000100"
-        VITE_PAYFAST_MERCHANT_KEY: 46f0cd694581a
     scripts:
       - name: Install packages
         script: npm ci

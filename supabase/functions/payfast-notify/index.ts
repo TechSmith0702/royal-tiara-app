@@ -9,16 +9,19 @@
 //   2. it came from one of PayFast's own servers,
 //   3. PayFast itself confirms the message when we send it back ("validate"),
 //   4. the amount matches the order total (checked in the database).
+// It must also be for Royal Tiara's own merchant account.
 //
 // Deploy:  supabase functions deploy payfast-notify --no-verify-jwt
-// Secrets: PAYFAST_PASSPHRASE, PAYFAST_MODE (sandbox|live)
+// Secrets: PAYFAST_PASSPHRASE, PAYFAST_MODE (sandbox|live), PAYFAST_MERCHANT_ID
+//          (the same secrets as payfast-checkout)
 //          SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { crypto } from 'https://deno.land/std@0.224.0/crypto/mod.ts'
 
-const MODE = Deno.env.get('PAYFAST_MODE') ?? 'sandbox'
+const MODE = Deno.env.get('PAYFAST_MODE') === 'live' ? 'live' : 'sandbox'
 const PASSPHRASE = Deno.env.get('PAYFAST_PASSPHRASE') ?? ''
+const MERCHANT_ID = Deno.env.get('PAYFAST_MERCHANT_ID') || (MODE === 'sandbox' ? '10000100' : '')
 const HOST = MODE === 'live' ? 'www.payfast.co.za' : 'sandbox.payfast.co.za'
 
 // PayFast's own servers. A message from anywhere else is ignored.
@@ -29,9 +32,15 @@ const ALLOWED_HOSTS = [
   'w2w.payfast.co.za',
 ]
 
-/** PayFast encodes like PHP: spaces as "+", percent escapes in upper case. */
+/**
+ * PayFast encodes like PHP's urlencode: spaces as "+", upper-case escapes, and
+ * ! ' ( ) * ~ escaped too (encodeURIComponent leaves those alone).
+ */
 const encode = (value: string) =>
-  encodeURIComponent(value.trim()).replace(/%20/g, '+').replace(/%[0-9a-f]{2}/g, m => m.toUpperCase())
+  encodeURIComponent(value.trim())
+    .replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
+    .replace(/%20/g, '+')
+    .replace(/%[0-9a-f]{2}/g, m => m.toUpperCase())
 
 async function md5(text: string) {
   const digest = await crypto.subtle.digest('MD5', new TextEncoder().encode(text))
@@ -89,6 +98,7 @@ Deno.serve(async req => {
   }
 
   if (PASSPHRASE && !(await signatureMatches(pairs, data['signature'] ?? ''))) return stop('bad signature')
+  if (MERCHANT_ID && data['merchant_id'] !== MERCHANT_ID) return stop('not for this merchant account')
   if (!(await cameFromPayfast(req))) return stop('not from a PayFast server')
   if (!(await payfastAgrees(raw))) return stop('PayFast did not confirm the message')
   if (data['payment_status'] !== 'COMPLETE') return stop(`payment status ${data['payment_status']}`)
