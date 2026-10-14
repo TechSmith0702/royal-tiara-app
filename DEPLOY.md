@@ -43,18 +43,17 @@ netlify.com by hand each time instead.
 2. Netlify reads `netlify.toml`, so the build command (`npm run build`) and
    folder (`dist`) fill in on their own. Leave them.
 3. Before the first deploy, open **Site configuration → Environment variables**
-   and add these four:
+   and add these:
 
    | Name | Value |
    | --- | --- |
    | `VITE_SUPABASE_URL` | `https://zfeqbhoqdcrrcxfwrctb.supabase.co` |
    | `VITE_SUPABASE_PUBLISHABLE_KEY` | the publishable key from your `.env` |
    | `VITE_PAYFAST_MODE` | `sandbox` |
-   | `VITE_PAYFAST_MERCHANT_ID` | `10000100` |
-   | `VITE_PAYFAST_MERCHANT_KEY` | `46f0cd694581a` |
+   | `VITE_TEST_TOOLS` | `off` |
 
-   Leave `VITE_PAYFAST_PASSPHRASE` out while testing: the sandbox has no
-   passphrase, and PayFast rejects a signed request when there is none.
+   PayFast's merchant details are not website settings: they are Supabase
+   secrets used by the payment functions (section 4).
 
 4. Deploy. Note the address it gives you, e.g. `royal-tiara.netlify.app`.
    Everything below calls this **YOUR-SITE**.
@@ -98,20 +97,16 @@ function has to accept an anonymous call. It does its own checking instead —
 the signature, that the call came from a PayFast server, PayFast's own
 confirmation of the message, and the amount against the order total.
 
-Then set the secrets it needs:
+Deploy the function that prepares and signs each card payment too:
 
 ```bash
-npx supabase secrets set PAYFAST_MODE=sandbox PAYFAST_PASSPHRASE=
+npx supabase functions deploy payfast-checkout --no-verify-jwt
 ```
 
-The function's address is:
-
-```
-https://zfeqbhoqdcrrcxfwrctb.supabase.co/functions/v1/payfast-notify
-```
-
-Add it in Netlify as `VITE_PAYFAST_NOTIFY_URL`, then **Deploys → Trigger
-deploy**, because the app reads these values while it builds.
+Both use the same Supabase secrets: `PAYFAST_MODE` (`sandbox` by default),
+and for real payments `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY` and
+`PAYFAST_PASSPHRASE` (see section 7). In sandbox without them, PayFast's
+public test account is used. Nothing PayFast-related goes into Netlify.
 
 ---
 

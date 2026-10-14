@@ -377,7 +377,8 @@ someone qualified before real trading.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | The whole site says it cannot connect, or data won't load | Supabase free projects **pause after about a week with no activity** | Supabase dashboard → the project → **Restore** |
-| Card order stuck on "Confirming..." or unpaid after paying | `VITE_PAYFAST_NOTIFY_URL` missing (it must be the Supabase function address, even on localhost), or the function failed | Check the setting; check `payfast-notify` logs; the admin can verify by hand in Sales |
+| Card order stuck on "Confirming..." or unpaid after paying | PayFast's confirmation was refused: usually `PAYFAST_MODE` or `PAYFAST_MERCHANT_ID` not matching the account that was paid (e.g. a sandbox payment while the secrets say live) | Check the Supabase secrets; check `payfast-notify` logs ("ignored: ..." says why); the admin can verify by hand in Sales |
+| "The card payment could not be started" | `payfast-checkout` refused or failed | Check its logs; in live mode all three merchant secrets must be set |
 | Notifications not arriving | Not turned on for that device, phone in Do Not Disturb, or the device unsubscribed | Bell → gear; check `push-send` logs |
 | Password-reset or sign-up emails not arriving | SMTP settings wrong or mailbox password changed | Supabase → Authentication → Emails → SMTP Settings |
 | The confirmation or password-reset link opens the wrong site, or the plain home page | The address is not on Supabase's allowed list | Supabase → Authentication → URL Configuration: Site URL `https://royaltiara.netlify.app`, Redirect URLs `https://royaltiara.netlify.app/**` (plus `http://localhost:5190/**` for testing on a PC) |
