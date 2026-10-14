@@ -360,6 +360,7 @@ someone qualified before real trading.
 | Card order stuck on "Confirming..." or unpaid after paying | `VITE_PAYFAST_NOTIFY_URL` missing (it must be the Supabase function address, even on localhost), or the function failed | Check the setting; check `payfast-notify` logs; the admin can verify by hand in Sales |
 | Notifications not arriving | Not turned on for that device, phone in Do Not Disturb, or the device unsubscribed | Bell → gear; check `push-send` logs |
 | Password-reset or sign-up emails not arriving | SMTP settings wrong or mailbox password changed | Supabase → Authentication → Emails → SMTP Settings |
+| The confirmation or password-reset link opens the wrong site, or the plain home page | The address is not on Supabase's allowed list | Supabase → Authentication → URL Configuration: Site URL `https://royaltiara.netlify.app`, Redirect URLs `https://royaltiara.netlify.app/**` (plus `http://localhost:5190/**` for testing on a PC) |
 | "The database is not set up yet" | A `.sql` migration was not run | Run the missing file (section 7) |
 | Netlify build failed | A code error, or out of credits | Netlify → Deploys → the failed deploy → log |
 | `npx`/`npm` "running scripts is disabled" | PowerShell policy | Use `npx.cmd` / `npm.cmd` |

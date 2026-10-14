@@ -101,7 +101,11 @@ export default function App() {
         {/* Public: the app stores and new applicants open these without signing in. */}
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/delete-account" element={<DeleteAccountHelp />} />
-        <Route path="/pending" element={user ? <Pending /> : <Navigate to="/signin" replace />} />
+        {/* Leaves by itself the moment the admin approves (the profile updates live). */}
+        <Route
+          path="/pending"
+          element={!user ? <Navigate to="/signin" replace /> : home !== '/pending' ? <Navigate to={home} replace /> : <Pending />}
+        />
 
         <Route element={<RequireSignedIn />}>
           {/* Admins use the Chat tab in the console, not a personal chat thread. */}

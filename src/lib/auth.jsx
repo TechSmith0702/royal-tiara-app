@@ -89,6 +89,8 @@ export async function signUp(form) {
     email: form.email.trim(),
     password: form.password,
     options: {
+      // The link in the confirmation email signs them in and opens the waiting screen.
+      emailRedirectTo: publicUrl('/pending?confirmed=1'),
       data: {
         name: form.name,
         business: form.business,

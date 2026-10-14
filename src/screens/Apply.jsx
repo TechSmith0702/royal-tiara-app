@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { signUp } from '../lib/auth.jsx'
+import { signIn, signUp } from '../lib/auth.jsx'
 import { JOINING_FEE, fetchFees } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
@@ -27,6 +27,39 @@ export default function Apply() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(null)
+  const [checking, setChecking] = useState(false)
+  const [confirmError, setConfirmError] = useState('')
+  const lastTry = useRef(0)
+
+  // Once the email is confirmed (often in the email app, not here), signing in
+  // works. Success signs them in, and the app moves on to the waiting screen.
+  const trySignIn = useCallback(async showError => {
+    if (!done || !done.needsEmailConfirmation) return
+    lastTry.current = Date.now()
+    setChecking(true)
+    setConfirmError('')
+    try {
+      await signIn(done.email, done.password)
+    } catch (err) {
+      if (showError) setConfirmError(err.message)
+    } finally {
+      setChecking(false)
+    }
+  }, [done])
+
+  // Try quietly whenever they come back to the app, e.g. from their email.
+  useEffect(() => {
+    if (!done || !done.needsEmailConfirmation) return
+    const back = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastTry.current > 5000) trySignIn(false)
+    }
+    document.addEventListener('visibilitychange', back)
+    window.addEventListener('focus', back)
+    return () => {
+      document.removeEventListener('visibilitychange', back)
+      window.removeEventListener('focus', back)
+    }
+  }, [done, trySignIn])
 
   const submit = async e => {
     e.preventDefault()
@@ -53,7 +86,8 @@ export default function Apply() {
       // The postal code is stored on the same line as the town, e.g. "Soweto, Gauteng, 1804".
       const town = clean.postal ? clean.town + ', ' + clean.postal : clean.town
       const result = await signUp({ ...clean, town, joinPay })
-      setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation })
+      // Kept in memory only, to sign them in once they have confirmed their email.
+      setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -83,7 +117,15 @@ export default function Apply() {
                 ? 'Your ' + R(joiningFee) + ' joining fee is payable once your account is approved.'
                 : 'Send your ' + R(joiningFee) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
             </p>
-            <Link to="/signin" className="btn btn-sage">Back to sign in</Link>
+            {done.needsEmailConfirmation && (
+              <>
+                <button type="button" className="btn btn-primary" disabled={checking} onClick={() => trySignIn(true)}>
+                  {checking ? 'Checking...' : "I've confirmed my email"}
+                </button>
+                {confirmError && <p className="form-error mb-0" role="alert">{confirmError}</p>}
+              </>
+            )}
+            <Link to="/signin" className={done.needsEmailConfirmation ? 'btn btn-outline' : 'btn btn-sage'}>Back to sign in</Link>
           </div>
         ) : (
           <form className="stack gap-14" onSubmit={submit} noValidate>
