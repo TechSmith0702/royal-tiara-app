@@ -128,7 +128,7 @@ export default function OrderDetail() {
           </ol>
         </section>
 
-        {!st.hasProof && (
+        {!st.hasProof && !st.verified && (
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
@@ -138,6 +138,9 @@ export default function OrderDetail() {
               <span className="upload-title">Upload proof of payment</span>
               <span className="upload-sub">Photo or PDF</span>
             </FilePicker>
+            <button type="button" className="btn btn-outline" disabled={busy} onClick={payByCard}>
+              {busy ? 'Opening PayFast...' : 'Pay by card instead'}
+            </button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
         )}
