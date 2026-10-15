@@ -79,11 +79,12 @@ Deno.serve(async req => {
 
   const { data: order } = await db
     .from('orders')
-    .select('id, user_id, total, pay_method, pay_status, proof')
+    .select('id, user_id, total, pay_method, pay_status, proof, fulfil')
     .eq('id', String(orderId ?? ''))
     .maybeSingle()
   if (!order || order.user_id !== user.id) return reply(404, { error: 'That order was not found.' })
   if (order.pay_status === 'verified') return reply(409, { error: 'This order is already paid.' })
+  if (order.fulfil === 'cancelled') return reply(409, { error: 'This order was cancelled.' })
   // A bank-transfer order can still be paid by card until a proof is uploaded.
   // It stays a bank-transfer order until PayFast confirms the payment, which
   // then makes it a card order (payfast_mark_paid).

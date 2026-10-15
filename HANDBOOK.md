@@ -214,6 +214,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 12. `migration-card-retry.sql`
 13. `migration-push.sql`
 14. `migration-delete-account.sql`
+15. `migration-cancel-order.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:

@@ -16,7 +16,7 @@ export default function Invoices() {
   const [problem, setProblem] = useState('')
 
   const list = orders || []
-  const unpaid = list.filter(o => o.payStatus !== 'verified')
+  const unpaid = list.filter(o => o.payStatus !== 'verified' && o.fulfil !== 'cancelled')
   const outstanding = unpaid.reduce((t, o) => t + o.total, 0)
 
   const attachTo = orderId => async file => {
@@ -70,7 +70,7 @@ export default function Invoices() {
               </div>
               <div className="row gap-9">
                 <Link to={'/invoices/' + o.id} className="btn btn-outline btn-44 grow">Download PDF</Link>
-                {!st.hasProof && (
+                {!st.hasProof && !st.cancelled && (
                   <FilePicker className="btn btn-primary btn-44 grow" onPicked={attachTo(o.id)}>
                     Upload proof
                   </FilePicker>

@@ -53,7 +53,7 @@ export default function Person() {
 
   const chip = CHIP[p.status] || CHIP.pending
   const orders = (orderList.data || []).filter(o => o.userId === p.id)
-  const spent = orders.reduce((sum, o) => sum + o.total, 0)
+  const spent = orders.filter(o => o.payStatus === 'verified').reduce((sum, o) => sum + o.total, 0)
 
   const run = async fn => {
     setBusy(true)
@@ -130,7 +130,7 @@ export default function Person() {
             {p.joinPay === 'card' ? 'By card once approved' : 'Bank transfer - proof on WhatsApp'}
           </Line>
           <Line label="Orders">
-            {orderList.loading ? 'Loading...' : orders.length === 0 ? 'None yet' : orders.length + ' · ' + R(spent) + ' in total'}
+            {orderList.loading ? 'Loading...' : orders.length === 0 ? 'None yet' : orders.length + ' · ' + R(spent) + ' paid'}
           </Line>
           {orders[0] && <Line label="Last order">{orders[0].invoice} &middot; {timeAgo(orders[0].createdAt)}</Line>}
         </section>

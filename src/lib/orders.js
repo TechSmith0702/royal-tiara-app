@@ -13,8 +13,13 @@ export function orderState(order, audience) {
   const packed = ['packed', 'collected', 'delivered'].includes(order.fulfil)
   const collected = ['collected', 'delivered'].includes(order.fulfil)
   const delivered = order.fulfil === 'delivered'
+  const cancelled = order.fulfil === 'cancelled'
+  // A distributor can cancel until the order is paid or they upload a proof
+  // (after that they may already have paid). The admin can cancel any unpaid order.
+  const canCancel = !verified && !order.fulfil && (forAdmin || !order.proof)
 
-  const status = delivered ? 'Delivered'
+  const status = cancelled ? 'Cancelled'
+    : delivered ? 'Delivered'
     : collected ? 'In transit'
     : packed ? 'Packed & ready'
     : verified ? 'Payment verified'
@@ -22,7 +27,9 @@ export function orderState(order, audience) {
     : hasProof ? 'Payment under review'
     : 'Awaiting payment'
 
-  const waybill = delivered ? 'Delivered - thank you!'
+  const waybill = cancelled
+    ? (order.events.cancelled_by === 'admin' ? 'Cancelled by Royal Tiara' : forAdmin ? 'Cancelled by the distributor' : 'You cancelled this order') + ' - nothing is owed'
+    : delivered ? 'Delivered - thank you!'
     : collected ? 'Collected by courier - on the way to you'
     : packed ? 'Packed & ready for collection'
     : verified ? 'Payment verified - being packed'
@@ -30,7 +37,10 @@ export function orderState(order, audience) {
     : hasProof ? 'Payment under review'
     : 'Awaiting proof of payment'
 
-  const steps = [
+  const steps = cancelled ? [
+    { label: 'Order placed', done: true, when: fmtDate(order.createdAt) },
+    { label: 'Cancelled', done: true, when: fmtDate(order.events.cancelled || order.createdAt) },
+  ] : [
     { label: 'Order placed', done: true, when: fmtDate(order.createdAt) },
     byCard
       ? {
@@ -63,11 +73,13 @@ export function orderState(order, audience) {
     },
   ]
 
-  const invoice = verified
-    ? { label: 'Paid', tone: 'sage' }
-    : hasProof
-      ? { label: 'Under review', tone: 'sage' }
-      : { label: 'Awaiting proof', tone: 'peach' }
+  const invoice = cancelled
+    ? { label: 'Cancelled', tone: 'grey' }
+    : verified
+      ? { label: 'Paid', tone: 'sage' }
+      : order.proof
+        ? { label: 'Under review', tone: 'sage' }
+        : { label: byCard ? 'Awaiting card payment' : 'Awaiting proof', tone: 'peach' }
 
   return {
     byCard,
@@ -76,12 +88,18 @@ export function orderState(order, audience) {
     packed,
     collected,
     delivered,
+    cancelled,
+    canCancel,
     status,
     waybill,
     steps,
     invoice,
-    tone: hasProof || verified ? 'sage' : 'peach',
+    // Green once paid or a proof is in; amber while payment is still owed.
+    tone: cancelled ? 'grey' : verified || order.proof ? 'sage' : 'peach',
   }
 }
+
+/** Still to be paid, packed or delivered (cancelled orders are not). */
+export const isOpen = order => order.fulfil !== 'delivered' && order.fulfil !== 'cancelled'
 
 export const unitsIn = order => order.lines.reduce((t, l) => t + l.qty, 0)

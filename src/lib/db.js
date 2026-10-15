@@ -178,6 +178,12 @@ export async function switchToEft(orderId) {
   if (error) fail(error)
 }
 
+/** Cancels an unpaid order (the distributor's own, or any for the admin). */
+export async function cancelOrder(orderId) {
+  const { error } = await supabase.rpc('cancel_order', { p_order_id: orderId })
+  if (error) fail(error)
+}
+
 /** The distributor confirms the parcel arrived. */
 export async function confirmReceipt(orderId) {
   const { error } = await supabase.rpc('confirm_receipt', { p_order_id: orderId })

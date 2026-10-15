@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { fetchActiveProducts, fetchOrders, priceLabel } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { greeting, pluralise, R, waLink } from '../lib/format.js'
+import { isOpen } from '../lib/orders.js'
 import { ActiveDot, Avatar, ErrorNote, Loading, ProductImage } from '../components/ui.jsx'
 import NotificationBell from '../components/NotificationBell.jsx'
 import TabBar from '../components/TabBar.jsx'
@@ -16,12 +17,14 @@ export default function Home() {
 
   const mine = orders || []
   const today = new Date()
+  // Only paid orders count as spent; unpaid ones show under open orders.
   const thisMonth = mine.filter(o => {
     const d = new Date(o.createdAt)
-    return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()
+    return o.payStatus === 'verified' && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()
   })
   const spend = thisMonth.reduce((t, o) => t + o.total, 0)
-  const open = mine.filter(o => o.fulfil !== 'delivered').length
+  const open = mine.filter(isOpen)
+  const unpaid = open.filter(o => o.payStatus !== 'verified').length
   const featured = FEATURED_IDS.map(id => (products || []).find(p => p.id === id)).filter(Boolean)
 
   return (
@@ -56,12 +59,12 @@ export default function Home() {
           <div className="stat stat-plain grow">
             <div className="kicker muted">This month</div>
             <div className="stat-value">{R(spend)}</div>
-            <div className="stat-sub">{pluralise(thisMonth.length, 'order')} placed</div>
+            <div className="stat-sub">{pluralise(thisMonth.length, 'order')} paid</div>
           </div>
           <div className="stat stat-sage grow">
             <div className="kicker">Open orders</div>
-            <div className="stat-value">{open}</div>
-            <div className="stat-sub">in progress</div>
+            <div className="stat-value">{open.length}</div>
+            <div className="stat-sub">{unpaid ? unpaid + ' awaiting payment' : 'in progress'}</div>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { adminAdvanceOrder, fetchOrders } from '../../lib/db.js'
+import { adminAdvanceOrder, cancelOrder, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { fmtDate, R } from '../../lib/format.js'
@@ -11,8 +11,11 @@ export default function Sales() {
   const { data, loading, error, refresh } = useLive(fetchOrders, ['orders'], [])
   const [problem, setProblem] = useState('')
 
-  const orders = data || []
-  const toVerify = orders.filter(o => orderState(o).hasProof && o.payStatus !== 'verified').length
+  const all = data || []
+  // Cancelled orders are kept for the record but out of the way, at the bottom.
+  const orders = all.filter(o => o.fulfil !== 'cancelled')
+  const cancelled = all.filter(o => o.fulfil === 'cancelled')
+  const toVerify = orders.filter(o => o.proof && o.payStatus !== 'verified').length
 
   return (
     <div className="stack gap-18">
@@ -42,6 +45,17 @@ export default function Sales() {
       {orders.map(o => (
         <SaleCard key={o.id} order={o} onDone={refresh} onProblem={setProblem} />
       ))}
+
+      {cancelled.length > 0 && (
+        <details className="items-details">
+          <summary>Cancelled orders &middot; {cancelled.length}</summary>
+          <div className="stack gap-12 mt-10">
+            {cancelled.map(o => (
+              <SaleCard key={o.id} order={o} onDone={refresh} onProblem={setProblem} />
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   )
 }
@@ -50,13 +64,15 @@ function SaleCard({ order, onDone, onProblem }) {
   const [busy, setBusy] = useState(false)
   const st = orderState(order, 'admin')
 
-  const pay = st.verified
-    ? { label: order.payMethod === 'card' ? 'Card payment confirmed' : 'Payment verified', cls: 'pay-ok' }
-    : order.proof
-      ? { label: 'Proof received - verify', cls: 'pay-review' }
-      : order.payMethod === 'card'
-        ? { label: 'Card payment - confirm before packing', cls: 'pay-review' }
-        : { label: 'Awaiting proof of payment', cls: 'pay-waiting' }
+  const pay = st.cancelled
+    ? { label: st.waybill, cls: 'pay-waiting' }
+    : st.verified
+      ? { label: order.payMethod === 'card' ? 'Card payment confirmed' : 'Payment verified', cls: 'pay-ok' }
+      : order.proof
+        ? { label: 'Proof received - verify', cls: 'pay-review' }
+        : order.payMethod === 'card'
+          ? { label: 'Card payment not received yet', cls: 'pay-waiting' }
+          : { label: 'Awaiting proof of payment', cls: 'pay-waiting' }
 
   const advance = async step => {
     if (step === 'delivered') {
@@ -73,6 +89,24 @@ function SaleCard({ order, onDone, onProblem }) {
     onProblem('')
     try {
       await adminAdvanceOrder(order.id, step)
+      onDone()
+    } catch (e) {
+      onProblem(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const cancel = async () => {
+    const ok = confirm(
+      'Cancel ' + order.id + '? ' + (order.business || order.customer) + ' is told it was cancelled. ' +
+      'If the money arrives later, verifying it brings the order back.',
+    )
+    if (!ok) return
+    setBusy(true)
+    onProblem('')
+    try {
+      await cancelOrder(order.id)
       onDone()
     } catch (e) {
       onProblem(e.message)
@@ -129,7 +163,12 @@ function SaleCard({ order, onDone, onProblem }) {
       )}
       {!st.verified && (
         <button type="button" className="btn btn-sage btn-46" disabled={busy} onClick={() => advance('verify')}>
-          Verify payment
+          {st.cancelled ? 'Payment arrived - verify and restore' : 'Verify payment'}
+        </button>
+      )}
+      {st.canCancel && (
+        <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={cancel}>
+          Cancel order
         </button>
       )}
       {st.verified && !st.packed && (

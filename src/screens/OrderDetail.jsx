@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
-import { attachProof, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
+import { attachProof, cancelOrder, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
-import { R } from '../lib/format.js'
+import { fmtDate, R } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
@@ -47,7 +47,7 @@ export default function OrderDetail() {
   const st = orderState(order)
   // PayFast confirms a card payment a few seconds after the distributor comes
   // back. Until then, offering "Pay by card" again would invite paying twice.
-  const confirming = st.byCard && !st.verified && !showRetry && waitLeft > 0
+  const confirming = st.byCard && !st.verified && !st.cancelled && !showRetry && waitLeft > 0
 
   const attach = async file => {
     setError('')
@@ -98,6 +98,20 @@ export default function OrderDetail() {
     }
   }
 
+  const cancel = async () => {
+    if (!confirm('Cancel order ' + order.id + '? Nothing has been paid, so nothing is owed.')) return
+    setError('')
+    setBusy(true)
+    try {
+      await cancelOrder(order.id)
+      refresh()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const reorder = () => {
     replaceCart(user.id, order.lines.map(l => ({ productId: l.productId, variant: l.variant, qty: l.qty })))
     navigate('/cart')
@@ -128,7 +142,7 @@ export default function OrderDetail() {
           </ol>
         </section>
 
-        {!st.hasProof && !st.verified && (
+        {!st.hasProof && !st.verified && !st.cancelled && (
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
@@ -161,7 +175,7 @@ export default function OrderDetail() {
           </section>
         )}
 
-        {st.byCard && !st.verified && !confirming && (
+        {st.byCard && !st.verified && !st.cancelled && !confirming && (
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
@@ -176,6 +190,22 @@ export default function OrderDetail() {
             </button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
+        )}
+
+        {st.cancelled && (
+          <section className="card card-pad stack gap-10">
+            <div className="kicker muted">Cancelled</div>
+            <p className="body-muted mb-0">
+              {order.events.cancelled_by === 'admin' ? 'Royal Tiara cancelled' : 'You cancelled'} this order on{' '}
+              {fmtDate(order.events.cancelled)}. Nothing is owed. If you paid for it anyway, chat to Royal Tiara.
+            </p>
+          </section>
+        )}
+
+        {st.canCancel && !confirming && (
+          <button type="button" className="link-inline link-btn retry-link cancel-link" disabled={busy} onClick={cancel}>
+            Cancel this order
+          </button>
         )}
 
         {st.collected && !st.delivered && (
@@ -213,8 +243,10 @@ export default function OrderDetail() {
         </section>
 
         <div className="row gap-10">
-          {st.delivered ? (
-            <button type="button" className="btn btn-primary btn-52 grow" onClick={reorder}>Reorder</button>
+          {st.delivered || st.cancelled ? (
+            <button type="button" className="btn btn-primary btn-52 grow" onClick={reorder}>
+              {st.cancelled ? 'Order again' : 'Reorder'}
+            </button>
           ) : (
             // Still on its way: reordering makes no sense yet, so offer the way back.
             <Link to="/home" className="btn btn-primary btn-52 grow">Back to home</Link>
