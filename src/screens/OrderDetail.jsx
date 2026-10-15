@@ -25,6 +25,7 @@ export default function OrderDetail() {
   const { data: orders, loading, refresh } = useLive(fetchOrders, ['orders'], [])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [askCancel, setAskCancel] = useState(false)
   // Coming from "Payment cancelled" we know the payment did not happen.
   const [params] = useSearchParams()
   const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
@@ -100,11 +101,11 @@ export default function OrderDetail() {
   }
 
   const cancel = async () => {
-    if (!confirm('Cancel order ' + order.id + '? Nothing has been paid, so nothing is owed.')) return
     setError('')
     setBusy(true)
     try {
       await cancelOrder(order.id)
+      setAskCancel(false)
       refresh()
     } catch (e) {
       setError(e.message)
@@ -204,10 +205,26 @@ export default function OrderDetail() {
           </section>
         )}
 
-        {st.canCancel && !confirming && (
-          <button type="button" className="link-inline link-btn retry-link cancel-link" disabled={busy} onClick={cancel}>
+        {st.canCancel && !confirming && !askCancel && (
+          <button type="button" className="link-inline link-btn retry-link cancel-link" onClick={() => setAskCancel(true)}>
             Cancel this order
           </button>
+        )}
+
+        {st.canCancel && !confirming && askCancel && (
+          <section className="card card-pad stack gap-10" role="alertdialog" aria-label="Cancel this order?">
+            <strong>Cancel order {order.id}?</strong>
+            <p className="body-muted mb-0">Nothing has been paid, so nothing is owed. This cannot be undone.</p>
+            {error && <p className="form-error mb-0" role="alert">{error}</p>}
+            <div className="row gap-10">
+              <button type="button" className="btn btn-danger btn-46 grow" disabled={busy} onClick={cancel}>
+                {busy ? 'Cancelling...' : 'Yes, cancel it'}
+              </button>
+              <button type="button" className="btn btn-outline btn-46 grow" disabled={busy} onClick={() => setAskCancel(false)}>
+                Keep it
+              </button>
+            </div>
+          </section>
         )}
 
         {st.collected && !st.delivered && (
