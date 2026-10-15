@@ -10,9 +10,12 @@ import { orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 
-// PayFast confirms a card payment within seconds. If nothing has arrived after
-// this long, the payment most likely failed and the options to pay again show.
-const CONFIRM_WINDOW_MS = 5 * 60 * 1000
+// PayFast confirms a card payment within seconds of the distributor coming
+// back. If nothing has arrived this long after they open the order, the
+// payment most likely failed and the options to pay again show.
+const CONFIRM_WINDOW_MS = 30 * 1000
+// Only an order placed this recently can still be waiting on PayFast.
+const RECENT_ORDER_MS = 30 * 60 * 1000
 
 export default function OrderDetail() {
   const { id } = useParams()
@@ -24,9 +27,11 @@ export default function OrderDetail() {
   // Coming from "Payment cancelled" we know the payment did not happen.
   const [params] = useSearchParams()
   const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
-  const [now, setNow] = useState(() => Date.now())
+  const [openedAt] = useState(() => Date.now())
+  const [now, setNow] = useState(openedAt)
   const order = (orders || []).find(o => o.id === id)
-  const waitLeft = order ? new Date(order.createdAt).getTime() + CONFIRM_WINDOW_MS - now : 0
+  const recent = order && openedAt - new Date(order.createdAt).getTime() < RECENT_ORDER_MS
+  const waitLeft = recent ? openedAt + CONFIRM_WINDOW_MS - now : 0
 
   // Re-check when the waiting window ends, so the page moves on by itself.
   useEffect(() => {
@@ -145,7 +150,7 @@ export default function OrderDetail() {
               <strong>Confirming your card payment...</strong>
             </div>
             <p className="body-muted mb-0">
-              PayFast usually confirms within a minute. This page updates by itself, so there is no need to pay again.
+              PayFast usually confirms within a few seconds. This page updates by itself, so there is no need to pay again.
             </p>
             <button type="button" className="link-inline link-btn retry-link" onClick={() => setShowRetry(true)}>
               Payment didn't go through?
@@ -157,8 +162,8 @@ export default function OrderDetail() {
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
-              We have not received your card payment yet. If you have just paid, this updates by itself in a
-              few minutes. If the payment was cancelled or did not go through, try again or pay by bank transfer.
+              We have not received your card payment yet. If you have just paid, wait a minute before paying
+              again - this page updates by itself as soon as PayFast confirms. If the payment was cancelled or did not go through, try again or pay by bank transfer.
             </p>
             <button type="button" className="btn btn-primary" disabled={busy} onClick={payByCard}>
               Pay {R(order.total)} by card
