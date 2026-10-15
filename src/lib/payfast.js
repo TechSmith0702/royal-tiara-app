@@ -46,5 +46,12 @@ export async function goToPayfast(order) {
     form.appendChild(input)
   })
   document.body.appendChild(form)
+
+  // If the distributor leaves PayFast without finishing (the X in the installed
+  // app, or Back), they land on this order, not on an empty checkout. A page
+  // the browser restores from memory is reloaded so it shows the order fresh.
+  window.history.replaceState(window.history.state, '', '/orders/' + order.id)
+  window.addEventListener('pageshow', e => { if (e.persisted) window.location.reload() }, { once: true })
+
   form.submit()
 }
