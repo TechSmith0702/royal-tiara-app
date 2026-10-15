@@ -115,7 +115,8 @@ export async function signOut() {
   // Stop this phone's notifications first, so the next person to sign in here
   // does not receive the previous account's orders and messages.
   await disablePush().catch(() => {})
-  await supabase.auth.signOut()
+  // Only this device: signing out on a laptop leaves the phone app signed in.
+  await supabase.auth.signOut({ scope: 'local' })
 }
 
 // Set when an account is deleted, read once by the sign-in screen to confirm it.

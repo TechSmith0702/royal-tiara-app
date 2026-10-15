@@ -382,6 +382,7 @@ someone qualified before real trading.
 | Notifications not arriving | Not turned on for that device, phone in Do Not Disturb, or the device unsubscribed | Bell → gear; check `push-send` logs |
 | Password-reset or sign-up emails not arriving | SMTP settings wrong or mailbox password changed | Supabase → Authentication → Emails → SMTP Settings |
 | The confirmation or password-reset link opens the wrong site, or the plain home page | The address is not on Supabase's allowed list | Supabase → Authentication → URL Configuration: Site URL `https://royaltiara.netlify.app`, Redirect URLs `https://royaltiara.netlify.app/**` (plus `http://localhost:5190/**` for testing on a PC) |
+| A phone was lost or stolen, or someone must be signed out everywhere | Signing out only signs out the device you're on, and changing the password does **not** sign out other devices | Supabase → SQL Editor: `delete from auth.sessions where user_id = (select id from auth.users where email = 'their@email');` Their other devices are signed out within the hour (when their sign-in next renews). Then have them change their password |
 | "The database is not set up yet" | A `.sql` migration was not run | Run the missing file (section 7) |
 | Netlify build failed | A code error, or out of credits | Netlify → Deploys → the failed deploy → log |
 | `npx`/`npm` "running scripts is disabled" | PowerShell policy | Use `npx.cmd` / `npm.cmd` |
