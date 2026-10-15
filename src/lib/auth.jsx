@@ -98,6 +98,9 @@ export async function signUp(form) {
         address: form.address,
         town: form.town,
         join_pay: form.joinPay,
+        // Which distributor terms they agreed to, and when (kept with the login).
+        terms_version: form.termsVersion,
+        terms_accepted_at: new Date().toISOString(),
       },
     },
   })

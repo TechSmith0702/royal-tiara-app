@@ -59,6 +59,9 @@ export default function Account() {
             <span>WhatsApp Royal Tiara</span>
             <span className="menu-val">{WHATSAPP_DISPLAY}<span className="chev">&rsaquo;</span></span>
           </a>
+          <Link to="/terms" className="menu-row">
+            <span>Distributor terms</span><span className="menu-val"><span className="chev">&rsaquo;</span></span>
+          </Link>
           <Link to="/privacy" className="menu-row">
             <span>Privacy policy</span><span className="menu-val"><span className="chev">&rsaquo;</span></span>
           </Link>

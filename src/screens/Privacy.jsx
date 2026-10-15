@@ -10,7 +10,7 @@ const BUSINESS_ADDRESS = '' // street address of the business; shown only when f
 const EFFECTIVE = '13 October 2026'
 
 /** A plain page that works signed in or out, opened in the app or from a link. */
-function PolicyPage({ title, children }) {
+export function PolicyPage({ title, children }) {
   const navigate = useNavigate()
   const { key } = useLocation()
   // "default" means this page was opened directly, so there is nothing to go back to.
@@ -40,7 +40,8 @@ export default function Privacy() {
       <p>
         This is the privacy policy for the {BUSINESS} trade app, which approved distributors use to order {BUSINESS}{' '}
         products. It explains what personal information the app collects, why, and what you can do about it. It is
-        written to meet the Protection of Personal Information Act (POPIA).
+        written to meet the Protection of Personal Information Act (POPIA). Ordering is covered by the{' '}
+        <Link className="link-inline" to="/terms">distributor terms</Link>.
       </p>
 
       <h3>Who is responsible</h3>

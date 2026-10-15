@@ -373,6 +373,15 @@ details at the top of that file (contact email, Information Officer, address,
 effective date) must be kept correct, and the policy should be reviewed by
 someone qualified before real trading.
 
+**Distributor terms:** the public page `/terms`, in `src/screens/Terms.jsx`.
+Applicants must tick that they agree before applying; the version they agreed
+to and the time are stored with their login (Supabase → Authentication → Users
+→ the user → raw user metadata: `terms_version`, `terms_accepted_at`). The
+business choices at the top of the file (dispatch time, how long to report
+damage, when unpaid orders may be cancelled, whether the joining fee is
+refundable) must match how Royal Tiara works. When the wording changes, update
+both `EFFECTIVE` and `TERMS_VERSION`.
+
 ---
 
 ## 13. When something goes wrong

@@ -5,6 +5,7 @@ import { JOINING_FEE, fetchFees } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { BackButton, Segmented } from '../components/ui.jsx'
+import { TERMS_VERSION } from './Terms.jsx'
 
 const FIELDS = [
   { key: 'name', label: 'Full name', placeholder: 'e.g. John Smith', autoComplete: 'name', required: true },
@@ -24,6 +25,7 @@ export default function Apply() {
   const joiningFee = fees ? fees.joining : JOINING_FEE
   const [form, setForm] = useState(EMPTY)
   const [joinPay, setJoinPay] = useState('card')
+  const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(null)
@@ -80,12 +82,16 @@ export default function Apply() {
       setError('Your password must be at least 6 characters.')
       return
     }
+    if (!agreed) {
+      setError('Please read and agree to the distributor terms.')
+      return
+    }
 
     setBusy(true)
     try {
       // The postal code is stored on the same line as the town, e.g. "Soweto, Gauteng, 1804".
       const town = clean.postal ? clean.town + ', ' + clean.postal : clean.town
-      const result = await signUp({ ...clean, town, joinPay })
+      const result = await signUp({ ...clean, town, joinPay, termsVersion: TERMS_VERSION })
       // Kept in memory only, to sign them in once they have confirmed their email.
       setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
     } catch (err) {
@@ -164,6 +170,14 @@ export default function Apply() {
                   : 'Transfer the fee and send proof on WhatsApp - we activate once it reflects.'}
               </div>
             </div>
+
+            <label className="agree-row">
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
+              <span>
+                I agree to the <Link to="/terms" className="link-inline">distributor terms</Link>, including how
+                orders, payment, delivery and returns work.
+              </span>
+            </label>
 
             {error && <p className="form-error" role="alert">{error}</p>}
 

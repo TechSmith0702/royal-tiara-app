@@ -91,7 +91,10 @@ export default function SignIn() {
       <a className="help-line" href={waLink()} target="_blank" rel="noreferrer">
         <span className="dot" />Need help? WhatsApp {WHATSAPP_DISPLAY}
       </a>
-      <Link to="/privacy" className="link-inline foot-link">Privacy policy</Link>
+      <div className="row center gap-18 foot-links">
+        <Link to="/terms" className="link-inline foot-link">Distributor terms</Link>
+        <Link to="/privacy" className="link-inline foot-link">Privacy policy</Link>
+      </div>
     </div>
   )
 }

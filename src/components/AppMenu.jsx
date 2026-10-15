@@ -113,7 +113,10 @@ export default function AppMenu() {
                 <span className="dot" />Need help? WhatsApp {WHATSAPP_DISPLAY}
               </a>
               <button type="button" className="btn btn-outline btn-44" onClick={signOut}>Sign out</button>
-              <Link to="/privacy" className="link-inline foot-link">Privacy policy</Link>
+              <div className="row center gap-18 foot-links">
+                <Link to="/terms" className="link-inline foot-link">Terms</Link>
+                <Link to="/privacy" className="link-inline foot-link">Privacy policy</Link>
+              </div>
             </div>
           </nav>
         </div>,

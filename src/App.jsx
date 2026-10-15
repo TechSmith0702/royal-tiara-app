@@ -27,6 +27,7 @@ import ProductEditor from './screens/admin/ProductEditor.jsx'
 import InstallApp from './screens/InstallApp.jsx'
 import DeleteAccount from './screens/DeleteAccount.jsx'
 import Privacy, { DeleteAccountHelp } from './screens/Privacy.jsx'
+import Terms from './screens/Terms.jsx'
 
 const homeFor = user => {
   if (!user) return '/signin'
@@ -100,6 +101,7 @@ export default function App() {
         <Route path="/new-password" element={<NewPassword />} />
         {/* Public: the app stores and new applicants open these without signing in. */}
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/delete-account" element={<DeleteAccountHelp />} />
         {/* Leaves by itself the moment the admin approves (the profile updates live). */}
         <Route
