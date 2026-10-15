@@ -28,10 +28,12 @@ import InstallApp from './screens/InstallApp.jsx'
 import DeleteAccount from './screens/DeleteAccount.jsx'
 import Privacy, { DeleteAccountHelp } from './screens/Privacy.jsx'
 import Terms from './screens/Terms.jsx'
+import JoinFee from './screens/JoinFee.jsx'
 
 const homeFor = user => {
   if (!user) return '/signin'
   if (user.role === 'admin') return '/admin'
+  if (user.joinFeeDue) return '/join-fee'
   return user.status === 'approved' ? '/home' : '/pending'
 }
 
@@ -61,7 +63,9 @@ function NotConfigured() {
 function RequireDistributor() {
   const { user } = useAuth()
   if (!user) return <Navigate to="/signin" replace />
-  if (user.role !== 'distributor' || user.status !== 'approved') return <Navigate to={homeFor(user)} replace />
+  if (user.role !== 'distributor' || user.status !== 'approved' || user.joinFeeDue) {
+    return <Navigate to={homeFor(user)} replace />
+  }
   return <Outlet />
 }
 
@@ -107,6 +111,12 @@ export default function App() {
         <Route
           path="/pending"
           element={!user ? <Navigate to="/signin" replace /> : home !== '/pending' ? <Navigate to={home} replace /> : <Pending />}
+        />
+
+        {/* Approved, joining fee not paid yet: leaves by itself once PayFast confirms. */}
+        <Route
+          path="/join-fee"
+          element={!user ? <Navigate to="/signin" replace /> : home !== '/join-fee' ? <Navigate to={home} replace /> : <JoinFee />}
         />
 
         <Route element={<RequireSignedIn />}>

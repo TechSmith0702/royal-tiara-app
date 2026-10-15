@@ -99,6 +99,9 @@ const mapPerson = row => ({
   email: row.email,
   address: { line1: row.address_line1, line2: row.address_line2 },
   joinPay: row.join_pay,
+  joinFeePaidAt: row.join_fee_paid_at,
+  joinFeeAmount: row.join_fee_amount == null ? null : Number(row.join_fee_amount),
+  joinFeeReference: row.join_fee_reference,
   createdAt: row.created_at,
   decidedAt: row.decided_at,
 })
@@ -204,6 +207,12 @@ export async function attachProof(orderId, proof) {
 /** An unpaid card order becomes a bank transfer, so a proof can be uploaded. */
 export async function switchToEft(orderId) {
   const { error } = await supabase.rpc('switch_to_eft', { p_order_id: orderId })
+  if (error) fail(error)
+}
+
+/** The admin marks a distributor's joining fee as paid (e.g. by bank transfer). */
+export async function adminMarkJoiningPaid(userId) {
+  const { error } = await supabase.rpc('admin_mark_joining_paid', { p_user: userId })
   if (error) fail(error)
 }
 

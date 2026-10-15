@@ -5,9 +5,9 @@ import { supabase } from './supabase.js'
 //
 // The payment is prepared and signed on the server by the payfast-checkout
 // Supabase function, which holds the merchant details and passphrase and takes
-// the amount from the database. The app only sends the order number. PayFast
-// then confirms the payment to the payfast-notify function, which marks the
-// order paid.
+// the amount from the database. The app only says what is being paid for (an
+// order, or the joining fee). PayFast then confirms the payment to the
+// payfast-notify function, which marks it paid.
 
 // Only for showing "test mode" notes. The real switch is the PAYFAST_MODE
 // secret in Supabase; set VITE_PAYFAST_MODE=live alongside it.
@@ -23,15 +23,13 @@ async function problem(error) {
   return 'The card payment could not be started. Please try again.'
 }
 
-/** Gets the signed payment from the server and sends the browser to PayFast. */
-export async function goToPayfast(order) {
-  const { data, error } = await supabase.functions.invoke('payfast-checkout', {
-    body: {
-      orderId: order.id,
-      returnUrl: paymentReturnUrl('/payment/return?order=' + order.id),
-      cancelUrl: paymentReturnUrl('/payment/cancel?order=' + order.id),
-    },
-  })
+/**
+ * Gets the signed payment from the server and sends the browser to PayFast.
+ * `comeBackTo` is the page the distributor lands on if they leave PayFast
+ * without finishing (the X in the installed app, or Back).
+ */
+async function sendToPayfast(body, comeBackTo) {
+  const { data, error } = await supabase.functions.invoke('payfast-checkout', { body })
   if (error) throw new Error(await problem(error))
 
   const form = document.createElement('form')
@@ -47,11 +45,28 @@ export async function goToPayfast(order) {
   })
   document.body.appendChild(form)
 
-  // If the distributor leaves PayFast without finishing (the X in the installed
-  // app, or Back), they land on this order, not on an empty checkout. A page
-  // the browser restores from memory is reloaded so it shows the order fresh.
-  window.history.replaceState(window.history.state, '', '/orders/' + order.id)
+  // Landing back on this page rather than an empty checkout. A page the
+  // browser restores from memory is reloaded so it shows up to date.
+  window.history.replaceState(window.history.state, '', comeBackTo)
   window.addEventListener('pageshow', e => { if (e.persisted) window.location.reload() }, { once: true })
 
   form.submit()
+}
+
+/** Pays an order by card. */
+export function goToPayfast(order) {
+  return sendToPayfast({
+    orderId: order.id,
+    returnUrl: paymentReturnUrl('/payment/return?order=' + order.id),
+    cancelUrl: paymentReturnUrl('/payment/cancel?order=' + order.id),
+  }, '/orders/' + order.id)
+}
+
+/** Pays the once-off joining fee by card. */
+export function goToPayfastJoiningFee() {
+  return sendToPayfast({
+    joiningFee: true,
+    returnUrl: paymentReturnUrl('/join-fee?paid=1'),
+    cancelUrl: paymentReturnUrl('/join-fee?cancelled=1'),
+  }, '/join-fee?paid=1')
 }

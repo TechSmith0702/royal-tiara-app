@@ -109,11 +109,18 @@ Deno.serve(async req => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  const { data: outcome, error } = await supabase.rpc('payfast_mark_paid', {
-    p_order_id: orderId,
-    p_amount: amount,
-    p_reference: reference,
-  })
+  // Joining fees are sent as "JOIN-<distributor id>"; everything else is an order.
+  const { data: outcome, error } = orderId.startsWith('JOIN-')
+    ? await supabase.rpc('payfast_mark_joining_paid', {
+      p_user: orderId.slice('JOIN-'.length),
+      p_amount: amount,
+      p_reference: reference,
+    })
+    : await supabase.rpc('payfast_mark_paid', {
+      p_order_id: orderId,
+      p_amount: amount,
+      p_reference: reference,
+    })
 
   if (error) {
     console.error('payfast-notify database error:', error.message, orderId)

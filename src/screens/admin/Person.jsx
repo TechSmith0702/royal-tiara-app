@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { adminDecideApplication, adminSetMembership, fetchApplications, fetchOrders } from '../../lib/db.js'
+import { adminDecideApplication, adminMarkJoiningPaid, adminSetMembership, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
 import { R, fmtDate, timeAgo, waLinkTo } from '../../lib/format.js'
 import { Avatar, BackButton, ErrorNote, Loading, StatusChip } from '../../components/ui.jsx'
@@ -85,6 +85,19 @@ export default function Person() {
 
   const restore = () => run(() => adminSetMembership(p.id, 'approved'))
 
+  const markJoiningPaid = async () => {
+    const ok = await ask({
+      title: 'Mark the joining fee as paid?',
+      body: 'Only do this once the money has reflected in the Royal Tiara account. ' + (p.business || p.name) + ' can then start ordering.',
+      yes: 'Mark paid',
+    })
+    if (!ok) return
+    run(() => adminMarkJoiningPaid(p.id))
+  }
+
+  // undefined means the database has no joining-fee columns yet.
+  const joinFeeDue = p.status === 'approved' && p.joinFeePaidAt === null
+
   return (
     <div className="screen">
       {dialog}
@@ -135,13 +148,24 @@ export default function Person() {
           <Line label="Applied">{fmtDate(p.createdAt)} &middot; {timeAgo(p.createdAt)}</Line>
           {p.decidedAt && <Line label="Decided">{fmtDate(p.decidedAt)}</Line>}
           <Line label="Joining fee">
-            {p.joinPay === 'card' ? 'By card once approved' : 'Bank transfer - proof on WhatsApp'}
+            {p.joinFeePaidAt
+              ? 'Paid' + (p.joinFeeAmount ? ' ' + R(p.joinFeeAmount) : '') + ' on ' + fmtDate(p.joinFeePaidAt)
+                + (p.joinFeeReference ? ' · ' + p.joinFeeReference : '')
+              : joinFeeDue
+                ? 'Not paid yet - they cannot order until it is'
+                : p.joinPay === 'card' ? 'By card once approved' : 'Bank transfer - proof on WhatsApp'}
           </Line>
           <Line label="Orders">
             {orderList.loading ? 'Loading...' : orders.length === 0 ? 'None yet' : orders.length + ' · ' + R(spent) + ' paid'}
           </Line>
           {orders[0] && <Line label="Last order">{orders[0].invoice} &middot; {timeAgo(orders[0].createdAt)}</Line>}
         </section>
+
+        {joinFeeDue && (
+          <button type="button" className="btn btn-sage btn-46" disabled={busy} onClick={markJoiningPaid}>
+            Joining fee received - mark paid
+          </button>
+        )}
 
         {problem && <p className="form-error" role="alert">{problem}</p>}
 

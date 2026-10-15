@@ -15,6 +15,10 @@ export const mapProfile = row => ({
   email: row.email,
   address: { line1: row.address_line1, line2: row.address_line2 },
   joinPay: row.join_pay,
+  // An approved distributor must pay the joining fee before ordering. Only an
+  // explicit null counts as unpaid, so nobody is locked out if the database
+  // has not been updated for joining fees yet.
+  joinFeeDue: row.role === 'distributor' && row.status === 'approved' && row.join_fee_paid_at === null,
   memberSince: row.created_at,
 })
 
