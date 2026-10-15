@@ -4,7 +4,7 @@ import { signIn, signUp } from '../lib/auth.jsx'
 import { JOINING_FEE, fetchFees } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
-import { BackButton, Segmented } from '../components/ui.jsx'
+import { BackButton, PasswordInput, Segmented } from '../components/ui.jsx'
 import { TERMS_VERSION } from './Terms.jsx'
 
 const FIELDS = [
@@ -21,8 +21,9 @@ const FIELDS = [
 const EMPTY = { name: '', business: '', address: '', town: '', postal: '', phone: '', email: '', password: '' }
 
 export default function Apply() {
-  const { data: fees } = useLive(fetchFees, ['settings'], [])
-  const joiningFee = fees ? fees.joining : JOINING_FEE
+  const { data: fees, error: feesError } = useLive(fetchFees, ['settings'], [])
+  // Shown once the real amount has loaded; the built-in amount is only a fallback if it cannot load.
+  const joiningFee = fees ? fees.joining : feesError ? JOINING_FEE : null
   const [form, setForm] = useState(EMPTY)
   const [joinPay, setJoinPay] = useState('card')
   const [agreed, setAgreed] = useState(false)
@@ -120,8 +121,8 @@ export default function Apply() {
             </p>
             <p className="success-text">
               {done.joinPay === 'card'
-                ? 'Your ' + R(joiningFee) + ' joining fee is payable once your account is approved.'
-                : 'Send your ' + R(joiningFee) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
+                ? 'Your ' + R(joiningFee ?? JOINING_FEE) + ' joining fee is payable once your account is approved.'
+                : 'Send your ' + R(joiningFee ?? JOINING_FEE) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
             </p>
             {done.needsEmailConfirmation && (
               <>
@@ -138,22 +139,31 @@ export default function Apply() {
             {FIELDS.map(f => (
               <label key={f.key} className="field-label">
                 {f.label}
-                <input
-                  className="field"
-                  type={f.type || 'text'}
-                  inputMode={f.inputMode}
-                  autoComplete={f.autoComplete}
-                  placeholder={f.placeholder}
-                  value={form[f.key]}
-                  onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                />
+                {f.type === 'password' ? (
+                  <PasswordInput
+                    autoComplete={f.autoComplete}
+                    placeholder={f.placeholder}
+                    value={form[f.key]}
+                    onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  />
+                ) : (
+                  <input
+                    className="field"
+                    type={f.type || 'text'}
+                    inputMode={f.inputMode}
+                    autoComplete={f.autoComplete}
+                    placeholder={f.placeholder}
+                    value={form[f.key]}
+                    onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  />
+                )}
               </label>
             ))}
 
             <div className="card-dark stack gap-12 mt-4">
               <div className="row between baseline gap-12">
                 <span className="kicker on-dark">Once-off joining fee</span>
-                <span className="fee">{R(joiningFee)}</span>
+                <span className="fee">{joiningFee == null ? '…' : R(joiningFee)}</span>
               </div>
               <p className="on-dark-text">
                 Activates your distributor account and unlocks ordering. Paid once - no monthly fees.

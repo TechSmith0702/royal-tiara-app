@@ -18,6 +18,25 @@ export function BackButton({ to, label = 'Back' }) {
   return <Link to={to} className="icon-btn" aria-label={label}>&lsaquo;</Link>
 }
 
+/** A password box with a Show/Hide button, so people can check what they typed. */
+export function PasswordInput({ className = 'field', ...props }) {
+  const [shown, setShown] = useState(false)
+  return (
+    <span className="pw-wrap">
+      <input {...props} className={className + ' pw-field'} type={shown ? 'text' : 'password'} />
+      <button
+        type="button"
+        className="pw-toggle"
+        onClick={() => setShown(s => !s)}
+        aria-label={shown ? 'Hide password' : 'Show password'}
+        aria-pressed={shown}
+      >
+        {shown ? 'Hide' : 'Show'}
+      </button>
+    </span>
+  )
+}
+
 export function ActiveDot({ label = 'Active' }) {
   return <span className="active-dot"><span className="dot" />{label}</span>
 }

@@ -3,7 +3,7 @@ import { R } from './format.js'
 
 // Used only until the saved fees arrive, and if the database cannot be reached.
 export const DELIVERY_FEE = 90
-export const JOINING_FEE = 200
+export const JOINING_FEE = 100   // only used if the real fee cannot be loaded
 
 /** The fees the admin last saved. Everyone reads the same row. */
 export async function fetchFees() {

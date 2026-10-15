@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { sendPasswordReset, signIn, wasJustDeleted } from '../lib/auth.jsx'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import InstallCard from '../components/InstallCard.jsx'
+import { PasswordInput } from '../components/ui.jsx'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -63,9 +64,7 @@ export default function SignIn() {
           </label>
           <label className="field-label">
             Password
-            <input
-              className="field"
-              type="password"
+            <PasswordInput
               autoComplete="current-password"
               placeholder="Your password"
               value={password}

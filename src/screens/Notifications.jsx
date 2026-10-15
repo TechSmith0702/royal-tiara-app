@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchNotifications, markNotificationsRead } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
@@ -19,6 +19,7 @@ const ICONS = {
 export default function Notifications() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { key } = useLocation()
   const { data, loading, error, refresh } = useLive(fetchNotifications, ['notifications'], [])
   const marked = useRef(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -33,11 +34,14 @@ export default function Notifications() {
   }, [unread, refresh])
 
   const showTabs = user.role === 'distributor' && user.status === 'approved'
+  // Opened straight from a phone notification there is no page to go back to.
+  const back = () => (key === 'default' ? navigate(user.role === 'admin' ? '/admin' : '/home') : navigate(-1))
 
   return (
     <div className="screen">
-      <div className="page-top row between center">
-        <h2 className="title">Notifications</h2>
+      <div className="page-top row center gap-12">
+        <button type="button" className="icon-btn" aria-label="Back" onClick={back}>&lsaquo;</button>
+        <h2 className="title-sm grow">Notifications</h2>
         <div className="row center gap-10">
           <button
             type="button"
@@ -48,7 +52,6 @@ export default function Notifications() {
           >
             <GearIcon />
           </button>
-          <button type="button" className="btn btn-outline btn-sm btn-inline" onClick={() => navigate(-1)}>Back</button>
         </div>
       </div>
 

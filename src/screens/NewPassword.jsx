@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setNewPassword, useAuth } from '../lib/auth.jsx'
+import { PasswordInput } from '../components/ui.jsx'
 
 /**
  * Where the "forgot password" email link lands. Supabase signs the person in
@@ -60,9 +61,7 @@ export default function NewPassword() {
 
             <label className="field-label">
               New password
-              <input
-                className="field"
-                type="password"
+              <PasswordInput
                 autoComplete="new-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -72,9 +71,7 @@ export default function NewPassword() {
 
             <label className="field-label">
               Type it again
-              <input
-                className="field"
-                type="password"
+              <PasswordInput
                 autoComplete="new-password"
                 value={again}
                 onChange={e => setAgain(e.target.value)}
