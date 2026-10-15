@@ -5,6 +5,7 @@ import { adminDeleteProduct, adminSaveProduct, adminSetProductImages, fetchProdu
 import { deleteProductPhoto, uploadProductPhoto } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { BackButton, ErrorNote, FilePicker, FitPhoto, Loading, PhotoViewer } from '../../components/ui.jsx'
+import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
 const BLANK = { name: '', sub: '', cat: '', price: '', blurb: '', sku: '', variants: [], archived: false }
 const onlyPrice = value => value.replace(/[^0-9.]/g, '')
@@ -20,6 +21,7 @@ export default function ProductEditor() {
   const [problem, setProblem] = useState('')
   const [saved, setSaved] = useState('')
   const [viewing, setViewing] = useState(null)
+  const [ask, dialog] = useConfirm()
 
   const product = isNew ? null : (data || []).find(p => p.id === id)
 
@@ -92,7 +94,7 @@ export default function ProductEditor() {
   }
 
   const removePhoto = async url => {
-    if (!confirm('Remove this photo?')) return
+    if (!(await ask({ title: 'Remove this photo?', yes: 'Remove', danger: true }))) return
     await saveGallery(photos.filter(p => p !== url))
     try {
       await deleteProductPhoto(url)
@@ -102,8 +104,14 @@ export default function ProductEditor() {
   }
 
   const deleteProduct = async () => {
-    if (!confirm('Delete ' + product.name + ' for good?\n\nIt disappears from the catalogue and its photos are removed. '
-      + 'Past orders and invoices keep their details. This cannot be undone.')) return
+    const ok = await ask({
+      title: 'Delete ' + product.name + ' for good?',
+      body: 'It disappears from the catalogue and its photos are removed. Past orders and invoices keep their details. '
+        + 'This cannot be undone.',
+      yes: 'Delete product',
+      danger: true,
+    })
+    if (!ok) return
     setBusy(true)
     setProblem('')
     try {
@@ -123,6 +131,7 @@ export default function ProductEditor() {
 
   return (
     <div className="screen">
+      {dialog}
       <div className="page-top row center gap-12">
         <BackButton to="/admin?tab=catalogue" />
         <h2 className="title-sm ellipsis">{isNew ? 'New product' : product.name}</h2>

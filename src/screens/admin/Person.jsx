@@ -4,6 +4,7 @@ import { adminDecideApplication, adminSetMembership, fetchApplications, fetchOrd
 import { useLive } from '../../lib/live.js'
 import { R, fmtDate, timeAgo, waLinkTo } from '../../lib/format.js'
 import { Avatar, BackButton, ErrorNote, Loading, StatusChip } from '../../components/ui.jsx'
+import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
 const CHIP = {
   pending: { tone: 'peach', label: 'Awaiting review' },
@@ -28,6 +29,7 @@ export default function Person() {
   const orderList = useLive(fetchOrders, ['orders'], [])
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState('')
+  const [ask, dialog] = useConfirm()
 
   if (people.loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (people.error) {
@@ -70,9 +72,14 @@ export default function Person() {
 
   const decide = approve => run(() => adminDecideApplication(p.id, approve))
 
-  const revoke = () => {
-    if (!confirm('Put ' + (p.business || p.name) + ' on hold?\n\nThey keep their account and past orders, but cannot place new '
-      + 'orders until you restore them.')) return
+  const revoke = async () => {
+    const ok = await ask({
+      title: 'Put ' + (p.business || p.name) + ' on hold?',
+      body: 'They keep their account and past orders, but cannot place new orders until you restore them.',
+      yes: 'Put on hold',
+      danger: true,
+    })
+    if (!ok) return
     run(() => adminSetMembership(p.id, 'revoked'))
   }
 
@@ -80,6 +87,7 @@ export default function Person() {
 
   return (
     <div className="screen">
+      {dialog}
       <div className="page-top row center gap-12">
         <BackButton to="/admin" />
         <h2 className="title-sm ellipsis">{p.business || p.name}</h2>

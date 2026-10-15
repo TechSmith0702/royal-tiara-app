@@ -5,6 +5,7 @@ import { useLive } from '../../lib/live.js'
 import { fmtDate, R } from '../../lib/format.js'
 import { orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
+import { useConfirm } from '../../components/ConfirmDialog.jsx'
 import BankDetailsForm from './BankDetailsForm.jsx'
 import Fees from './Fees.jsx'
 
@@ -64,6 +65,7 @@ export default function Sales() {
 
 function SaleCard({ order, onDone, onProblem }) {
   const [busy, setBusy] = useState(false)
+  const [ask, dialog] = useConfirm()
   const st = orderState(order, 'admin')
 
   const pay = st.cancelled
@@ -78,13 +80,19 @@ function SaleCard({ order, onDone, onProblem }) {
 
   const advance = async step => {
     if (step === 'delivered') {
-      const ok = confirm('Mark ' + order.id + ' as delivered? Only do this if the distributor told you it arrived.')
+      const ok = await ask({
+        title: 'Mark ' + order.id + ' as delivered?',
+        body: 'Only do this if the distributor told you it arrived.',
+        yes: 'Mark delivered',
+      })
       if (!ok) return
     }
     if (step === 'verify' && !order.proof) {
-      const ok = confirm(
-        'No proof uploaded for ' + order.id + '. Only verify if ' + R(order.total) + ' has reflected in the Royal Tiara account.',
-      )
+      const ok = await ask({
+        title: 'Verify ' + order.id + ' without a proof?',
+        body: 'No proof was uploaded. Only verify if ' + R(order.total) + ' has reflected in the Royal Tiara account.',
+        yes: 'It has reflected - verify',
+      })
       if (!ok) return
     }
     setBusy(true)
@@ -100,10 +108,13 @@ function SaleCard({ order, onDone, onProblem }) {
   }
 
   const cancel = async () => {
-    const ok = confirm(
-      'Cancel ' + order.id + '? ' + (order.business || order.customer) + ' is told it was cancelled. ' +
-      'If the money arrives later, verifying it brings the order back.',
-    )
+    const ok = await ask({
+      title: 'Cancel ' + order.id + '?',
+      body: (order.business || order.customer) + ' is told it was cancelled. If the money arrives later, verifying it brings the order back.',
+      yes: 'Cancel order',
+      no: 'Keep it',
+      danger: true,
+    })
     if (!ok) return
     setBusy(true)
     onProblem('')
@@ -128,6 +139,7 @@ function SaleCard({ order, onDone, onProblem }) {
 
   return (
     <div className="card card-pad-lg stack gap-15">
+      {dialog}
       <div className="row between start gap-10">
         <div className="min0">
           <div className="sale-id">{order.id} &middot; {order.business || order.customer}</div>

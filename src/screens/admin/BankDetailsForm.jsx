@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { adminSaveBankDetails, fetchBankDetails } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
+import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
 // Universal branch codes, filled in when a bank is picked. Check them against
 // the bank's own confirmation letter before saving.
@@ -25,6 +26,7 @@ export default function BankDetailsForm() {
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState('')
   const [saved, setSaved] = useState('')
+  const [ask, dialog] = useConfirm()
 
   useEffect(() => {
     if (!loading && !form) setForm(data ? { ...data } : EMPTY)
@@ -49,7 +51,11 @@ export default function BankDetailsForm() {
 
   const save = async () => {
     if (data && form.accountNumber.replace(/\D/g, '') !== data.accountNumber) {
-      const ok = confirm('Change the account number? Distributors will pay into the new account from now on, and both admins are notified.')
+      const ok = await ask({
+        title: 'Change the account number?',
+        body: 'Distributors will pay into the new account from now on, and all admins are notified.',
+        yes: 'Change it',
+      })
       if (!ok) return
     }
     setBusy(true)
@@ -69,6 +75,7 @@ export default function BankDetailsForm() {
 
   return (
     <section className="card card-pad stack gap-12">
+      {dialog}
       <div>
         <div className="kicker muted">Bank details</div>
         <p className="hint mb-0">
