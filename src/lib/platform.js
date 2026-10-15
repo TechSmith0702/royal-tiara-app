@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core'
 
 /** True inside the Android or iPhone app, false on the website. */
 export const isNativeApp = Capacitor.isNativePlatform()
-const isIosApp = Capacitor.getPlatform() === 'ios'
 
 /** An iPhone or iPad (iPads report themselves as a Mac with a touch screen). */
 export const isIos =
@@ -21,11 +20,12 @@ const SITE_URL = (import.meta.env.VITE_SITE_URL || '').replace(/\/$/, '')
 export const publicUrl = path => (isNativeApp && SITE_URL ? SITE_URL : window.location.origin) + path
 
 /**
- * Where PayFast sends the distributor back to after paying. PayFast only accepts
- * https:// addresses, so on iPhone it goes through public/app-return.html on the
+ * Where PayFast sends the distributor back to after paying. Live PayFast refuses
+ * return addresses at "localhost" (where both apps live) and anything that is not
+ * https://, so inside the apps it goes through public/app-return.html on the
  * website, which hands straight back to the app.
  */
 export const paymentReturnUrl = path =>
-  isIosApp && SITE_URL
+  isNativeApp && SITE_URL
     ? SITE_URL + '/app-return.html?to=' + encodeURIComponent(path)
     : window.location.origin + path

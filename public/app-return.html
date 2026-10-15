@@ -13,16 +13,18 @@
 </head>
 <body>
   <!--
-    PayFast only accepts https:// return addresses, but the iPhone app lives at
-    capacitor://localhost. On iPhone, PayFast returns here (inside the app) and this
-    page hands over to the app's own payment screen. Only the two payment pages,
-    for a Royal Tiara order number, are ever opened.
+    Live PayFast refuses return addresses at "localhost", where both apps live
+    (https://localhost on Android, capacitor://localhost on iPhone). So PayFast
+    returns here (inside the app) and this page hands over to the app's own
+    screen. Only the payment pages for a Royal Tiara order, and the joining-fee
+    page, are ever opened.
   -->
   <p id="msg">Returning to the Royal Tiara app...</p>
   <script>
     var to = new URLSearchParams(location.search).get('to') || ''
-    if (/^\/payment\/(return|cancel)\?order=RT-\d+$/.test(to)) {
-      location.replace('capacitor://localhost' + to)
+    var app = /Android/.test(navigator.userAgent) ? 'https://localhost' : 'capacitor://localhost'
+    if (/^\/payment\/(return|cancel)\?order=RT-\d+$/.test(to) || /^\/join-fee\?(paid|cancelled)=1$/.test(to)) {
+      location.replace(app + to)
     }
     // Opened outside the app (e.g. in a desktop browser): offer the website instead.
     setTimeout(function () {
