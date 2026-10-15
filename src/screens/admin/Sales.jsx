@@ -5,6 +5,7 @@ import { useLive } from '../../lib/live.js'
 import { fmtDate, R } from '../../lib/format.js'
 import { orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
+import BankDetailsForm from './BankDetailsForm.jsx'
 import Fees from './Fees.jsx'
 
 export default function Sales() {
@@ -33,6 +34,7 @@ export default function Sales() {
       </div>
 
       <Fees />
+      <BankDetailsForm />
 
       {loading && <Loading label="Loading sales..." />}
       <ErrorNote message={error} onRetry={refresh} />

@@ -5,6 +5,7 @@ import { fmtDate, R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
 import { isNativeApp } from '../lib/platform.js'
 import { BackButton, Loading } from '../components/ui.jsx'
+import BankDetails from '../components/BankDetails.jsx'
 
 export default function InvoiceView() {
   const { id } = useParams()
@@ -87,6 +88,13 @@ export default function InvoiceView() {
             <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
             <div className="muted-sm right">Prices include VAT.</div>
           </div>
+
+          {order.payMethod === 'eft' && !st.verified && !st.cancelled && (
+            <div className="stack gap-8">
+              <div className="kicker muted">Payment details</div>
+              <BankDetails amount={order.total} reference={order.id} />
+            </div>
+          )}
         </article>
       </div>
     </div>

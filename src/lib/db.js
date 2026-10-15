@@ -17,6 +17,35 @@ export async function adminSaveFees(delivery, joining) {
   if (error) fail(error)
 }
 
+/** Royal Tiara's bank details, or null until the admin has filled them in. */
+export async function fetchBankDetails() {
+  const { data, error } = await supabase
+    .from('bank_details')
+    .select('holder, bank, account_number, branch_code, account_type')
+    .eq('id', true)
+    .maybeSingle()
+  if (error) fail(error)
+  if (!data || !data.account_number) return null
+  return {
+    holder: data.holder,
+    bank: data.bank,
+    accountNumber: data.account_number,
+    branchCode: data.branch_code,
+    accountType: data.account_type,
+  }
+}
+
+export async function adminSaveBankDetails(d) {
+  const { error } = await supabase.rpc('admin_save_bank_details', {
+    p_holder: d.holder,
+    p_bank: d.bank,
+    p_account_number: d.accountNumber,
+    p_branch_code: d.branchCode,
+    p_account_type: d.accountType,
+  })
+  if (error) fail(error)
+}
+
 /* ---------- shaping rows from the database ---------- */
 
 // The bundled photos in /products were converted from PNG/JPG to WebP (about

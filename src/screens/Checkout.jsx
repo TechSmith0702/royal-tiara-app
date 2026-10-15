@@ -8,6 +8,7 @@ import { goToPayfast, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import AddressCard from '../components/AddressCard.jsx'
+import BankDetails from '../components/BankDetails.jsx'
 import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx'
 
 export default function Checkout() {
@@ -74,6 +75,11 @@ export default function Checkout() {
             onChange={setMethod}
             options={[{ value: 'eft', label: 'Bank transfer' }, { value: 'card', label: 'Card' }]}
           />
+
+          {method === 'eft' && <BankDetails amount={cart.total} />}
+          {method === 'eft' && (
+            <p className="hint mb-0">You will see your order number, your payment reference, once you place the order.</p>
+          )}
 
           {method === 'eft' ? (
             proof ? (

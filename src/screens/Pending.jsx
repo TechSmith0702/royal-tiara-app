@@ -1,12 +1,19 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { signOut, useAuth } from '../lib/auth.jsx'
+import { fetchFees } from '../lib/db.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
+import { useLive } from '../lib/live.js'
+import BankDetails from '../components/BankDetails.jsx'
 
 export default function Pending() {
   const { user } = useAuth()
   const declined = user && user.status === 'declined'
   const [params] = useSearchParams()
   const justConfirmed = params.get('confirmed') === '1'
+  const { data: fees } = useLive(fetchFees, [], [])
+  const payJoiningByEft = user && !declined && user.joinPay === 'eft'
+  // Bank references allow about 20 characters.
+  const joinReference = user ? ('JOIN ' + user.name).toUpperCase().slice(0, 20) : ''
 
   return (
     <div className="screen">
@@ -23,6 +30,16 @@ export default function Pending() {
               : 'Thanks ' + (user ? user.name.split(' ')[0] : '') + '! Royal Tiara reviews trade accounts within one working day. This screen opens your account by itself as soon as you are approved.'}
           </p>
         </div>
+
+        {payJoiningByEft && (
+          <div className="card card-pad stack gap-10">
+            <div className="kicker muted">Joining fee</div>
+            <p className="body-muted mb-0">
+              Pay your joining fee by bank transfer, then send the proof on WhatsApp {WHATSAPP_DISPLAY}.
+            </p>
+            <BankDetails amount={fees ? fees.joining : null} reference={joinReference} />
+          </div>
+        )}
 
         <div className="card card-pad stack gap-10">
           <div className="kicker muted">While you wait</div>

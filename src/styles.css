@@ -93,6 +93,10 @@ p { margin: 0; }
 .text-btn { border: 0; background: none; font-weight: 700; font-size: 13px; color: var(--sage-deep); padding: 6px; }
 .retry-link { align-self: flex-start; border: 0; background: none; }
 .cancel-link { color: var(--muted); }
+.bank-box { display: flex; flex-direction: column; gap: 9px; padding: 14px 16px; border-radius: 18px; background: var(--ground); border: 1px solid var(--line); }
+.bank-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); }
+.bank-value { color: var(--ink); font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.copy-btn { flex: none; height: 28px; padding: 0 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12px; font-weight: 700; color: var(--accent-deep); }
 .form-error { font-size: 13.5px; color: var(--oos-fg); background: var(--oos-bg); border-radius: 16px; padding: 10px 14px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .chev { font-size: 20px; color: rgba(32, 30, 29, .35); line-height: 1; }

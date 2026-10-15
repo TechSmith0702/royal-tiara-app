@@ -17,7 +17,7 @@ export default function Success() {
     ? 'Royal Tiara will confirm your card payment and start packing.'
     : order.proof
       ? 'Your proof of payment is with us - we will confirm as soon as it reflects.'
-      : 'Send your proof of payment and we will confirm. Courier collects within two working days.'
+      : 'Pay by bank transfer using ' + order.id + ' as the reference, then upload your proof of payment. The bank details are on the order page.'
 
   return (
     <div className="screen screen-dark">
@@ -32,7 +32,9 @@ export default function Success() {
         </div>
       </div>
       <div className="stack gap-10">
-        <Link to={'/orders/' + order.id} className="btn btn-primary" replace>Track this order</Link>
+        <Link to={'/orders/' + order.id} className="btn btn-primary" replace>
+          {order.payMethod === 'eft' && !order.proof ? 'See bank details' : 'Track this order'}
+        </Link>
         <Link to="/shop" className="btn btn-ghost-light" replace>Keep shopping</Link>
       </div>
     </div>

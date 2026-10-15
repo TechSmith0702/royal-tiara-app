@@ -9,6 +9,7 @@ import { fmtDate, R } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
+import BankDetails from '../components/BankDetails.jsx'
 
 // PayFast confirms a card payment within seconds of the distributor coming
 // back. If nothing has arrived this long after they open the order, the
@@ -148,6 +149,7 @@ export default function OrderDetail() {
             <p className="body-muted">
               Pay {R(order.total)} by bank transfer using <strong>{order.id}</strong> as your reference, then upload your proof here.
             </p>
+            <BankDetails amount={order.total} reference={order.id} />
             <FilePicker className="upload-box" onPicked={attach}>
               <span className="upload-title">Upload proof of payment</span>
               <span className="upload-sub">Photo or PDF</span>
