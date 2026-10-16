@@ -21,6 +21,7 @@
     "alias": "royaltiara"
   },
   "appVersionName": "1.0.0",
+  "appVersion": "1.0.0",
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
@@ -28,7 +29,7 @@
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": { "enabled": false },
-  "enableSiteSettingsShortcut": false,
+  "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://royaltiara.netlify.app/",

@@ -46,7 +46,7 @@ def twaManifest = [
     // The fallback strategy for when Trusted Web Activity is not available. Possible values are
     // 'customtabs' and 'webview'.
     fallbackType: 'customtabs',
-    enableSiteSettingsShortcut: 'false',
+    enableSiteSettingsShortcut: 'true',
     orientation: 'portrait',
 ]
 
@@ -58,7 +58,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
         versionCode 1
-        versionName ""
+        versionName "1.0.0"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
