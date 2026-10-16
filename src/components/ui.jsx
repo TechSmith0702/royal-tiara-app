@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { initials } from '../lib/format.js'
+import { EyeIcon, EyeOffIcon } from './Icons.jsx'
 
 export function Avatar({ name, size = 46, dark = false }) {
   return (
@@ -31,7 +32,7 @@ export function PasswordInput({ className = 'field', ...props }) {
         aria-label={shown ? 'Hide password' : 'Show password'}
         aria-pressed={shown}
       >
-        {shown ? 'Hide' : 'Show'}
+        {shown ? <EyeOffIcon /> : <EyeIcon />}
       </button>
     </span>
   )

@@ -20,6 +20,14 @@ export const ReceiptIcon = () => <Svg><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" /
 export const UserIcon = () => <Svg><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></Svg>
 export const ChatIcon = () => <Svg><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.2-4.4A8 8 0 1 1 21 12Z" /></Svg>
 export const BellIcon = () => <Svg><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6Z" /><path d="M10.5 20a2 2 0 0 0 3 0" /></Svg>
+export const EyeIcon = () => <Svg><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></Svg>
+export const EyeOffIcon = () => (
+  <Svg>
+    <path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.7 3.6M6.6 6.6A17.4 17.4 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+    <path d="m3 3 18 18" />
+  </Svg>
+)
 export const SendIcon = () => <Svg><path d="M4 12 20 4l-7 16-2.5-6.5L4 12Z" /></Svg>
 export const GearIcon = () => (
   <Svg>
