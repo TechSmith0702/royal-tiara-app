@@ -356,6 +356,8 @@ icon, colours or splash screen need a new upload.
 
 - Settings (name, colours, icons, version): `twa/twa-manifest.json`. After
   changing it, regenerate: in `twa`, `npx @bubblewrap/cli@1.24.1 update`.
+  Keep `"enableSiteSettingsShortcut": true`: with it off, the app crashes on
+  opening (the library still uses that shortcut's screen).
 - **Build** (Java 17): in `twa`, `set JAVA_HOME=C:\Program Files\Java\jdk-17`
   then `gradlew.bat --no-daemon assembleRelease bundleRelease`.
   (`bubblewrap build` itself fails on this PC: its old SDK installer needs
