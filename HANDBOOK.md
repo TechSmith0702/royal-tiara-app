@@ -358,6 +358,10 @@ icon, colours or splash screen need a new upload.
   changing it, regenerate: in `twa`, `npx @bubblewrap/cli@1.24.1 update`.
   Keep `"enableSiteSettingsShortcut": true`: with it off, the app crashes on
   opening (the library still uses that shortcut's screen).
+  After `update`, re-add `allowChromeToReadSplash()` to
+  `twa/app/src/main/java/za/co/royaltiara/trade/LauncherActivity.java` (it is in
+  Git history): since Chrome 152 Chrome refuses the splash image without it,
+  and shows its address bar over a black screen at start-up instead.
 - **Build** (Java 17): in `twa`, `set JAVA_HOME=C:\Program Files\Java\jdk-17`
   then `gradlew.bat --no-daemon assembleRelease bundleRelease`.
   (`bubblewrap build` itself fails on this PC: its old SDK installer needs
