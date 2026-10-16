@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "za.co.royaltiara.trade",
+      "sha256_cert_fingerprints": [
+        "F5:AD:E6:C5:C5:CB:B6:37:A9:47:F9:3D:E4:FF:45:22:1A:31:FB:52:38:4A:F9:CC:D4:1E:4F:EA:1E:FD:26:ED"
+      ]
+    }
+  }
+]
