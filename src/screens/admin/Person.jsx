@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { adminDecideApplication, adminMarkJoiningPaid, adminSetMembership, fetchApplications, fetchOrders } from '../../lib/db.js'
+import { adminDecideApplication, adminMarkJoiningPaid, adminPersonDetails, adminSetMembership, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
 import { R, fmtDate, timeAgo, waLinkTo } from '../../lib/format.js'
 import { Avatar, BackButton, ErrorNote, Loading, StatusChip } from '../../components/ui.jsx'
@@ -27,6 +27,7 @@ export default function Person() {
   const { id } = useParams()
   const people = useLive(fetchApplications, ['profiles'], [])
   const orderList = useLive(fetchOrders, ['orders'], [])
+  const { data: details } = useLive(() => adminPersonDetails(id), [], [id])
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState('')
   const [ask, dialog] = useConfirm()
@@ -70,7 +71,19 @@ export default function Person() {
     }
   }
 
-  const decide = approve => run(() => adminDecideApplication(p.id, approve))
+  const decide = async approve => {
+    if (!approve) {
+      const ok = await ask({
+        title: 'Decline ' + (p.business || p.name) + '?',
+        body: 'They will see that their application was not approved and cannot order. You can still chat to them, and approve them later.',
+        yes: 'Decline',
+        no: 'Keep reviewing',
+        danger: true,
+      })
+      if (!ok) return
+    }
+    run(() => adminDecideApplication(p.id, approve))
+  }
 
   const revoke = async () => {
     const ok = await ask({
@@ -112,8 +125,10 @@ export default function Person() {
             <div className="row center gap-12 min0">
               <Avatar name={p.name} />
               <div className="min0">
-                <div className="app-name">{p.business || p.name}</div>
-                <div className="row-sub">{p.business ? p.name : 'Distributor'}</div>
+                {/* The name is already the page title, so only add what is new. */}
+                <div className="row-sub">
+                  {p.business && p.business !== p.name ? 'Owner: ' + p.name : p.status === 'pending' ? 'Applicant' : 'Distributor'}
+                </div>
               </div>
             </div>
             <StatusChip tone={chip.tone}>{chip.label}</StatusChip>
@@ -146,6 +161,24 @@ export default function Person() {
         <section className="card card-pad stack gap-10">
           <div className="kicker muted">Account</div>
           <Line label="Applied">{fmtDate(p.createdAt)} &middot; {timeAgo(p.createdAt)}</Line>
+          {details && (
+            <Line label="Email">
+              {details.emailConfirmedAt ? 'Confirmed ' + fmtDate(details.emailConfirmedAt) : 'Not confirmed yet - they cannot sign in until they do'}
+            </Line>
+          )}
+          {details && (
+            <Line label="Last signed in">{details.lastSignInAt ? timeAgo(details.lastSignInAt) : 'Never'}</Line>
+          )}
+          {details && (
+            <Line label="Terms">
+              {details.termsAcceptedAt
+                ? 'Agreed ' + fmtDate(details.termsAcceptedAt) + (details.termsVersion ? ' (version ' + details.termsVersion + ')' : '')
+                : 'Not on record - applied before the terms tick box'}
+            </Line>
+          )}
+          {details && details.monthlyMinimumAccepted && (
+            <Line label="Monthly minimum">Ticked: “{details.monthlyMinimumAccepted}”</Line>
+          )}
           {p.decidedAt && <Line label="Decided">{fmtDate(p.decidedAt)}</Line>}
           <Line label="Joining fee">
             {p.joinFeePaidAt
@@ -180,7 +213,7 @@ export default function Person() {
           </div>
         )}
 
-        <Link className="btn btn-outline btn-46" to="/admin?tab=chat">Open chat</Link>
+        <Link className="btn btn-outline btn-46" to={'/admin?tab=chat&thread=' + p.id}>Open chat</Link>
 
         {p.status === 'approved' && (
           <div className="danger-zone stack gap-10">

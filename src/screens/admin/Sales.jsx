@@ -1,71 +1,117 @@
 import { useState } from 'react'
-import { adminAdvanceOrder, cancelOrder, fetchOrders } from '../../lib/db.js'
+import { Link } from 'react-router-dom'
+import { adminAdvanceOrder, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
-import { fmtDate, R } from '../../lib/format.js'
+import { fmtDate, R, waLinkTo } from '../../lib/format.js'
 import { orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
-import BankDetailsForm from './BankDetailsForm.jsx'
-import Fees from './Fees.jsx'
-import MonthlyMinimumForm from './MonthlyMinimumForm.jsx'
+
+// Which list an order belongs in. "Active" is everything still needing work.
+const FILTERS = [
+  { value: 'active', label: 'Active', test: o => o.fulfil !== 'delivered' && o.fulfil !== 'cancelled' },
+  { value: 'verify', label: 'To verify', test: o => o.payStatus !== 'verified' && !!o.proof && o.fulfil !== 'cancelled' },
+  { value: 'pack', label: 'To pack', test: o => o.payStatus === 'verified' && !o.fulfil },
+  { value: 'unpaid', label: 'Awaiting payment', test: o => o.payStatus !== 'verified' && !o.proof && o.fulfil !== 'cancelled' },
+  { value: 'transit', label: 'Packed & on the way', test: o => o.fulfil === 'packed' || o.fulfil === 'collected' },
+  { value: 'delivered', label: 'Delivered', test: o => o.fulfil === 'delivered' },
+  { value: 'cancelled', label: 'Cancelled', test: o => o.fulfil === 'cancelled' },
+]
 
 export default function Sales() {
   const { data, loading, error, refresh } = useLive(fetchOrders, ['orders'], [])
+  const { data: people } = useLive(fetchApplications, ['profiles'], [])
   const [problem, setProblem] = useState('')
+  const [filter, setFilter] = useState('active')
+  const [query, setQuery] = useState('')
 
   const all = data || []
-  // Cancelled orders are kept for the record but out of the way, at the bottom.
-  const orders = all.filter(o => o.fulfil !== 'cancelled')
-  const cancelled = all.filter(o => o.fulfil === 'cancelled')
-  const toVerify = orders.filter(o => o.proof && o.payStatus !== 'verified').length
+  const count = value => all.filter(FILTERS.find(f => f.value === value).test).length
+  const now = new Date()
+  const thisMonth = all
+    .filter(o => {
+      const d = new Date(o.createdAt)
+      return o.payStatus === 'verified' && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+    .reduce((t, o) => t + o.total, 0)
+
+  // The courier needs a phone number, which lives on the distributor's profile.
+  const phones = new Map((people || []).map(p => [p.id, p.phone]))
+
+  const q = query.trim().toLowerCase()
+  const shown = all
+    .filter(FILTERS.find(f => f.value === filter).test)
+    .filter(o => !q || (o.id + ' ' + o.invoice + ' ' + o.customer + ' ' + (o.business || '')).toLowerCase().includes(q))
 
   return (
-    <div className="stack gap-18">
-      <div className="row gap-12">
-        <div className="stat stat-outline grow">
-          <div className="kicker">Orders</div>
-          <div className="stat-value">{orders.length}</div>
-          <div className="stat-sub">placed</div>
-        </div>
-        <div className="stat stat-sage grow">
-          <div className="kicker">Payments</div>
-          <div className="stat-value">{toVerify}</div>
-          <div className="stat-sub">to verify</div>
-        </div>
+    <div className="stack gap-16">
+      <div className="row gap-10">
+        <button type="button" className="stat stat-sage grow stat-btn" onClick={() => setFilter('verify')}>
+          <div className="kicker">To verify</div>
+          <div className="stat-value">{count('verify')}</div>
+          <div className="stat-sub">payments</div>
+        </button>
+        <button type="button" className="stat stat-peach grow stat-btn" onClick={() => setFilter('pack')}>
+          <div className="kicker">To pack</div>
+          <div className="stat-value">{count('pack')}</div>
+          <div className="stat-sub">paid orders</div>
+        </button>
+      </div>
+      <div className="stat stat-plain">
+        <div className="kicker muted">Paid this month</div>
+        <div className="stat-value">{R(thisMonth)}</div>
       </div>
 
-      <Fees />
-      <MonthlyMinimumForm />
-      <BankDetailsForm />
+      <Link to="/admin/settings" className="settings-link">
+        <span className="grow">Fees, monthly minimum &amp; bank details</span>
+        <span className="chev">&rsaquo;</span>
+      </Link>
+
+      <input
+        className="field field-search"
+        type="search"
+        placeholder="Search order number or name"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        aria-label="Search orders"
+      />
+
+      <div className="chips" role="tablist" aria-label="Show orders">
+        {FILTERS.map(f => (
+          <button
+            key={f.value}
+            type="button"
+            role="tab"
+            aria-selected={filter === f.value}
+            className={'chip' + (filter === f.value ? ' chip-on' : '')}
+            onClick={() => setFilter(f.value)}
+          >
+            {f.label} <span className="chip-count">{count(f.value)}</span>
+          </button>
+        ))}
+      </div>
 
       {loading && <Loading label="Loading sales..." />}
       <ErrorNote message={error} onRetry={refresh} />
       {problem && <p className="form-error" role="alert">{problem}</p>}
 
-      {!loading && orders.length === 0 && (
-        <div className="empty-card empty-sm">No sales yet. Distributor orders appear here.</div>
+      {!loading && shown.length === 0 && (
+        <div className="empty-card empty-sm">
+          {all.length === 0
+            ? 'No sales yet. Distributor orders appear here.'
+            : q ? 'No orders match "' + query.trim() + '".' : 'Nothing here right now.'}
+        </div>
       )}
 
-      {orders.map(o => (
-        <SaleCard key={o.id} order={o} onDone={refresh} onProblem={setProblem} />
+      {shown.map(o => (
+        <SaleCard key={o.id} order={o} phone={phones.get(o.userId)} onDone={refresh} onProblem={setProblem} />
       ))}
-
-      {cancelled.length > 0 && (
-        <details className="items-details">
-          <summary>Cancelled orders &middot; {cancelled.length}</summary>
-          <div className="stack gap-12 mt-10">
-            {cancelled.map(o => (
-              <SaleCard key={o.id} order={o} onDone={refresh} onProblem={setProblem} />
-            ))}
-          </div>
-        </details>
-      )}
     </div>
   )
 }
 
-function SaleCard({ order, onDone, onProblem }) {
+function SaleCard({ order, phone, onDone, onProblem }) {
   const [busy, setBusy] = useState(false)
   const [ask, dialog] = useConfirm()
   const st = orderState(order, 'admin')
@@ -170,6 +216,15 @@ function SaleCard({ order, onDone, onProblem }) {
             <div className="muted-sm">
               {order.address.line1}{order.address.line2 ? ', ' + order.address.line2 : ''}
             </div>
+            {phone && (
+              <div className="muted-sm">
+                <a className="link-inline" href={'tel:' + phone.replace(/\s/g, '')}>{phone}</a>
+                {' · '}
+                <a className="link-inline" href={waLinkTo(phone, 'Hi, this is Royal Tiara about order ' + order.id + '.')} target="_blank" rel="noreferrer">
+                  WhatsApp
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </details>

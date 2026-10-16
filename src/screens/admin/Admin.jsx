@@ -43,21 +43,16 @@ export default function Admin() {
     <div className="screen">
       <div ref={scrollRef} className="scroll page stack gap-18 pb-24">
         <header className="row between start gap-12">
-          <div>
+          <div className="min0">
             <p className="kicker sage mb-2">Admin console</p>
             <h2 className="title">Royal Tiara</h2>
+            <p className="muted-sm mb-0">Signed in as {user.name}</p>
           </div>
           <div className="row center gap-10">
             <NotificationBell />
             <AppMenu />
           </div>
         </header>
-
-        <section className="card-dark">
-          <div className="kicker on-dark">Signed in as</div>
-          <div className="admin-name">{user.name}</div>
-          <div className="accent-line">Admin controller &middot; manages accounts &amp; payments</div>
-        </section>
 
 
         {tab === 'apps' && <Applications />}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../lib/auth.jsx'
-import { fetchThreads, markThreadRead, sendMessage } from '../../lib/db.js'
+import { fetchApplications, fetchThreads, markThreadRead, sendMessage } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
 import { timeAgo } from '../../lib/format.js'
 import { Avatar, ErrorNote, Loading } from '../../components/ui.jsx'
@@ -22,8 +22,20 @@ export default function AdminChat() {
   const [problem, setProblem] = useState('')
   const marked = useRef('')
 
+  const { data: people } = useLive(fetchApplications, ['profiles'], [])
+
   const threads = data || []
-  const thread = threads.find(t => t.id === openId)
+  // Opened from a distributor's page before either side has written: start an
+  // empty conversation so the admin can send the first message.
+  const person = !threads.some(t => t.id === openId) && (people || []).find(p => p.id === openId)
+  const thread = threads.find(t => t.id === openId) || (person && {
+    id: person.id,
+    name: person.name,
+    business: person.business,
+    status: person.status,
+    messages: [],
+    unread: 0,
+  })
 
   useEffect(() => {
     if (!thread || !thread.unread || marked.current === thread.id) return
@@ -69,7 +81,9 @@ export default function AdminChat() {
         </div>
 
         <div className="admin-thread">
-          <MessageList messages={thread.messages} myId={user.id} />
+          {thread.messages.length
+            ? <MessageList messages={thread.messages} myId={user.id} />
+            : <p className="muted-sm center mb-0">No messages yet. Write the first one below.</p>}
         </div>
 
         {problem && <p className="form-error" role="alert">{problem}</p>}
@@ -101,7 +115,10 @@ export default function AdminChat() {
       </div>
 
       {threads.length === 0 && (
-        <div className="empty-card empty-sm">No chats yet. Distributor messages appear here.</div>
+        <div className="empty-card empty-sm">
+          No chats yet. Distributor messages appear here. To message someone first, open them under Applications and
+          tap Open chat.
+        </div>
       )}
 
       <div className="stack gap-10">

@@ -8,13 +8,14 @@ import { useLive } from '../lib/live.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { Avatar } from './ui.jsx'
 import { useInstallState } from '../lib/install.js'
-import { BagIcon, BoxIcon, ChatIcon, DownloadIcon, HomeIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
+import { BagIcon, BoxIcon, ChatIcon, DownloadIcon, GearIcon, HomeIcon, ReceiptIcon, UserIcon } from './Icons.jsx'
 
 const ADMIN_LINKS = [
   { to: '/admin', tab: 'apps', label: 'Applications', Icon: UserIcon },
   { to: '/admin?tab=sales', tab: 'sales', label: 'Sales', Icon: ReceiptIcon },
   { to: '/admin?tab=catalogue', tab: 'catalogue', label: 'Catalogue', Icon: BagIcon },
   { to: '/admin?tab=chat', tab: 'chat', label: 'Chat', Icon: ChatIcon },
+  { to: '/admin/settings', label: 'Settings', Icon: GearIcon },
 ]
 
 const LINKS = [
@@ -109,9 +110,12 @@ export default function AppMenu() {
             </div>
 
             <div className="drawer-foot stack gap-10">
-              <a className="help-line" href={waLink()} target="_blank" rel="noreferrer">
-                <span className="dot" />Need help? WhatsApp {WHATSAPP_DISPLAY}
-              </a>
+              {/* Admins are the help line, so it is only shown to distributors. */}
+              {!admin && (
+                <a className="help-line" href={waLink()} target="_blank" rel="noreferrer">
+                  <span className="dot" />Need help? WhatsApp {WHATSAPP_DISPLAY}
+                </a>
+              )}
               <button type="button" className="btn btn-outline btn-44" onClick={signOut}>Sign out</button>
               <div className="row center gap-18 foot-links">
                 <Link to="/terms" className="link-inline foot-link">Terms</Link>

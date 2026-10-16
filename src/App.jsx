@@ -23,6 +23,7 @@ import Notifications from './screens/Notifications.jsx'
 import PaymentReturn from './screens/PaymentReturn.jsx'
 import Admin from './screens/admin/Admin.jsx'
 import Person from './screens/admin/Person.jsx'
+import AdminSettings from './screens/admin/Settings.jsx'
 import ProductEditor from './screens/admin/ProductEditor.jsx'
 import InstallApp from './screens/InstallApp.jsx'
 import DeleteAccount from './screens/DeleteAccount.jsx'
@@ -150,6 +151,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/product/:id" element={<ProductEditor />} />
           <Route path="/admin/person/:id" element={<Person />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
 
         <Route path="*" element={<Navigate to={home} replace />} />

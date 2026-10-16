@@ -234,6 +234,24 @@ export async function switchToEft(orderId) {
   if (error) fail(error)
 }
 
+/**
+ * Admin only: details kept with a distributor's login rather than their
+ * profile. Null if the database has not been updated for it yet.
+ */
+export async function adminPersonDetails(userId) {
+  const { data, error } = await supabase.rpc('admin_person_details', { p_user: userId })
+  if (error) return null
+  const row = (data || [])[0]
+  if (!row) return null
+  return {
+    emailConfirmedAt: row.email_confirmed_at,
+    lastSignInAt: row.last_sign_in_at,
+    termsVersion: row.terms_version,
+    termsAcceptedAt: row.terms_accepted_at,
+    monthlyMinimumAccepted: row.monthly_minimum_accepted,
+  }
+}
+
 /** The admin marks a distributor's joining fee as paid (e.g. by bank transfer). */
 export async function adminMarkJoiningPaid(userId) {
   const { error } = await supabase.rpc('admin_mark_joining_paid', { p_user: userId })
