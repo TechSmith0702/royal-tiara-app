@@ -54,7 +54,7 @@ async function forMessage(id: number): Promise<[string[], Push] | null> {
       db.from('profiles').select('id').eq('role', 'admin'),
     ])
     const who = sender?.business || sender?.name || 'A distributor'
-    return [(admins ?? []).map(a => a.id), { title: 'Message from ' + who, body: text, link: '/admin?tab=chat', tag: 'chat-' + m.distributor_id }]
+    return [(admins ?? []).map(a => a.id), { title: 'Message from ' + who, body: text, link: '/admin/chat/' + m.distributor_id, tag: 'chat-' + m.distributor_id }]
   }
 
   // Royal Tiara wrote: tell the distributor.

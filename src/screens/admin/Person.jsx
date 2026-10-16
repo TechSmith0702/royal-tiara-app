@@ -213,7 +213,7 @@ export default function Person() {
           </div>
         )}
 
-        <Link className="btn btn-outline btn-46" to={'/admin?tab=chat&thread=' + p.id}>Open chat</Link>
+        <Link className="btn btn-outline btn-46" to={'/admin/chat/' + p.id}>Open chat</Link>
 
         {p.status === 'approved' && (
           <div className="danger-zone stack gap-10">
