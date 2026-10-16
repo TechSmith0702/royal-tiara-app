@@ -6,7 +6,7 @@ import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 const BUSINESS = 'Royal Tiara'
 const CONTACT_EMAIL = 'info@royaltiara.co.za'
 const INFORMATION_OFFICER = 'Dinah Smith'
-const BUSINESS_ADDRESS = '' // street address of the business; shown only when filled in
+const BUSINESS_ADDRESS = 'Meyerton, Midvaal, Gauteng' // from royaltiara.co.za; add the street address if wanted
 const EFFECTIVE = '13 October 2026'
 
 /** A plain page that works signed in or out, opened in the app or from a link. */

@@ -2,16 +2,17 @@ import { Link } from 'react-router-dom'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { PolicyPage } from './Privacy.jsx'
 
-// Business choices that appear in the terms. Check each with Royal Tiara, and
-// update EFFECTIVE (and TERMS_VERSION, which applicants accept) whenever the
-// wording changes.
+// Business choices that appear in the terms. Most follow the returns and
+// shipping policies on royaltiara.co.za; keep the two in step. Update EFFECTIVE
+// (and TERMS_VERSION, which applicants accept) whenever the wording changes.
 const BUSINESS = 'Royal Tiara'
 const CONTACT_EMAIL = 'info@royaltiara.co.za'
-const BUSINESS_ADDRESS = ''                 // street address; shown only when filled in
-const EFFECTIVE = '15 October 2026'
-export const TERMS_VERSION = '2026-10-15'
-const DISPATCH = 'within two working days of your payment being verified'
-const REPORT_WITHIN = '48 hours'            // to report damaged, missing or wrong items
+const BUSINESS_ADDRESS = 'Meyerton, Midvaal, Gauteng'
+const OTHER_CONTACT = 'WhatsApp 068 617 1259 or phone 016 424 1135'
+const EFFECTIVE = '16 October 2026'
+export const TERMS_VERSION = '2026-10-16'
+const REPORT_WITHIN = '3 days'              // to report damaged, missing or wrong items
+const REFUND_WITHIN = '14 working days'
 const UNPAID_CANCEL_DAYS = 7                // unpaid orders may be cancelled after this
 const JOINING_FEE_REFUNDABLE = false
 
@@ -49,7 +50,7 @@ export default function Terms() {
 
       <h3>3. Prices</h3>
       <ul>
-        <li>The app shows your distributor (wholesale) prices, which include VAT where it applies.</li>
+        <li>The app shows your distributor (wholesale) prices.</li>
         <li>Prices and the delivery fee may change at any time. An order keeps the prices and delivery fee shown when you placed it.</li>
         <li>If a price was shown in obvious error, {BUSINESS} will contact you before packing, and you may cancel the order for a full refund.</li>
       </ul>
@@ -64,24 +65,51 @@ export default function Terms() {
           which can take up to two working days between different banks.
         </li>
         <li>You can cancel an unpaid order in the app. {BUSINESS} may cancel orders that are still unpaid after {UNPAID_CANCEL_DAYS} days.</li>
-        <li>Once an order is paid, ask {BUSINESS} in the app's chat if you need to change or cancel it. It cannot be changed once it has been collected by the courier.</li>
+        <li>
+          Once your payment has been confirmed, the order cannot be changed, added to or cancelled. Please check the
+          products, quantities and delivery address before you pay.
+        </li>
         <li>Stock is limited. If a paid item turns out to be unavailable, {BUSINESS} will offer you a replacement or refund that item.</li>
       </ul>
 
       <h3>5. Delivery</h3>
       <ul>
-        <li>Orders are handed to the courier {DISPATCH}. Delivery times after that depend on the courier and your area.</li>
+        <li>
+          Orders are packed once payment is verified: usually within 1 to 3 working days, 3 to 7 working days for bulk
+          orders, and up to 10 working days during sales and launches.
+        </li>
+        <li>Delivery times after that are set by the courier and depend on your area, and can be longer in peak periods or bad weather.</li>
         <li>The delivery fee shown at checkout is added to each order.</li>
-        <li>Please make sure someone can receive the parcel at the delivery address. Extra courier costs caused by a wrong address or a missed delivery may be charged to you.</li>
+        <li>
+          Keep your delivery address correct on the Account page. {BUSINESS} is not responsible for delays, failed
+          deliveries or extra courier costs caused by a wrong or incomplete address, and the address cannot be changed
+          once the order is paid.
+        </li>
         <li>Check your parcel when it arrives and confirm delivery in the app.</li>
       </ul>
 
-      <h3>6. Damaged, missing or wrong items</h3>
+      <h3>6. Returns, damaged and faulty items</h3>
       <ul>
-        <li>Report damaged, missing or wrong items within {REPORT_WITHIN} of delivery in the app's chat, with photos of the parcel and products.</li>
-        <li>{BUSINESS} will replace the item or refund it, including any delivery cost to return it.</li>
-        <li>Products that are faulty or not of good quality are covered as the Consumer Protection Act requires: within six months of delivery, you may return them for a repair, replacement or refund.</li>
-        <li>Products in good condition that you no longer want are not taken back, unless {BUSINESS} agrees to it in writing.</li>
+        <li>
+          Hair care products cannot be returned or exchanged once they have been received, because of the risk of
+          contamination. This includes creams, lotions, serums, masks, oils and all other topical products.
+        </li>
+        <li>
+          If something arrives damaged, faulty, missing or wrong, tell {BUSINESS} within {REPORT_WITHIN} of delivery in
+          the app's chat or by email, with your order number and photos. {BUSINESS} will replace it or refund it.
+        </li>
+        <li>
+          Products that are faulty or not of good quality are also covered as the Consumer Protection Act requires:
+          within six months of delivery, you may return them for a repair, replacement or refund.
+        </li>
+        <li>
+          Allergies and sensitivities differ from person to person, so products are not taken back for those. Check the
+          ingredients on the label, and stop using a product and see a medical professional if there is a reaction.
+        </li>
+        <li>
+          Approved refunds are paid within {REFUND_WITHIN}. Delivery fees are not refunded, unless {BUSINESS} sent a
+          damaged, faulty or wrong item.
+        </li>
       </ul>
 
       <h3>7. Reselling {BUSINESS} products</h3>
@@ -117,7 +145,8 @@ export default function Terms() {
 
       <h3>11. Contact</h3>
       <p>
-        {BUSINESS}{BUSINESS_ADDRESS && ', ' + BUSINESS_ADDRESS}. Use the chat in the app, <WhatsApp />, or email <Email />.
+        {BUSINESS}{BUSINESS_ADDRESS && ', ' + BUSINESS_ADDRESS}. Use the chat in the app, <WhatsApp />, {OTHER_CONTACT},
+        or email <Email />.
       </p>
     </PolicyPage>
   )

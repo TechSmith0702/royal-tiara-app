@@ -379,9 +379,12 @@ someone qualified before real trading.
 Applicants must tick that they agree before applying; the version they agreed
 to and the time are stored with their login (Supabase → Authentication → Users
 → the user → raw user metadata: `terms_version`, `terms_accepted_at`). The
-business choices at the top of the file (dispatch time, how long to report
-damage, when unpaid orders may be cancelled, whether the joining fee is
-refundable) must match how Royal Tiara works. When the wording changes, update
+business choices in it (processing times, 3 days to report damage, no returns
+of opened hair care, refunds within 14 working days) follow the returns and
+shipping policies on royaltiara.co.za, so change both together. The invoice
+says "Invoice", not "Tax invoice": Royal Tiara is not VAT-registered as far as
+we know. If it registers, the invoice must say "Tax invoice" and show the VAT
+number and address (`src/screens/InvoiceView.jsx`). When the wording changes, update
 both `EFFECTIVE` and `TERMS_VERSION`.
 
 ---

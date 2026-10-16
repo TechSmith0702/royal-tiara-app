@@ -38,7 +38,7 @@ export default function InvoiceView() {
               <div className="muted-sm">Where beauty begins within &middot; WhatsApp {WHATSAPP_DISPLAY}</div>
             </div>
             <div className="right">
-              <div className="kicker muted">Tax invoice</div>
+              <div className="kicker muted">Invoice</div>
               <div className="inv-no">{order.invoice}</div>
               <div className="muted-sm">{fmtDate(order.createdAt)}</div>
             </div>
@@ -86,7 +86,6 @@ export default function InvoiceView() {
             <div className="sum-row"><span>Delivery Fee</span><strong>{R(order.delivery)}</strong></div>
             <div className="divider" />
             <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
-            <div className="muted-sm right">Prices include VAT.</div>
           </div>
 
           {order.payMethod === 'eft' && !st.verified && !st.cancelled && (

@@ -71,7 +71,12 @@ export default function Applications() {
                     )}
                   </div>
                   <div className="row-sub">
-                    Joining fee: {p.joinPay === 'card' ? 'card once approved' : 'bank transfer - check proof on WhatsApp'}
+                    Joining fee:{' '}
+                    {p.joinFeePaidAt
+                      ? 'paid'
+                      : p.status === 'approved' && p.joinFeePaidAt === null
+                        ? 'not paid yet'
+                        : p.joinPay === 'card' ? 'card once approved' : 'bank transfer - check proof on WhatsApp'}
                   </div>
                   <div className="row-sub link-inline">View details &rsaquo;</div>
                 </Link>
