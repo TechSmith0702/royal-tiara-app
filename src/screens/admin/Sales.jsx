@@ -8,6 +8,7 @@ import { ErrorNote, Loading } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
 import BankDetailsForm from './BankDetailsForm.jsx'
 import Fees from './Fees.jsx'
+import MonthlyMinimumForm from './MonthlyMinimumForm.jsx'
 
 export default function Sales() {
   const { data, loading, error, refresh } = useLive(fetchOrders, ['orders'], [])
@@ -35,6 +36,7 @@ export default function Sales() {
       </div>
 
       <Fees />
+      <MonthlyMinimumForm />
       <BankDetailsForm />
 
       {loading && <Loading label="Loading sales..." />}

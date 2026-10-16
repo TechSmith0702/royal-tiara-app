@@ -5,11 +5,33 @@ import { R } from './format.js'
 export const DELIVERY_FEE = 90
 export const JOINING_FEE = 100   // only used if the real fee cannot be loaded
 
-/** The fees the admin last saved. Everyone reads the same row. */
+/** The fees and rules the admin last saved. Everyone reads the same row. */
 export async function fetchFees() {
-  const { data, error } = await supabase.from('settings').select('delivery_fee, joining_fee').eq('id', true).single()
+  const { data, error } = await supabase.from('settings').select('*').eq('id', true).single()
   if (error) fail(error)
-  return { delivery: Number(data.delivery_fee), joining: Number(data.joining_fee) }
+  return {
+    delivery: Number(data.delivery_fee),
+    joining: Number(data.joining_fee),
+    // The monthly minimum to keep the distributor discount; 0 means none.
+    monthlyMin: Number(data.monthly_min_amount || 0),
+    monthlyMinUnit: data.monthly_min_unit || 'rand',
+    discount: data.distributor_discount == null ? 30 : Number(data.distributor_discount),
+  }
+}
+
+/** "R1 500,00 worth of products" or "20 products", for the monthly minimum. */
+export const monthlyMinLabel = fees =>
+  fees.monthlyMinUnit === 'products'
+    ? fees.monthlyMin + (fees.monthlyMin === 1 ? ' product' : ' products')
+    : R(fees.monthlyMin) + ' worth of products'
+
+export async function adminSaveMonthlyMinimum(amount, unit, discount) {
+  const { error } = await supabase.rpc('admin_save_monthly_minimum', {
+    p_amount: Number(amount),
+    p_unit: unit,
+    p_discount: Number(discount),
+  })
+  if (error) fail(error)
 }
 
 export async function adminSaveFees(delivery, joining) {
@@ -68,6 +90,8 @@ const mapProduct = row => ({
   images: (row.images && row.images.length ? row.images : row.image ? [row.image] : []).map(bundledPhoto),
   inStock: row.in_stock,
   archived: Boolean(row.archived),
+  // Position under "Moving fast" on the home screen; null = not shown there.
+  featuredRank: row.featured_rank,
 })
 
 const mapOrder = row => ({
@@ -244,6 +268,18 @@ export async function adminUpdateProduct(productId, { price, inStock }) {
     p_price: price == null ? null : price,
     p_in_stock: inStock == null ? null : inStock,
   })
+  if (error) fail(error)
+}
+
+/** Admin only: show a product under "Moving fast" (added at the end) or not. */
+export async function adminSetFeatured(productId, featured) {
+  const { error } = await supabase.rpc('admin_set_featured', { p_id: productId, p_featured: featured })
+  if (error) fail(error)
+}
+
+/** Admin only: move a "Moving fast" product one place earlier or later. */
+export async function adminMoveFeatured(productId, up) {
+  const { error } = await supabase.rpc('admin_move_featured', { p_id: productId, p_up: up })
   if (error) fail(error)
 }
 

@@ -105,6 +105,8 @@ export async function signUp(form) {
         // Which distributor terms they agreed to, and when (kept with the login).
         terms_version: form.termsVersion,
         terms_accepted_at: new Date().toISOString(),
+        // The monthly minimum they ticked, word for word, if there was one.
+        monthly_minimum_accepted: form.monthlyMinimum || null,
       },
     },
   })

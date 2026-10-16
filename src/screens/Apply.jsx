@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { signIn, signUp } from '../lib/auth.jsx'
-import { JOINING_FEE, fetchFees } from '../lib/db.js'
+import { JOINING_FEE, fetchFees, monthlyMinLabel } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { BackButton, PasswordInput, Segmented } from '../components/ui.jsx'
@@ -24,9 +24,15 @@ export default function Apply() {
   const { data: fees, error: feesError } = useLive(fetchFees, ['settings'], [])
   // Shown once the real amount has loaded; the built-in amount is only a fallback if it cannot load.
   const joiningFee = fees ? fees.joining : feesError ? JOINING_FEE : null
+  // Set by the admin under Sales; no tick box while there is no minimum.
+  const minimumText = fees && fees.monthlyMin > 0
+    ? 'I understand that to keep my ' + fees.discount + '% distributor discount, I must order at least '
+      + monthlyMinLabel(fees) + ' from Royal Tiara every month.'
+    : ''
   const [form, setForm] = useState(EMPTY)
   const [joinPay, setJoinPay] = useState('card')
   const [agreed, setAgreed] = useState(false)
+  const [agreedMinimum, setAgreedMinimum] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(null)
@@ -87,12 +93,16 @@ export default function Apply() {
       setError('Please read and agree to the distributor terms.')
       return
     }
+    if (minimumText && !agreedMinimum) {
+      setError('Please tick that you accept the monthly minimum order.')
+      return
+    }
 
     setBusy(true)
     try {
       // The postal code is stored on the same line as the town, e.g. "Soweto, Gauteng, 1804".
       const town = clean.postal ? clean.town + ', ' + clean.postal : clean.town
-      const result = await signUp({ ...clean, town, joinPay, termsVersion: TERMS_VERSION })
+      const result = await signUp({ ...clean, town, joinPay, termsVersion: TERMS_VERSION, monthlyMinimum: minimumText })
       // Kept in memory only, to sign them in once they have confirmed their email.
       setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
     } catch (err) {
@@ -188,6 +198,13 @@ export default function Apply() {
                 orders, payment, delivery and returns work.
               </span>
             </label>
+
+            {minimumText && (
+              <label className="agree-row">
+                <input type="checkbox" checked={agreedMinimum} onChange={e => setAgreedMinimum(e.target.checked)} />
+                <span>{minimumText}</span>
+              </label>
+            )}
 
             {error && <p className="form-error" role="alert">{error}</p>}
 

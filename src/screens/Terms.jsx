@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import { fetchFees, monthlyMinLabel } from '../lib/db.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
+import { useLive } from '../lib/live.js'
 import { PolicyPage } from './Privacy.jsx'
 
 // Business choices that appear in the terms. Most follow the returns and
@@ -22,6 +24,9 @@ const WhatsApp = () => (
 )
 
 export default function Terms() {
+  // The monthly minimum is set by the admin, so it is read live.
+  const { data: fees } = useLive(fetchFees, [], [])
+
   return (
     <PolicyPage title="Distributor terms">
       <p className="hint">Effective {EFFECTIVE}</p>
@@ -51,6 +56,13 @@ export default function Terms() {
       <h3>3. Prices</h3>
       <ul>
         <li>The app shows your distributor (wholesale) prices.</li>
+        {fees && fees.monthlyMin > 0 && (
+          <li>
+            <strong>Monthly minimum:</strong> to keep your {fees.discount}% distributor discount, order at least{' '}
+            {monthlyMinLabel(fees)} from {BUSINESS} every calendar month. {BUSINESS} may review the discount for
+            accounts that order less.
+          </li>
+        )}
         <li>Prices and the delivery fee may change at any time. An order keeps the prices and delivery fee shown when you placed it.</li>
         <li>If a price was shown in obvious error, {BUSINESS} will contact you before packing, and you may cancel the order for a full refund.</li>
       </ul>

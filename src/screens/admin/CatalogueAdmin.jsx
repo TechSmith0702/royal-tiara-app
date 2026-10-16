@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { adminUpdateProduct, fetchProducts, priceLabel } from '../../lib/db.js'
+import { adminMoveFeatured, adminSetFeatured, adminUpdateProduct, fetchProducts, priceLabel } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
 import { ErrorNote, Loading, ProductImage, Segmented } from '../../components/ui.jsx'
 
@@ -26,6 +26,23 @@ export default function CatalogueAdmin() {
     }
   }
 
+  // "Moving fast" on the distributor home screen, in order. featuredRank is
+  // undefined until the database has been updated for it.
+  const canFeature = products.some(p => p.featuredRank !== undefined)
+  const featured = products.filter(p => p.featuredRank != null).sort((a, b) => a.featuredRank - b.featuredRank)
+
+  const run = async fn => {
+    setProblem('')
+    try {
+      await fn()
+      refresh()
+    } catch (e) {
+      setProblem(e.message)
+    }
+  }
+  const setFeatured = (product, on) => run(() => adminSetFeatured(product.id, on))
+  const move = (product, up) => run(() => adminMoveFeatured(product.id, up))
+
   return (
     <div className="stack gap-16">
       <div className="stat stat-peach">
@@ -37,6 +54,27 @@ export default function CatalogueAdmin() {
         Update your price or mark a product out of stock. Changes reflect on every distributor phone straight away.
         Tap a product to manage its photos.
       </p>
+
+      {canFeature && (
+        <section className="card card-pad stack gap-10">
+          <div>
+            <div className="kicker muted">Moving fast</div>
+            <p className="hint mb-0">
+              Shown in this order on every distributor's home screen. Add products with the star on each one below.
+            </p>
+          </div>
+          {featured.length === 0 && <div className="muted-sm">None yet - the home screen shows no Moving fast row.</div>}
+          {featured.map((p, i) => (
+            <div key={p.id} className="row center gap-10 featured-row">
+              <span className="featured-pos">{i + 1}</span>
+              <span className="grow min0 ellipsis">{p.name}</span>
+              <button type="button" className="icon-btn icon-btn-sm" aria-label={'Move ' + p.name + ' up'} disabled={i === 0} onClick={() => move(p, true)}>&uarr;</button>
+              <button type="button" className="icon-btn icon-btn-sm" aria-label={'Move ' + p.name + ' down'} disabled={i === featured.length - 1} onClick={() => move(p, false)}>&darr;</button>
+              <button type="button" className="icon-btn icon-btn-sm" aria-label={'Remove ' + p.name + ' from Moving fast'} onClick={() => setFeatured(p, false)}>&times;</button>
+            </div>
+          ))}
+        </section>
+      )}
 
       <Link to="/admin/product/new" className="btn btn-primary btn-46">+ Add a product</Link>
 
@@ -78,6 +116,18 @@ export default function CatalogueAdmin() {
                 onChange={v => setStock(p, v === 'in')}
                 options={[{ value: 'in', label: 'In stock' }, { value: 'out', label: 'Out' }]}
               />
+              {canFeature && (
+                <button
+                  type="button"
+                  className={'icon-btn icon-btn-sm star-btn' + (p.featuredRank != null ? ' on' : '')}
+                  aria-label={(p.featuredRank != null ? 'Remove ' + p.name + ' from' : 'Add ' + p.name + ' to') + ' Moving fast'}
+                  aria-pressed={p.featuredRank != null}
+                  title="Moving fast"
+                  onClick={() => setFeatured(p, p.featuredRank == null)}
+                >
+                  {p.featuredRank != null ? '★' : '☆'}
+                </button>
+              )}
             </div>
           </div>
         ))}

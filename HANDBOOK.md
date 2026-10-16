@@ -40,6 +40,8 @@ All four use the same code (`src/`) and the same database.
 - add products, change prices and photos, mark items out of stock
 - change the delivery fee and the joining fee (Admin → Sales → Fees)
 - change the bank details distributors pay into (Admin → Sales → Bank details; every change notifies all admins)
+- set the monthly minimum a distributor must order to keep their discount (Admin → Sales → Monthly minimum; 0 means none). New applicants tick that they accept it
+- choose and order the "Moving fast" products on the distributor home screen (Admin → Catalogue: the star on each product, and the arrows in the Moving fast list)
 - see whether a distributor has paid the joining fee, and mark it paid after a bank transfer (Admin → the distributor). Card applicants pay it in the app straight after approval and are unlocked automatically; bank-transfer applicants count as paid when approved, so approve them once the fee has reflected
 
 **A technical person is only needed to:**
@@ -219,6 +221,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 15. `migration-cancel-order.sql`
 16. `migration-bank-details.sql`
 17. `migration-joining-fee.sql`
+18. `migration-minimum-and-featured.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:

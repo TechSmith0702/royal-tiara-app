@@ -25,7 +25,12 @@ export default function Home() {
   const spend = thisMonth.reduce((t, o) => t + o.total, 0)
   const open = mine.filter(isOpen)
   const unpaid = open.filter(o => o.payStatus !== 'verified').length
-  const featured = FEATURED_IDS.map(id => (products || []).find(p => p.id === id)).filter(Boolean)
+  // The admin picks these in Catalogue. Until the database knows about "Moving
+  // fast" (featuredRank undefined), the built-in four are shown.
+  const all = products || []
+  const featured = all.some(p => p.featuredRank !== undefined)
+    ? all.filter(p => p.featuredRank != null).sort((a, b) => a.featuredRank - b.featuredRank)
+    : FEATURED_IDS.map(id => all.find(p => p.id === id)).filter(Boolean)
 
   return (
     <div className="screen">
@@ -87,14 +92,14 @@ export default function Home() {
         </a>
 
         <div className="row between center mt-2">
-          <h3 className="section-title">Moving fast</h3>
+          <h3 className="section-title">{featured.length || loading ? 'Moving fast' : 'Catalogue'}</h3>
           <Link to="/shop" className="link-btn">See all {(products || []).length}</Link>
         </div>
 
         {loading && <Loading label="Loading products..." />}
         <ErrorNote message={error} onRetry={refresh} />
 
-        <div className="carousel">
+        {featured.length > 0 && <div className="carousel">
           {featured.map(p => (
             <Link key={p.id} to={'/shop/' + p.id} className="feature-card">
               <ProductImage product={p} className="feature-img" initialSize={26} />
@@ -102,7 +107,7 @@ export default function Home() {
               <div className="feature-price">{priceLabel(p)}</div>
             </Link>
           ))}
-        </div>
+        </div>}
       </div>
       <TabBar />
     </div>
