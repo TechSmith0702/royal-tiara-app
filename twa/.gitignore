@@ -1,0 +1,11 @@
+# Build output and local caches - rebuilt by "bubblewrap build".
+.gradle/
+build/
+app/build/
+local.properties
+*.apk
+*.aab
+*.idsig
+# Never commit a signing key. It lives in C:\Users\Private\royal-tiara-keys.
+*.keystore
+*.jks

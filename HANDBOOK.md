@@ -347,6 +347,32 @@ because PayFast only accepts `https://` return addresses.
 **Icons and splash screens:** `python scripts/generate-app-icons.py`
 (needs Pillow) after changing `public/app-icon.png` or `public/logo.png`.
 
+### The Google Play app (TWA)
+
+The Play Store app is a **Trusted Web Activity**: a small Android app that
+opens the live website full screen. It is in the `twa` folder, made with
+Google's Bubblewrap. Website changes reach it straight away; only its name,
+icon, colours or splash screen need a new upload.
+
+- Settings (name, colours, icons, version): `twa/twa-manifest.json`. After
+  changing it, regenerate: in `twa`, `npx @bubblewrap/cli@1.24.1 update`.
+- **Build** (Java 17): in `twa`, `set JAVA_HOME=C:\Program Files\Java\jdk-17`
+  then `gradlew.bat --no-daemon assembleRelease bundleRelease`.
+  (`bubblewrap build` itself fails on this PC: its old SDK installer needs
+  Java 8. Gradle directly is the same build.)
+- **Sign:** double-click `twa\sign-app.cmd`. It makes `RoyalTiara.apk` (to
+  install on a phone) and `RoyalTiara.aab` (to upload to Play), asking for the
+  signing-key password.
+- **The signing key** is `C:\Users\Private\royal-tiara-keys\royal-tiara-upload.keystore`
+  (alias `royaltiara`). It is never in GitHub. **Back it up** (USB stick or a
+  password manager) with its password: without it the app can never be updated.
+- **For each update:** raise `appVersionCode` (by 1) and `appVersionName` in
+  `twa-manifest.json`, run `update`, build, sign, upload the new `.aab`.
+- **Full screen depends on** `public/.well-known/assetlinks.json` on the website
+  listing the key's SHA-256 fingerprint. Once Google Play signs the app ("Play
+  App Signing"), add Play's fingerprint too (Play Console → Test and release →
+  App integrity), then deploy. Without it the app shows a browser address bar.
+
 **Before either store:** create a reviewer test account. The stores also ask
 for two web links, which exist: the privacy policy
 (`https://royaltiara.netlify.app/privacy`) and how to delete an account
