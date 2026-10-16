@@ -24,15 +24,16 @@ export default function Apply() {
   const { data: fees, error: feesError } = useLive(fetchFees, ['settings'], [])
   // Shown once the real amount has loaded; the built-in amount is only a fallback if it cannot load.
   const joiningFee = fees ? fees.joining : feesError ? JOINING_FEE : null
-  // Set by the admin under Sales; no tick box while there is no minimum.
-  const minimumText = fees && fees.monthlyMin > 0
-    ? 'I understand that to keep my ' + fees.discount + '% distributor discount, I must order at least '
-      + monthlyMinLabel(fees) + ' from Royal Tiara every month.'
+  // The monthly minimum is set by the admin (Settings). When there is one, it is
+  // part of the single "I agree" tick box, and its wording is stored with the login.
+  const minimumClause = fees && fees.monthlyMin > 0
+    ? 'to keep my ' + fees.discount + '% distributor discount, I must order at least '
+      + monthlyMinLabel(fees) + ' from Royal Tiara every month'
     : ''
+  const minimumText = minimumClause ? 'I agree to the distributor terms, including that ' + minimumClause + '.' : ''
   const [form, setForm] = useState(EMPTY)
   const [joinPay, setJoinPay] = useState('card')
   const [agreed, setAgreed] = useState(false)
-  const [agreedMinimum, setAgreedMinimum] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(null)
@@ -90,11 +91,9 @@ export default function Apply() {
       return
     }
     if (!agreed) {
-      setError('Please read and agree to the distributor terms.')
-      return
-    }
-    if (minimumText && !agreedMinimum) {
-      setError('Please tick that you accept the monthly minimum order.')
+      setError(minimumClause
+        ? 'Please tick that you agree to the distributor terms and the monthly minimum.'
+        : 'Please read and agree to the distributor terms.')
       return
     }
 
@@ -194,17 +193,10 @@ export default function Apply() {
             <label className="agree-row">
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
               <span>
-                I agree to the <Link to="/terms" className="link-inline">distributor terms</Link>, including how
-                orders, payment, delivery and returns work.
+                I agree to the <Link to="/terms" className="link-inline">distributor terms</Link>, including{' '}
+                {minimumClause ? 'that ' + minimumClause + '.' : 'how orders, payment, delivery and returns work.'}
               </span>
             </label>
-
-            {minimumText && (
-              <label className="agree-row">
-                <input type="checkbox" checked={agreedMinimum} onChange={e => setAgreedMinimum(e.target.checked)} />
-                <span>{minimumText}</span>
-              </label>
-            )}
 
             {error && <p className="form-error" role="alert">{error}</p>}
 
