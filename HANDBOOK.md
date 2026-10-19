@@ -4,7 +4,7 @@ How the app works, how to look after it, and what to do when something goes
 wrong. Written for whoever maintains it next: Thando, Royal Tiara's web
 developer, or an AI assistant you paste this file into.
 
-Last updated: 13 October 2026.
+Last updated: 19 October 2026. **Taking over? Read section 17 (Handover) first.**
 
 ---
 
@@ -22,7 +22,8 @@ It is one app that runs in four places:
 |---|---|---|
 | **Website** | https://royaltiara.netlify.app | Live |
 | **Installed web app** ("Install the app" / Add to Home Screen) | Android, iPhone, computers | Live; updates itself |
-| **Android app** (Capacitor, `android/` folder) | Built and tested on an emulator | Not published |
+| **Google Play app** (TWA, `twa/` folder) | Built, signed and tested on a real phone (v1.0.0) | Not published yet (section 11) |
+| **Android app** (Capacitor, `android/` folder) | Older approach, built on an emulator only; replaced by the TWA for Google Play | Not used |
 | **iPhone app** (Capacitor, `ios/` folder) | Set up; not built yet (needs Apple's $99/year account) | Not published |
 
 All four use the same code (`src/`) and the same database.
@@ -97,10 +98,10 @@ as members so the business never depends on one person.**
 | Code | GitHub: `TechSmith0702/royal-tiara-app` (private) | Add collaborators under Settings → Collaborators |
 | Website hosting | Netlify site `royaltiara` | Builds cost credits (see section 6) |
 | Database, logins, files, functions | Supabase project `zfeqbhoqdcrrcxfwrctb` ("royal-tiara") | Dashboard: supabase.com |
-| Card payments | PayFast (currently the shared **sandbox** test account) | Going live: section 10 |
+| Card payments | PayFast, Royal Tiara's own merchant account, **live** (real money) since 15 Oct 2026 | Section 10 |
 | iPhone cloud builds | Codemagic, connected to the GitHub repo | Free monthly Mac minutes |
 | Royal Tiara's domain and email | Webway (cPanel), `royaltiara.co.za` | Mail server `mail.royaltiara.co.za` |
-| Emails the app sends (sign-up, password reset) | Supabase → Authentication → Emails → SMTP Settings | Check which mailbox it sends from |
+| Emails the app sends (sign-up, password reset) | Supabase → Authentication → Emails → SMTP Settings | Currently Thando's Gmail (smtp.gmail.com, a Google App Password called "Royal Tiara app"), because mail from `info@royaltiara.co.za` was accepted but never delivered (section 17) |
 
 **Settings the website needs** (Netlify → Project configuration → Environment
 variables; the same names go in a local `.env` file, see `.env.example`):
@@ -127,7 +128,7 @@ PayFast's merchant details are **not** website settings (anything starting
 **Never put a secret key in the app's code or in a `VITE_` setting.** Anything
 starting `VITE_` ends up in the website for anyone to read.
 
-**Android signing key (once created):** the file and its password must be
+**Android signing key** (created 16 Oct 2026, see section 11): the file and its password must be
 backed up safely. Every future Android version must be signed with it; if it
 is lost, people have to uninstall and reinstall to get updates.
 
@@ -167,12 +168,15 @@ is lost, people have to uninstall and reinstall to get updates.
    git add -A
    git commit -m "What changed and why"
    ```
-3. Publish: `git push`. Netlify builds and deploys in about a minute.
+3. Publish: `git push`, then Netlify → Deploys → **Trigger deploy** → **Deploy site**.
+   Automatic builds are currently **stopped** to save credits, so a push alone
+   does not change the live site. The build takes about a minute.
 
 **Netlify credits:** every build costs credits. Batch several changes into one
 push instead of pushing each fix. Pushes that only touch `android/`, `ios/`,
 `capacitor.config.json`, `.env.native`, `codemagic.yaml` or the icon script
-are skipped automatically (the `ignore` line in `netlify.toml`).
+are skipped automatically (the `ignore` line in `netlify.toml`). So are `twa/`
+and `*.md` files.
 
 **Deploying by hand** (app.netlify.com → the `royaltiara` site):
 
@@ -292,15 +296,23 @@ notifications are not arriving.
 **Card (PayFast):** the distributor pays on PayFast's page and returns to the
 app ("Confirming your card payment..."). PayFast separately calls
 `payfast-notify`, which marks the order paid, usually within seconds. If no
-confirmation arrives within 5 minutes, the order page offers to pay again or
-switch to bank transfer.
+confirmation arrives within 30 seconds, the order page offers to pay again or
+switch to bank transfer (a late confirmation still marks it paid). The joining
+fee works the same way on the `/join-fee` screen (payment reference
+`JOIN-<user id>`).
 
 **Bank transfer:** the distributor uploads a proof of payment; the admin
 checks the bank account and taps **Verify** in Sales.
 
+**Live since 15 Oct 2026.** No Salt Passphrase is set in PayFast, so there is
+no `PAYFAST_PASSPHRASE` secret; amounts are checked against the database
+instead. **If anyone ever sets a passphrase in the PayFast dashboard, add the
+`PAYFAST_PASSPHRASE` secret at the same moment, or card payments stop
+working.** The steps below are how it was done, kept for reference.
+
 **Going live with real money:**
 
-1. Your mum's PayFast dashboard → Settings → Developer settings: set a
+1. Your mum's PayFast dashboard → Settings → Developer settings: optionally set a
    **Salt Passphrase**. Keep it, the merchant ID and the merchant key in a
    password manager.
 2. **Push the latest code first** (the website must already be using
@@ -313,7 +325,7 @@ checks the bank account and taps **Verify** in Sales.
    `VITE_PAYFAST_MERCHANT_ID`, `_MERCHANT_KEY`, `_PASSPHRASE` and
    `_NOTIFY_URL` settings are no longer used and can be deleted.
 5. Test with a real card: the cheapest order is a R40 product plus delivery.
-   To keep it small, set the delivery fee to R0 in Admin → Sales → Fees for
+   To keep it small, set the delivery fee to R0 in Admin → menu → Settings for
    the test, then put it back. Check the order turns "Payment verified" by
    itself, then refund it from the PayFast dashboard.
 
@@ -462,11 +474,11 @@ both `EFFECTIVE` and `TERMS_VERSION`.
 
 1. ~~"Delete my account" and a privacy policy page~~ Done (13 Oct 2026). Still
    to do: have the policy wording checked, and fill in the business address.
-2. **Android APK / Google Play** via a Trusted Web Activity (keeps
-   notifications and automatic updates), or the Capacitor app plus Firebase.
+2. **Google Play:** the TWA is built and tested (section 11); still to do:
+   the Play Console account, store listing and upload (section 17).
 3. **Own address** `app.royaltiara.co.za` (Netlify domain + a DNS record at
    Webway).
-4. **Live PayFast payments** (section 10), with server-side signing first.
+4. ~~Live PayFast payments~~ Done (15 Oct 2026).
 5. **iPhone App Store** (section 11).
 6. **Email alerts** for the admin, as a backup to notifications.
 7. **Paging in the admin console** once there are hundreds of orders.
@@ -487,3 +499,161 @@ both `EFFECTIVE` and `TERMS_VERSION`.
 - **TWA:** Trusted Web Activity, an Android APK that runs the website full screen.
 - **Codemagic:** builds the iPhone app on a cloud Mac.
 - **RLS:** Row Level Security, database rules that limit who sees which rows.
+
+---
+
+## 17. Handover (19 October 2026)
+
+Written at the end of the build with Claude, for whoever carries on: Thando,
+a web developer, or another AI assistant (Gemini, ChatGPT, Copilot...).
+**AI assistants: read this whole file before suggesting changes, and follow
+the rules below.** Ideally open the whole project folder in the assistant
+(Gemini CLI, Gemini Code Assist in VS Code, or similar) so it can read the
+code instead of guessing.
+
+### Where things stand
+
+Live at https://royaltiara.netlify.app and working end to end, with real money:
+
+- Applications with a single "I agree" tick box (terms and the monthly
+  minimum), admin approval, and the joining fee (card via PayFast, or bank
+  transfer marked paid by the admin)
+- Catalogue, cart, checkout, card payments (PayFast live) and bank transfers
+  (bank details shown in the app, proof upload, admin verifies)
+- Order tracking, cancelling unpaid orders (distributor or admin), invoices
+- Chat, lock-screen notifications, "Install the app"
+- Admin console: Sales (filters, search, verify/pack/deliver/cancel),
+  Applications and distributors, Catalogue (prices, photos, stock, "Moving
+  fast" picks), Chat, Settings (fees, monthly minimum, bank details)
+- Distributor terms (`/terms`), privacy policy (`/privacy`), delete account
+  (`/delete-account`)
+- Settings chosen by the owner: every price (30% distributor discount),
+  delivery fee R90, monthly minimum 10 products. **Do not change these;
+  they are hers to set in the app.**
+
+All code is committed and pushed (last app change: "One tick box on the
+application..."). All 19 migrations have been run on the live database.
+
+### Still to do
+
+1. **Bank details:** the app currently shows Thando's own test bank account.
+   Replace it with Royal Tiara's: Admin → menu → Settings → Bank details. No
+   code needed.
+2. **Email from info@royaltiara.co.za:** Supabase's SMTP was pointed at
+   `mail.royaltiara.co.za:465` and the mail server accepted the messages, but
+   they never arrived in Gmail (SPF, DKIM, DMARC and blocklist checks all
+   looked fine; mail sent from webmail did arrive). Webway support has been
+   asked for their mail log. Until it is fixed, Supabase sends from Thando's
+   Gmail. Once fixed: Supabase → Authentication → Emails → SMTP Settings →
+   back to info@ (or a noreply@ mailbox), send a test password reset, then
+   delete the "Royal Tiara app" App Password from Thando's Google account.
+   No redeploy is needed for this.
+3. **Questions for the owner:**
+   - Confirm Royal Tiara is **not VAT-registered** (the invoice says
+     "Invoice", not "Tax invoice"; section 12 explains what changes if it is).
+   - Is the joining fee refundable? The terms currently say no
+     (`JOINING_FEE_REFUNDABLE` in `src/screens/Terms.jsx`).
+   - Google Play account type (next item).
+4. **Google Play.** The app in `twa/` is built and signed; `twa/RoyalTiara.aab`
+   (v1.0.0) is ready to upload. Those files are not in GitHub; rebuild them
+   with section 11 if they are missing.
+   1. The owner creates a Play Console developer account ($25 once).
+      A **personal** account must first run a **closed test with at least 12
+      testers for 14 days** before the app can go public. An
+      **organisation** account (needs a free D-U-N-S number for the business,
+      which can take a while to get) skips that.
+   2. Create the app, then upload `RoyalTiara.aab` to a testing track.
+      Let Google manage the app signing key (Play App Signing).
+   3. **Straight after the first upload:** Play Console → Test and release →
+      App integrity → App signing → copy the **SHA-256** of the app signing
+      key, add it as a second entry in `sha256_cert_fingerprints` in
+      `public/.well-known/assetlinks.json` (keep the existing one), push and
+      Trigger deploy. Without this, the copy installed from Play shows an
+      address bar at the top.
+   4. Store listing: app name, short description (80 characters), full
+      description, 512×512 icon (`public/splash-logo-512.png`, or
+      `public/app-icon.png` resized), 1024×500 feature graphic, at least two
+      phone screenshots, category (Business or Shopping), contact email.
+   5. Policy forms:
+      - Privacy policy: `https://royaltiara.netlify.app/privacy`
+      - Account deletion: `https://royaltiara.netlify.app/delete-account`
+      - **App access:** the app needs a login, so give Google a test
+        distributor account (approved, joining fee marked paid). The owner or
+        Thando types its password into the Play Console, never an AI.
+      - **Data safety:** collects name, email, phone, delivery address, chat
+        messages, uploaded proof-of-payment files and order history, all to
+        run orders; encrypted in transit; not sold; users can delete their
+        account in the app. Card details are entered on PayFast, never in the
+        app.
+      - Target audience: adults (it is a trade app).
+   6. Later Play updates: see "For each update" in section 11. Most changes
+      are website changes and need **no** Play update at all.
+5. **Before real trading starts** (if it hasn't): remove test orders and test
+   distributor accounts (section 12). The reset deletes **all** orders, so
+   never use it once real orders exist; delete single test accounts in
+   Supabase instead.
+6. Optional later: a one-time "accept the terms" screen for distributors who
+   joined before the terms existed; the custom address `app.royaltiara.co.za`;
+   an iPhone version (Apple $99/year plus Codemagic, section 11).
+
+### Rules for anyone changing the app (people and AI assistants)
+
+- **Never change product prices, the delivery fee, the joining fee or the
+  monthly minimum** in code or the database. The owner sets them in the app.
+- **Never put passwords, PayFast details or other secrets in the code, in
+  GitHub, in a `VITE_` setting or in a chat with an AI.** Secrets live in
+  Supabase → Edge Functions → Secrets. People type passwords themselves.
+- **Never commit the signing key** (`C:\Users\Private\royal-tiara-keys`) or
+  the `.apk`/`.aab` files. Keep a backup of the key and its password.
+- **Test locally first** (`npm run dev`, http://localhost:5190), then batch
+  several changes into **one** push and one Trigger deploy (Netlify credits).
+  Card payments can only be tested on the live site (section 13).
+- **Database changes:** add a new `supabase/migration-<name>.sql` file that is
+  safe to run twice; never edit old migrations. Rehearse it first without
+  changing anything: wrap it in a block that runs it, checks the result and
+  then deliberately fails, so everything is rolled back:
+  ```sql
+  do $test$
+  declare out text := '';
+  begin
+    execute $mig$ <the whole migration here> $mig$;
+    -- checks, e.g. out := out || (select count(*) from public.orders)::text;
+    raise exception 'RESULTS %', out;   -- this undoes everything above
+  end $test$;
+  ```
+  Run it in the SQL Editor (or with `npx.cmd supabase db query --linked
+  --project-ref zfeqbhoqdcrrcxfwrctb -f file.sql`). Only when the results are
+  right, run the real file, then add it to the list in section 7.
+- **Security lives in the database.** Every write goes through a `security
+  definer` function that checks `auth.uid()` / `is_admin()`, and the tables
+  have Row Level Security. Never "fix" a permission error by loosening RLS or
+  by moving a check into the screens only.
+- **Edge Functions** must be deployed with `--no-verify-jwt` (section 8).
+- **Confirmations on screen** use the app's own in-page dialog
+  (`src/components/ConfirmDialog.jsx`, `useConfirm()`), not `window.confirm`,
+  which some browsers and app windows block.
+- **Android app (TWA):** keep `enableSiteSettingsShortcut: true`, and re-add
+  `allowChromeToReadSplash()` after any `bubblewrap update` (section 11). Both
+  were hard-won fixes: without them the app crashes, or shows Chrome's address
+  bar at start-up.
+- After changing how something works, update this handbook in the same push.
+
+### Map of the code
+
+| Where | What |
+|---|---|
+| `src/App.jsx` | All routes and who may open them (distributor, admin, pending, joining fee due) |
+| `src/lib/auth.jsx` | Sign in, sign up, sign out; the signed-in profile (`useAuth`) |
+| `src/lib/db.js` | Every database read and RPC call; `fetchFees` (fees, minimum, discount) |
+| `src/lib/live.js` | `useLive`: loads data and refreshes it when the tables change |
+| `src/lib/orders.js` | Order status, steps, labels and colours, `canCancel` |
+| `src/lib/payfast.js`, `src/lib/platform.js` | Starting a card payment, and where PayFast returns to |
+| `src/screens/` | Distributor and public screens (Home, Product, Checkout, OrderDetail, Orders, Invoices, Apply, Pending, JoinFee, Terms, Privacy...) |
+| `src/screens/admin/` | Admin console (Sales, Applications, Person, CatalogueAdmin, AdminChat, AdminConversation, Settings and its forms) |
+| `src/components/` | Shared pieces (`ui.jsx`, `BankDetails.jsx`, `ConfirmDialog.jsx`, `Icons.jsx`, `AppMenu.jsx`) |
+| `src/styles.css` | All styling |
+| `supabase/*.sql` | Database structure and functions (section 7) |
+| `supabase/functions/` | Edge Functions (section 8) |
+| `public/app-return.html` | Brings PayFast back into the phone apps |
+| `public/.well-known/assetlinks.json` | Lets the Play app run full screen |
+| `twa/` | The Google Play app (section 11) |
