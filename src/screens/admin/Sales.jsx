@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { adminAdvanceOrder, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
+import { adminAdvanceOrder, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { fmtDate, R, waLinkTo } from '../../lib/format.js'
 import { orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
+
+// Suggestions only: any courier name can be typed.
+const COURIERS = ['The Courier Guy', 'PUDO', 'Pargo', 'PostNet', 'Aramex', 'RAM', 'DSV']
 
 // Which list an order belongs in. "Active" is everything still needing work.
 const FILTERS = [
@@ -114,7 +117,11 @@ export default function Sales() {
 function SaleCard({ order, phone, onDone, onProblem }) {
   const [busy, setBusy] = useState(false)
   const [ask, dialog] = useConfirm()
+  const [courier, setCourier] = useState(order.courier)
+  const [tracking, setTracking] = useState(order.trackingNumber)
+  const [editTracking, setEditTracking] = useState(false)
   const st = orderState(order, 'admin')
+  const trackingChanged = courier.trim() !== order.courier || tracking.trim() !== order.trackingNumber
 
   const pay = st.cancelled
     ? { label: st.waybill, cls: 'pay-waiting' }
@@ -143,9 +150,20 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       })
       if (!ok) return
     }
+    if (step === 'collected' && !tracking.trim()) {
+      const ok = await ask({
+        title: 'No tracking number?',
+        body: 'You can mark ' + order.id + ' collected now and add the tracking number later.',
+        yes: 'Mark collected',
+        no: 'Go back',
+      })
+      if (!ok) return
+    }
     setBusy(true)
     onProblem('')
     try {
+      // Saved first, so the "on its way" message includes the number.
+      if (step === 'collected' && trackingChanged) await adminSetTracking(order.id, courier, tracking)
       await adminAdvanceOrder(order.id, step)
       onDone()
     } catch (e) {
@@ -175,6 +193,44 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       setBusy(false)
     }
   }
+
+  const saveTracking = async () => {
+    setBusy(true)
+    onProblem('')
+    try {
+      await adminSetTracking(order.id, courier, tracking)
+      setEditTracking(false)
+      onDone()
+    } catch (e) {
+      onProblem(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const trackingFields = (
+    <div className="stack gap-8">
+      <input
+        className="field field-sm"
+        list={'couriers-' + order.id}
+        value={courier}
+        onChange={e => setCourier(e.target.value)}
+        placeholder="Courier, e.g. The Courier Guy"
+        aria-label="Courier"
+      />
+      <datalist id={'couriers-' + order.id}>
+        {COURIERS.map(c => <option key={c} value={c} />)}
+      </datalist>
+      <input
+        className="field field-sm"
+        value={tracking}
+        onChange={e => setTracking(e.target.value)}
+        placeholder="Tracking number"
+        aria-label="Tracking number"
+        autoCapitalize="characters"
+      />
+    </div>
+  )
 
   const view = async () => {
     onProblem('')
@@ -212,10 +268,23 @@ function SaleCard({ order, phone, onDone, onProblem }) {
           ))}
           <div className="deliver-to">
             <span className="kicker muted">Deliver to</span>
-            <div>{order.business || order.customer}</div>
+            <div>{order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}</div>
             <div className="muted-sm">
               {order.address.line1}{order.address.line2 ? ', ' + order.address.line2 : ''}
             </div>
+            {order.deliverTo === 'other' && (
+              <>
+                <div className="muted-sm">
+                  <a className="link-inline" href={'tel:' + order.recipientPhone.replace(/[^0-9+]/g, '')}>{order.recipientPhone}</a>
+                  {' · '}
+                  <a className="link-inline" href={waLinkTo(order.recipientPhone, 'Hi, this is Royal Tiara about a delivery for you (order ' + order.id + ').')} target="_blank" rel="noreferrer">
+                    WhatsApp
+                  </a>
+                </div>
+                <span className="kicker muted mt-10">Ordered by</span>
+                <div>{order.business || order.customer}</div>
+              </>
+            )}
             {phone && (
               <div className="muted-sm">
                 <a className="link-inline" href={'tel:' + phone.replace(/\s/g, '')}>{phone}</a>
@@ -248,9 +317,43 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         </button>
       )}
       {st.packed && !st.collected && (
-        <button type="button" className="btn btn-dark btn-46" disabled={busy} onClick={() => advance('collected')}>
-          Mark collected by courier
-        </button>
+        <>
+          {trackingFields}
+          <button type="button" className="btn btn-dark btn-46" disabled={busy} onClick={() => advance('collected')}>
+            Mark collected by courier
+          </button>
+        </>
+      )}
+      {st.collected && (
+        editTracking ? (
+          <>
+            {trackingFields}
+            <div className="row gap-9">
+              <button type="button" className="btn btn-primary btn-44 grow" disabled={busy || !trackingChanged} onClick={saveTracking}>
+                {busy ? 'Saving...' : 'Save tracking number'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-44 grow"
+                disabled={busy}
+                onClick={() => { setCourier(order.courier); setTracking(order.trackingNumber); setEditTracking(false) }}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="tracking-line">
+            <span className="grow min0">
+              {order.trackingNumber
+                ? <>Tracking: <strong>{order.trackingNumber}</strong>{order.courier && ' · ' + order.courier}</>
+                : 'No tracking number yet'}
+            </span>
+            <button type="button" className="text-btn" onClick={() => setEditTracking(true)}>
+              {order.trackingNumber ? 'Change' : 'Add'}
+            </button>
+          </div>
+        )
       )}
       {st.collected && !st.delivered && (
         <>

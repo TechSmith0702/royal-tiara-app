@@ -4,7 +4,7 @@ import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 
 /** A value with a Copy button, so nobody has to retype an account number. */
-function Copyable({ value }) {
+export function Copyable({ value }) {
   const [copied, setCopied] = useState(false)
   const copy = async () => {
     try {

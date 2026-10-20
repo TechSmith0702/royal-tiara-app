@@ -7,9 +7,17 @@ import { uploadProof } from '../lib/files.js'
 import { goToPayfast, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
-import AddressCard from '../components/AddressCard.jsx'
 import BankDetails from '../components/BankDetails.jsx'
 import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx'
+
+// Someone else receiving the order: the courier needs their name, number and address.
+const DELIVER_FIELDS = [
+  { key: 'name', label: 'Their name', short: 'their name', placeholder: 'e.g. Lerato Mokoena', autoComplete: 'off' },
+  { key: 'phone', label: 'Their phone number', short: 'their phone number', placeholder: 'e.g. 072 123 4567', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
+  { key: 'line1', label: 'Street address', short: 'the street address', placeholder: 'e.g. 25 Main Road, Soweto', autoComplete: 'off' },
+  { key: 'line2', label: 'Town, province and postal code', short: 'the town and postal code', placeholder: 'e.g. Soweto, Gauteng, 1804', autoComplete: 'off' },
+]
+const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
 
 export default function Checkout() {
   const { user } = useAuth()
@@ -22,6 +30,8 @@ export default function Checkout() {
   const [proof, setProof] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [deliverTo, setDeliverTo] = useState('me')
+  const [other, setOther] = useState({ name: '', phone: '', line1: '', line2: '' })
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (!cart.lines.length && !placed.current) return <Navigate to="/cart" replace />
@@ -36,9 +46,25 @@ export default function Checkout() {
 
   const place = async () => {
     setError('')
+    let deliver = null
+    if (deliverTo === 'other') {
+      deliver = { name: other.name.trim(), phone: other.phone.trim(), line1: other.line1.trim(), line2: other.line2.trim() }
+      const missing = DELIVER_FIELDS.filter(f => !deliver[f.key]).map(f => f.short)
+      if (missing.length) {
+        setError('Please fill in ' + missing.join(', ') + ' for the delivery.')
+        return
+      }
+      if (!PHONE_OK.test(deliver.phone)) {
+        setError('That phone number does not look right.')
+        return
+      }
+    } else if (!(user.address && user.address.line1)) {
+      setError('Your account has no delivery address. Add it under Account, or choose "Anyone else".')
+      return
+    }
     setBusy(true)
     try {
-      const order = await placeOrder(cart.items, method, method === 'eft' ? proof : null)
+      const order = await placeOrder(cart.items, method, method === 'eft' ? proof : null, deliver)
       placed.current = true
       clearCart(user.id)
       if (method === 'card') {
@@ -66,7 +92,46 @@ export default function Checkout() {
       </div>
 
       <div className="scroll px-22 pt-8 pb-16 stack gap-14">
-        <AddressCard user={user} />
+        <section className="card card-pad stack gap-12">
+          <div className="kicker muted">Deliver to</div>
+          <Segmented
+            value={deliverTo}
+            onChange={setDeliverTo}
+            options={[{ value: 'me', label: 'Me' }, { value: 'other', label: 'Anyone else' }]}
+          />
+          {deliverTo === 'me' ? (
+            <div>
+              <div className="addr-name">{user.business || user.name}</div>
+              <div className="addr-lines">
+                {user.address && user.address.line1 ? (
+                  <>
+                    {user.address.line1}
+                    {user.address.line2 && <><br />{user.address.line2}</>}
+                  </>
+                ) : 'No delivery address on your account yet. Add it under Account.'}
+              </div>
+              <p className="hint mb-0 mt-10">The address on your account. To deliver somewhere else, choose "Anyone else".</p>
+            </div>
+          ) : (
+            <div className="stack gap-10">
+              {DELIVER_FIELDS.map(f => (
+                <label key={f.key} className="field-label">
+                  {f.label}
+                  <input
+                    className="field field-sm"
+                    type={f.type || 'text'}
+                    inputMode={f.inputMode}
+                    autoComplete={f.autoComplete}
+                    placeholder={f.placeholder}
+                    value={other[f.key]}
+                    onChange={e => setOther(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  />
+                </label>
+              ))}
+              <p className="hint mb-0">Only for this order. The courier calls this number if they need to.</p>
+            </div>
+          )}
+        </section>
 
         <section className="card card-pad stack gap-14">
           <div className="kicker muted">Payment method</div>

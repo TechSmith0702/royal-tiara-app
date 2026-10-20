@@ -36,7 +36,7 @@ All four use the same code (`src/`) and the same database.
 
 - approve or decline trade applications, put a distributor on hold
 - verify bank-transfer payments (card payments verify themselves)
-- mark orders packed, collected and delivered
+- mark orders packed, collected and delivered, and add the courier and tracking number (Sales: type them in before tapping "Mark collected by courier", or add/change them later). The distributor sees "Your tracking number is ..." on the order
 - chat with distributors
 - add products, change prices and photos, mark items out of stock
 - change the delivery fee and the joining fee (Admin → menu → Settings)
@@ -227,6 +227,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 17. `migration-joining-fee.sql`
 18. `migration-minimum-and-featured.sql`
 19. `migration-person-details.sql`
+20. `migration-deliver-to-and-tracking.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:
@@ -531,8 +532,13 @@ Live at https://royaltiara.netlify.app and working end to end, with real money:
   delivery fee R90, monthly minimum 10 products. **Do not change these;
   they are hers to set in the app.**
 
-All code is committed and pushed (last app change: "One tick box on the
-application..."). All 19 migrations have been run on the live database.
+Checkout has a "Deliver to" choice: **Me** (the address on the account,
+not changeable at checkout; it can still be changed under Account) or
+**Anyone else** (name, phone and address typed for that order). Admin Sales
+and the invoice show who it goes to, and who ordered it.
+
+All 20 migrations have been run on the live database (check with section 7
+if in doubt).
 
 ### Still to do
 

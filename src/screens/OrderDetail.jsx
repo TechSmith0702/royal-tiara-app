@@ -9,7 +9,7 @@ import { fmtDate, R } from '../lib/format.js'
 import { orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
-import BankDetails from '../components/BankDetails.jsx'
+import BankDetails, { Copyable } from '../components/BankDetails.jsx'
 
 // PayFast confirms a card payment within seconds of the distributor coming
 // back. If nothing has arrived this long after they open the order, the
@@ -144,6 +144,17 @@ export default function OrderDetail() {
           </ol>
         </section>
 
+        {order.trackingNumber && !st.cancelled && (
+          <section className="card card-pad stack gap-8">
+            <div className="kicker muted">Tracking</div>
+            <div className="row between center gap-10 flex-wrap">
+              <span className="body-muted">Your tracking number is</span>
+              <Copyable value={order.trackingNumber} />
+            </div>
+            {order.courier && <div className="muted-sm">Courier: {order.courier}</div>}
+          </section>
+        )}
+
         {!st.hasProof && !st.verified && !st.cancelled && (
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
@@ -243,6 +254,18 @@ export default function OrderDetail() {
             <span className="grow">Delivered - thank you for your order.</span>
           </section>
         )}
+
+        <section className="card card-pad stack gap-6">
+          <div className="kicker muted">Deliver to</div>
+          <div className="addr-name">
+            {order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}
+          </div>
+          {order.deliverTo === 'other' && <div className="muted-sm">{order.recipientPhone}</div>}
+          <div className="addr-lines">
+            {order.address.line1}
+            {order.address.line2 && <><br />{order.address.line2}</>}
+          </div>
+        </section>
 
         <section className="card card-pad stack gap-11">
           <div className="kicker muted">Items</div>

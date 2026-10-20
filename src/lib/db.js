@@ -100,7 +100,13 @@ const mapOrder = row => ({
   userId: row.user_id,
   customer: row.customer,
   business: row.business,
+  // The delivery address. For "someone else" it is theirs, with their name and phone.
   address: { line1: row.address_line1, line2: row.address_line2 },
+  deliverTo: row.deliver_to || 'me',
+  recipientName: row.recipient_name || '',
+  recipientPhone: row.recipient_phone || '',
+  courier: row.courier || '',
+  trackingNumber: row.tracking_number || '',
   createdAt: row.created_at,
   lines: (row.lines || []).map(l => ({ ...l, price: Number(l.price), total: Number(l.total) })),
   subtotal: Number(row.subtotal),
@@ -213,11 +219,13 @@ export async function fetchThreads(myId) {
 
 /* ---------- actions ---------- */
 
-export async function placeOrder(items, payMethod, proof) {
+/** deliver: null for the distributor's own address, or { name, phone, line1, line2 }. */
+export async function placeOrder(items, payMethod, proof, deliver) {
   const { data, error } = await supabase.rpc('place_order', {
     p_items: items,
     p_pay_method: payMethod,
     p_proof: proof || null,
+    ...(deliver ? { p_deliver: deliver } : {}),
   })
   if (error) fail(error)
   return mapOrder(Array.isArray(data) ? data[0] : data)
@@ -272,6 +280,12 @@ export async function confirmReceipt(orderId) {
 
 export async function adminAdvanceOrder(orderId, step) {
   const { error } = await supabase.rpc('admin_advance_order', { p_order_id: orderId, p_step: step })
+  if (error) fail(error)
+}
+
+/** Admin: the courier and tracking number the distributor sees on the order. */
+export async function adminSetTracking(orderId, courier, tracking) {
+  const { error } = await supabase.rpc('admin_set_tracking', { p_order_id: orderId, p_courier: courier, p_tracking: tracking })
   if (error) fail(error)
 }
 

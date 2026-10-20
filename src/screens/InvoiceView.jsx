@@ -49,6 +49,12 @@ export default function InvoiceView() {
               <div className="kicker muted">Bill to</div>
               <div className="inv-strong">{order.business || order.customer}</div>
               <div className="muted-sm">{order.customer}</div>
+              {order.deliverTo === 'other' ? (
+                <>
+                  <div className="kicker muted mt-10">Deliver to</div>
+                  <div className="muted-sm">{order.recipientName} · {order.recipientPhone}</div>
+                </>
+              ) : null}
               <div className="muted-sm">{order.address.line1}</div>
               <div className="muted-sm">{order.address.line2}</div>
             </div>
