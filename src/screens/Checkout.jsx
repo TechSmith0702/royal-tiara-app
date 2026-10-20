@@ -15,9 +15,13 @@ const DELIVER_FIELDS = [
   { key: 'name', label: 'Their name', short: 'their name', autoComplete: 'off' },
   { key: 'phone', label: 'Their phone number', short: 'their phone number', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
   { key: 'line1', label: 'Street address', short: 'the street address', autoComplete: 'off' },
-  { key: 'line2', label: 'Town, province and postal code', short: 'the town and postal code', autoComplete: 'off' },
+  { key: 'suburb', label: 'Suburb', short: 'the suburb', autoComplete: 'off' },
+  { key: 'city', label: 'City / Town', short: 'the city or town', autoComplete: 'off' },
+  { key: 'province', label: 'Province', short: 'the province', autoComplete: 'off' },
+  { key: 'postal', label: 'Postal code', short: 'the postal code', inputMode: 'numeric', maxLength: 4, autoComplete: 'off' },
 ]
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
+const POSTAL_OK = /^[0-9]{4}$/
 
 export default function Checkout() {
   const { user } = useAuth()
@@ -31,7 +35,7 @@ export default function Checkout() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [deliverTo, setDeliverTo] = useState('me')
-  const [other, setOther] = useState({ name: '', phone: '', line1: '', line2: '' })
+  const [other, setOther] = useState({ name: '', phone: '', line1: '', suburb: '', city: '', province: '', postal: '' })
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (!cart.lines.length && !placed.current) return <Navigate to="/cart" replace />
@@ -48,15 +52,27 @@ export default function Checkout() {
     setError('')
     let deliver = null
     if (deliverTo === 'other') {
-      deliver = { name: other.name.trim(), phone: other.phone.trim(), line1: other.line1.trim(), line2: other.line2.trim() }
-      const missing = DELIVER_FIELDS.filter(f => !deliver[f.key]).map(f => f.short)
+      const typed = {}
+      DELIVER_FIELDS.forEach(f => { typed[f.key] = other[f.key].trim() })
+      const missing = DELIVER_FIELDS.filter(f => !typed[f.key]).map(f => f.short)
       if (missing.length) {
         setError('Please fill in ' + missing.join(', ') + ' for the delivery.')
         return
       }
-      if (!PHONE_OK.test(deliver.phone)) {
+      if (!PHONE_OK.test(typed.phone)) {
         setError('That phone number does not look right.')
         return
+      }
+      if (!POSTAL_OK.test(typed.postal)) {
+        setError('The postal code must be 4 digits.')
+        return
+      }
+      // Stored as two lines, like the address on an account: "Roodekop, Germiston, Gauteng, 1401".
+      deliver = {
+        name: typed.name,
+        phone: typed.phone,
+        line1: typed.line1,
+        line2: [typed.suburb, typed.city, typed.province, typed.postal].join(', '),
       }
     } else if (!(user.address && user.address.line1)) {
       setError('Your account has no delivery address. Add it under Account, or choose "Anyone else".')
@@ -121,6 +137,7 @@ export default function Checkout() {
                     className="field field-sm"
                     type={f.type || 'text'}
                     inputMode={f.inputMode}
+                    maxLength={f.maxLength}
                     autoComplete={f.autoComplete}
                     value={other[f.key]}
                     onChange={e => setOther(prev => ({ ...prev, [f.key]: e.target.value }))}
