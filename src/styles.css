@@ -61,6 +61,10 @@ p { margin: 0; }
 .list { padding: 6px 22px 18px; display: flex; flex-direction: column; gap: 10px; }
 .bottom-bar { padding: 12px 22px calc(var(--bottom) + 22px); }
 .float-bar { padding: 0 22px 10px; }
+.buy-bar { flex: none; padding-top: 10px; border-top: 1px solid rgba(32, 30, 29, .08); background: var(--ground); }
+.btn.cart-btn { height: 48px; justify-content: space-between; padding: 0 18px; font-weight: 700; color: var(--accent-deep); }
+.cart-btn svg { width: 20px; height: 20px; }
+.cart-btn-sum { font-size: 14px; color: var(--ink); white-space: nowrap; }
 .nowrap { white-space: nowrap; }
 
 /* ---------- type ---------- */
