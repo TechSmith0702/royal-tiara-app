@@ -542,9 +542,8 @@ if in doubt).
 
 ### Still to do
 
-1. **Bank details:** the app currently shows Thando's own test bank account.
-   Replace it with Royal Tiara's: Admin → menu → Settings → Bank details. No
-   code needed.
+1. ~~**Bank details**~~ Done: the app shows Royal Tiara's Capitec account
+   (Admin → menu → Settings → Bank details to change it).
 2. **Email from info@royaltiara.co.za:** Supabase's SMTP was pointed at
    `mail.royaltiara.co.za:465` and the mail server accepted the messages, but
    they never arrived in Gmail (SPF, DKIM, DMARC and blocklist checks all
