@@ -28,6 +28,12 @@ export const EyeOffIcon = () => (
     <path d="m3 3 18 18" />
   </Svg>
 )
+export const WhatsAppIcon = () => (
+  <Svg>
+    <path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" />
+    <path d="M8.8 8.2c.3-.5.8-.5 1.1-.3l.9 1.9c.1.3 0 .6-.2.8l-.5.6c.6 1.2 1.6 2.2 2.8 2.8l.6-.5c.2-.2.5-.3.8-.2l1.9.9c.2.3.2.8-.3 1.1-.7.5-1.5.7-2.3.4a8.4 8.4 0 0 1-5.2-5.2c-.3-.8-.1-1.6.4-2.3Z" />
+  </Svg>
+)
 export const SendIcon = () => <Svg><path d="M4 12 20 4l-7 16-2.5-6.5L4 12Z" /></Svg>
 export const GearIcon = () => (
   <Svg>

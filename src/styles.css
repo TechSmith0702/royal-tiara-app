@@ -65,6 +65,15 @@ p { margin: 0; }
 .btn.cart-btn { height: 48px; justify-content: space-between; padding: 0 18px; font-weight: 700; color: var(--accent-deep); }
 .cart-btn svg { width: 20px; height: 20px; }
 .cart-btn-sum { font-size: 14px; color: var(--ink); white-space: nowrap; }
+.btn.buy-btn { padding: 0 10px; white-space: nowrap; }
+.add-label { display: flex; flex-direction: column; align-items: center; line-height: 1.15; white-space: nowrap; }
+.add-sum { font-family: var(--body); font-size: 12.5px; font-weight: 600; opacity: .85; }
+.help-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+.help-row:hover { background: var(--hover); }
+.help-title { display: block; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.help-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.wa-dot { flex: none; width: 42px; height: 42px; border-radius: 999px; background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; }
+.wa-dot svg { width: 24px; height: 24px; }
 .nowrap { white-space: nowrap; }
 
 /* ---------- type ---------- */

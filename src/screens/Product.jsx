@@ -5,7 +5,7 @@ import { addToCart, useCart } from '../lib/cart.js'
 import { fetchActiveProducts, sizeLabel, unitPrice } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { pluralise, R, waLink } from '../lib/format.js'
-import { BagIcon } from '../components/Icons.jsx'
+import { BagIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import { BackButton, ErrorNote, FitPhoto, Loading, PhotoViewer, ProductImage, Stepper } from '../components/ui.jsx'
 
 export default function Product() {
@@ -120,12 +120,17 @@ export default function Product() {
           </div>
 
           <a
-            className="btn btn-outline-sage"
+            className="card help-row"
             target="_blank"
             rel="noreferrer"
             href={waLink('Hi Royal Tiara, I have a question about ' + p.name + ' (' + sizeLabel(p, variant) + ').')}
           >
-            Ask about this product on WhatsApp
+            <span className="wa-dot"><WhatsAppIcon /></span>
+            <span className="grow min0">
+              <span className="help-title">Questions about this product?</span>
+              <span className="help-sub">Ask Royal Tiara on WhatsApp</span>
+            </span>
+            <span className="chev">&rsaquo;</span>
           </a>
         </div>
       </div>
@@ -140,8 +145,13 @@ export default function Product() {
         )}
         <div className="row center gap-12">
           <Stepper value={qty} onDec={() => setQty(q => Math.max(1, q - 1))} onInc={() => setQty(q => q + 1)} />
-          <button type="button" className={'btn grow ' + (added ? 'btn-sage' : 'btn-primary')} onClick={add} disabled={!p.inStock}>
-            {!p.inStock ? 'Out of stock' : added ? 'Added to cart ✓' : 'Add · ' + R(price * qty)}
+          <button type="button" className={'btn grow buy-btn ' + (added ? 'btn-sage' : 'btn-primary')} onClick={add} disabled={!p.inStock}>
+            {!p.inStock ? 'Out of stock' : added ? 'Added to cart ✓' : (
+              <span className="add-label">
+                <span>Add to cart</span>
+                <span className="add-sum">{R(price * qty)}</span>
+              </span>
+            )}
           </button>
         </div>
       </div>
