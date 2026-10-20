@@ -1,26 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { addToCart, useCart } from '../lib/cart.js'
+import { addToCart } from '../lib/cart.js'
 import { fetchActiveProducts, sizeLabel, unitPrice } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
-import { pluralise, R, waLink } from '../lib/format.js'
+import { R, waLink } from '../lib/format.js'
 import { BackButton, ErrorNote, FitPhoto, Loading, PhotoViewer, ProductImage, Stepper } from '../components/ui.jsx'
 
 export default function Product() {
   const { id } = useParams()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { data: products, loading, error, refresh } = useLive(fetchActiveProducts, ['products'], [])
-  const cart = useCart(user.id, products)
   const [variant, setVariant] = useState(0)
   const [qty, setQty] = useState(1)
   const [photo, setPhoto] = useState(0)
   const [viewing, setViewing] = useState(false)
-  const [added, setAdded] = useState(false)
-  const timer = useRef(null)
 
-  useEffect(() => { setVariant(0); setQty(1); setPhoto(0); setViewing(false); setAdded(false) }, [id])
-  useEffect(() => () => clearTimeout(timer.current), [])
+  useEffect(() => { setVariant(0); setQty(1); setPhoto(0); setViewing(false) }, [id])
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (error) return <div className="screen"><div className="scroll page"><ErrorNote message={error} onRetry={refresh} /></div></div>
@@ -30,13 +27,9 @@ export default function Product() {
 
   const price = unitPrice(p, variant)
   const shown = photo > 0 && p.images[photo] ? { ...p, image: p.images[photo] } : p
-  // Stays on this page, so a distributor can carry on adding other products.
   const add = () => {
     addToCart(user.id, p.id, p.variants ? variant : null, qty)
-    setQty(1)
-    setAdded(true)
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => setAdded(false), 1600)
+    navigate('/cart')
   }
 
   return (
@@ -108,6 +101,16 @@ export default function Product() {
             <div className="per-unit">per unit</div>
           </div>
 
+          <div className="stack gap-10">
+            <div className="row center gap-12">
+              <Stepper value={qty} onDec={() => setQty(q => Math.max(1, q - 1))} onInc={() => setQty(q => q + 1)} />
+              <div className="grow units-label">{qty} {qty === 1 ? 'unit' : 'units'}</div>
+            </div>
+            <button type="button" className="btn btn-primary" onClick={add} disabled={!p.inStock}>
+              {p.inStock ? 'Add to cart \u00b7 ' + R(price * qty) : 'Out of stock'}
+            </button>
+          </div>
+
           <div className="card card-pad">
             <h4 className="about-title">About this line</h4>
             <p className="about-text">{p.blurb}</p>
@@ -126,22 +129,6 @@ export default function Product() {
           >
             Ask about this product on WhatsApp
           </a>
-        </div>
-      </div>
-
-      {/* Always on screen, however long the description. */}
-      <div className="bottom-bar buy-bar stack gap-10">
-        {cart.lines.length > 0 && (
-          <Link to="/cart" className="view-cart-link" aria-live="polite">
-            <span>{added ? 'Added to your cart ✓' : 'In your cart: ' + pluralise(cart.lines.length, 'product')}</span>
-            <span className="nowrap">View cart &rsaquo;</span>
-          </Link>
-        )}
-        <div className="row center gap-12">
-          <Stepper value={qty} onDec={() => setQty(q => Math.max(1, q - 1))} onInc={() => setQty(q => q + 1)} />
-          <button type="button" className="btn btn-primary grow" onClick={add} disabled={!p.inStock}>
-            {p.inStock ? 'Add · ' + R(price * qty) : 'Out of stock'}
-          </button>
         </div>
       </div>
     </div>

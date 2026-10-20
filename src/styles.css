@@ -61,8 +61,6 @@ p { margin: 0; }
 .list { padding: 6px 22px 18px; display: flex; flex-direction: column; gap: 10px; }
 .bottom-bar { padding: 12px 22px calc(var(--bottom) + 22px); }
 .float-bar { padding: 0 22px 10px; }
-.buy-bar { flex: none; padding-top: 10px; border-top: 1px solid rgba(32, 30, 29, .08); background: var(--ground); }
-.view-cart-link { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--accent-deep); }
 .nowrap { white-space: nowrap; }
 
 /* ---------- type ---------- */
