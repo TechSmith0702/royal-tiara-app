@@ -324,13 +324,15 @@ function SaleCard({ order, phone, onDone, onProblem }) {
           </button>
         </>
       )}
+      {st.collected && !st.delivered && <div className="done-pill">&#10003; Collected - in transit to client</div>}
+      {st.delivered && <div className="done-pill done-pill-sage">&#10003; Delivered</div>}
       {st.collected && (
         editTracking ? (
           <>
             {trackingFields}
             <div className="row gap-9">
               <button type="button" className="btn btn-primary btn-44 grow" disabled={busy || !trackingChanged} onClick={saveTracking}>
-                {busy ? 'Saving...' : 'Save tracking number'}
+                {busy ? 'Saving...' : 'Save'}
               </button>
               <button
                 type="button"
@@ -356,14 +358,10 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         )
       )}
       {st.collected && !st.delivered && (
-        <>
-          <div className="done-pill">&#10003; Collected - in transit to client</div>
-          <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={() => advance('delivered')}>
-            Client told me it arrived
-          </button>
-        </>
+        <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={() => advance('delivered')}>
+          Client told me it arrived
+        </button>
       )}
-      {st.delivered && <div className="done-pill done-pill-sage">&#10003; Delivered</div>}
 
       <div className="track">
         <div className="kicker faint">Tracking to client</div>
