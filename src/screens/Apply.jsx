@@ -10,15 +10,17 @@ import { TERMS_VERSION } from './Terms.jsx'
 const FIELDS = [
   { key: 'name', label: 'Full name', placeholder: 'e.g. John Smith', autoComplete: 'name', required: true },
   { key: 'business', label: 'Business name (optional)', placeholder: 'e.g. Naledi Salon', autoComplete: 'organization' },
-  { key: 'address', label: 'Delivery address', placeholder: 'e.g. 25 Main Road, Soweto', autoComplete: 'street-address', required: true },
-  { key: 'town', label: 'Town / province', placeholder: 'e.g. Soweto, Gauteng', autoComplete: 'address-level2', required: true },
-  { key: 'postal', label: 'Postal code', placeholder: 'e.g. 1911', autoComplete: 'postal-code', inputMode: 'numeric', required: true },
+  { key: 'address', label: 'Street address', placeholder: 'e.g. 60 Antelope Avenue', autoComplete: 'address-line1', required: true },
+  { key: 'suburb', label: 'Suburb', placeholder: 'e.g. Roodekop', autoComplete: 'address-level3', required: true },
+  { key: 'city', label: 'City / Town', placeholder: 'e.g. Germiston', autoComplete: 'address-level2', required: true },
+  { key: 'province', label: 'Province', placeholder: 'e.g. Gauteng', autoComplete: 'address-level1', required: true },
+  { key: 'postal', label: 'Postal code', placeholder: 'e.g. 1401', autoComplete: 'postal-code', inputMode: 'numeric', maxLength: 4, required: true },
   { key: 'phone', label: 'Phone number', placeholder: 'e.g. 072 123 4567', autoComplete: 'tel', type: 'tel', inputMode: 'tel', required: true },
   { key: 'email', label: 'Email', placeholder: 'e.g. name@email.com', autoComplete: 'email', type: 'email', inputMode: 'email', required: true },
   { key: 'password', label: 'Choose a password', placeholder: 'At least 6 characters', autoComplete: 'new-password', type: 'password', required: true },
 ]
 
-const EMPTY = { name: '', business: '', address: '', town: '', postal: '', phone: '', email: '', password: '' }
+const EMPTY = { name: '', business: '', address: '', suburb: '', city: '', province: '', postal: '', phone: '', email: '', password: '' }
 
 export default function Apply() {
   const { data: fees, error: feesError } = useLive(fetchFees, ['settings'], [])
@@ -82,6 +84,10 @@ export default function Apply() {
       setError('Please fill in ' + missing.map(f => f.label.toLowerCase()).join(', ') + '.')
       return
     }
+    if (!/^[0-9]{4}$/.test(clean.postal)) {
+      setError('The postal code must be 4 digits.')
+      return
+    }
     if (!/^\S+@\S+\.\S+$/.test(clean.email)) {
       setError('That email address does not look right.')
       return
@@ -99,8 +105,8 @@ export default function Apply() {
 
     setBusy(true)
     try {
-      // The postal code is stored on the same line as the town, e.g. "Soweto, Gauteng, 1804".
-      const town = clean.postal ? clean.town + ', ' + clean.postal : clean.town
+      // Stored as the account's second address line, e.g. "Roodekop, Germiston, Gauteng, 1401".
+      const town = [clean.suburb, clean.city, clean.province, clean.postal].join(', ')
       const result = await signUp({ ...clean, town, joinPay, termsVersion: TERMS_VERSION, monthlyMinimum: minimumText })
       // Kept in memory only, to sign them in once they have confirmed their email.
       setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
@@ -160,6 +166,7 @@ export default function Apply() {
                     className="field"
                     type={f.type || 'text'}
                     inputMode={f.inputMode}
+                    maxLength={f.maxLength}
                     autoComplete={f.autoComplete}
                     placeholder={f.placeholder}
                     value={form[f.key]}
