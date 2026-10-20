@@ -12,10 +12,10 @@ import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx
 
 // Someone else receiving the order: the courier needs their name, number and address.
 const DELIVER_FIELDS = [
-  { key: 'name', label: 'Their name', short: 'their name', placeholder: 'e.g. Lerato Mokoena', autoComplete: 'off' },
-  { key: 'phone', label: 'Their phone number', short: 'their phone number', placeholder: 'e.g. 072 123 4567', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
-  { key: 'line1', label: 'Street address', short: 'the street address', placeholder: 'e.g. 25 Main Road, Soweto', autoComplete: 'off' },
-  { key: 'line2', label: 'Town, province and postal code', short: 'the town and postal code', placeholder: 'e.g. Soweto, Gauteng, 1804', autoComplete: 'off' },
+  { key: 'name', label: 'Their name', short: 'their name', autoComplete: 'off' },
+  { key: 'phone', label: 'Their phone number', short: 'their phone number', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
+  { key: 'line1', label: 'Street address', short: 'the street address', autoComplete: 'off' },
+  { key: 'line2', label: 'Town, province and postal code', short: 'the town and postal code', autoComplete: 'off' },
 ]
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
 
@@ -122,13 +122,11 @@ export default function Checkout() {
                     type={f.type || 'text'}
                     inputMode={f.inputMode}
                     autoComplete={f.autoComplete}
-                    placeholder={f.placeholder}
                     value={other[f.key]}
                     onChange={e => setOther(prev => ({ ...prev, [f.key]: e.target.value }))}
                   />
                 </label>
               ))}
-              <p className="hint mb-0">Only for this order. The courier calls this number if they need to.</p>
             </div>
           )}
         </section>
