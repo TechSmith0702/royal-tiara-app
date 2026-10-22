@@ -442,6 +442,7 @@ both `EFFECTIVE` and `TERMS_VERSION`.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| Signing in takes very long (half a minute or more), everything else fine | Usually Supabase itself is slow (it runs the sign-in) | Check https://status.supabase.com (Royal Tiara's project is in the **EU, eu-west-1** region). Wait; don't reset passwords or change settings. People already signed in are not affected |
 | The whole site says it cannot connect, or data won't load | Supabase free projects **pause after about a week with no activity** | Supabase dashboard → the project → **Restore** |
 | Card order stuck on "Confirming..." or unpaid after paying | PayFast's confirmation was refused: usually `PAYFAST_MODE` or `PAYFAST_MERCHANT_ID` not matching the account that was paid (e.g. a sandbox payment while the secrets say live) | Check the Supabase secrets; check `payfast-notify` logs ("ignored: ..." says why); the admin can verify by hand in Sales |
 | PayFast shows "403 ERROR - Request blocked" when paying from a laptop | Live PayFast refuses return addresses at `localhost`, so real card payments cannot be tested from the local copy | Test card payments on the live website. The apps go through `public/app-return.html` on the website for the same reason |
