@@ -14,6 +14,7 @@ import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx
 const PERSON_FIELDS = [
   { key: 'name', label: 'Their name', short: 'their name', autoComplete: 'off' },
   { key: 'phone', label: 'Their phone number', short: 'their phone number', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
+  { key: 'email', label: 'Their email (optional)', optional: true, type: 'email', inputMode: 'email', autoComplete: 'off' },
 ]
 // To their door, by The Courier Guy.
 const ADDRESS_FIELDS = [
@@ -42,6 +43,7 @@ const PICKUP = {
 }
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
 const POSTAL_OK = /^[0-9]{4}$/
+const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 export default function Checkout() {
   const { user } = useAuth()
@@ -55,7 +57,7 @@ export default function Checkout() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [deliverTo, setDeliverTo] = useState('me')
-  const [other, setOther] = useState({ name: '', phone: '', line1: '', suburb: '', city: '', province: '', postal: '', point: '' })
+  const [other, setOther] = useState({ name: '', phone: '', email: '', line1: '', suburb: '', city: '', province: '', postal: '', point: '' })
   const [way, setWay] = useState('door')          // 'door' or 'branch'
   const [service, setService] = useState('pudo')  // which branch service
 
@@ -94,13 +96,17 @@ export default function Checkout() {
       const needed = way === 'door'
         ? [...PERSON_FIELDS, ...ADDRESS_FIELDS]
         : [...PERSON_FIELDS, { key: 'point', short: PICKUP[service].short }]
-      const missing = needed.filter(f => !typed[f.key]).map(f => f.short)
+      const missing = needed.filter(f => !f.optional && !typed[f.key]).map(f => f.short)
       if (missing.length) {
         setError('Please fill in ' + missing.join(', ') + ' for the delivery.')
         return
       }
       if (!PHONE_OK.test(typed.phone)) {
         setError('That phone number does not look right.')
+        return
+      }
+      if (typed.email && !EMAIL_OK.test(typed.email)) {
+        setError('That email address does not look right.')
         return
       }
       if (way === 'door' && !POSTAL_OK.test(typed.postal)) {
@@ -111,12 +117,13 @@ export default function Checkout() {
         ? {
           name: typed.name,
           phone: typed.phone,
+          email: typed.email,
           method: 'door',
           line1: typed.line1,
           // Stored as two lines, like the address on an account: "Roodekop, Germiston, Gauteng, 1401".
           line2: [typed.suburb, typed.city, typed.province, typed.postal].join(', '),
         }
-        : { name: typed.name, phone: typed.phone, method: service, point: typed.point }
+        : { name: typed.name, phone: typed.phone, email: typed.email, method: service, point: typed.point }
     } else if (!(user.address && user.address.line1)) {
       setError('Your account has no delivery address. Add it under Account, or choose "Anyone else".')
       return
@@ -169,7 +176,6 @@ export default function Checkout() {
                   </>
                 ) : 'No delivery address on your account yet. Add it under Account.'}
               </div>
-              <p className="hint mb-0 mt-10">The address on your account. To deliver somewhere else, choose "Anyone else".</p>
             </div>
           ) : (
             <div className="stack gap-10">

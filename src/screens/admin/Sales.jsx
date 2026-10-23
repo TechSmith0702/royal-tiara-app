@@ -282,6 +282,11 @@ function SaleCard({ order, phone, onDone, onProblem }) {
                     WhatsApp
                   </a>
                 </div>
+                {order.recipientEmail && (
+                  <div className="muted-sm">
+                    <a className="link-inline" href={'mailto:' + order.recipientEmail}>{order.recipientEmail}</a>
+                  </div>
+                )}
                 <span className="kicker muted mt-10">Ordered by</span>
                 <div>{order.business || order.customer}</div>
               </>

@@ -53,6 +53,7 @@ export default function InvoiceView() {
                 <>
                   <div className="kicker muted mt-10">Deliver to</div>
                   <div className="muted-sm">{order.recipientName} · {order.recipientPhone}</div>
+                  {order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
                 </>
               ) : null}
               {deliveryLines(order).map((line, i) => <div key={i} className="muted-sm">{line}</div>)}

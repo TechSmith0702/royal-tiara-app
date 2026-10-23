@@ -261,6 +261,7 @@ export default function OrderDetail() {
             {order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}
           </div>
           {order.deliverTo === 'other' && <div className="muted-sm">{order.recipientPhone}</div>}
+          {order.deliverTo === 'other' && order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
           <div className="addr-lines">
             {deliveryLines(order).map((line, i) => <div key={i}>{line}</div>)}
           </div>
