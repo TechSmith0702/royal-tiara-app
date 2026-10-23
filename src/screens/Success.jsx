@@ -33,7 +33,7 @@ export default function Success() {
       </div>
       <div className="stack gap-10">
         <Link to={'/orders/' + order.id} className="btn btn-primary" replace>
-          {order.payMethod === 'eft' && !order.proof ? 'See bank details' : 'Track this order'}
+          View Order
         </Link>
         <Link to="/shop" className="btn btn-ghost-light" replace>Keep shopping</Link>
       </div>
