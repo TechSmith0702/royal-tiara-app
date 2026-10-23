@@ -34,7 +34,7 @@ const PICKUP = {
   paxi: {
     label: 'PAXI point location',
     short: 'the PAXI point',
-    placeholder: 'e.g. PEP Germiston Mall',
+    placeholder: 'e.g. PEP Germiston Elsburg (P0137)',
   },
 }
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
