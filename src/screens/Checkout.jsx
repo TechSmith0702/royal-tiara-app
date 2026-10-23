@@ -29,12 +29,10 @@ const PICKUP = {
   pudo: {
     label: 'PUDO locker location',
     short: 'the PUDO locker',
-    hint: "Type the locker's name as it shows on the PUDO map.",
   },
   paxi: {
     label: 'PAXI point location',
     short: 'the PAXI point',
-    hint: 'Type the store (PEP or Tekkie Town) and its PAXI point code, shown on the sign in the store window.',
   },
 }
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
@@ -204,7 +202,6 @@ export default function Checkout() {
                       onChange={e => setOther(prev => ({ ...prev, point: e.target.value }))}
                     />
                   </label>
-                  <p className="hint mb-0">{PICKUP[service].hint}</p>
                 </>
               )}
             </div>
