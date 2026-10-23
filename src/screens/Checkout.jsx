@@ -24,17 +24,21 @@ const ADDRESS_FIELDS = [
   { key: 'province', label: 'Province', short: 'the province', autoComplete: 'off' },
   { key: 'postal', label: 'Postal code', short: 'the postal code', inputMode: 'numeric', maxLength: 4, autoComplete: 'off' },
 ]
-// Or collected from a PUDO locker or PAXI point they type in.
+// Or collected from a PUDO locker or PAXI point they type in (found on the service's own map).
 const PICKUP = {
   pudo: {
     label: 'PUDO locker location',
     short: 'the PUDO locker',
     placeholder: 'e.g. Town Square at Newmarket, Alberton',
+    finder: 'https://www.pudo.co.za',
+    find: 'Find a PUDO locker',
   },
   paxi: {
     label: 'PAXI point location',
     short: 'the PAXI point',
     placeholder: 'e.g. PEP Germiston Elsburg (P0137)',
+    finder: 'https://www.paxi.co.za/paxi-points',
+    find: 'Find a PAXI point',
   },
 }
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
@@ -205,6 +209,11 @@ export default function Checkout() {
                       onChange={e => setOther(prev => ({ ...prev, point: e.target.value }))}
                     />
                   </label>
+                  <p className="hint mb-0">
+                    <a className="link-inline" href={PICKUP[service].finder} target="_blank" rel="noreferrer">
+                      {PICKUP[service].find}
+                    </a>
+                  </p>
                 </>
               )}
             </div>
