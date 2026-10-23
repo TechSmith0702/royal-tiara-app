@@ -539,7 +539,8 @@ Checkout has a "Deliver to" choice: **Me** (the address on the account,
 not changeable at checkout; it can still be changed under Account) or
 **Anyone else** (their name, phone and optional email, then either **to their door** by The
 Courier Guy, with street, suburb, city, province and postal code, or
-**collect at a branch**: a PUDO locker or PAXI point they type in). Admin Sales and the invoice show who it goes
+**collect at a branch**: a PUDO locker or PAXI point they type in, with "Find a PUDO locker" /
+"Find a PAXI point" links to each service's own map). Admin Sales and the invoice show who it goes
 to and who ordered it, and the tracking box fills in the courier (The Courier
 Guy, PUDO or PAXI). One delivery fee for every option. The app does not book
 the courier: the admin books it on the courier's website and types the
