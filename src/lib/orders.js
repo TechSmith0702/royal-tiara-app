@@ -3,9 +3,9 @@ import { fmtDate } from './format.js'
 // How an order travels. "door" is The Courier Guy; the others are collected
 // from a pickup point the distributor typed at checkout.
 export const DELIVERY_METHODS = {
-  door: { courier: 'The Courier Guy', pickup: false },
-  pudo: { courier: 'PUDO', pickup: true, place: 'PUDO locker' },
-  paxi: { courier: 'PAXI', pickup: true, place: 'PAXI point' },
+  door: { courier: 'The Courier Guy', badge: 'COURIER GUY', pickup: false },
+  pudo: { courier: 'PUDO', badge: 'PUDO', pickup: true, place: 'PUDO locker' },
+  paxi: { courier: 'PAXI', badge: 'PAXI', pickup: true, place: 'PAXI point' },
 }
 export const deliveryMethod = order => DELIVERY_METHODS[order.deliveryMethod] || DELIVERY_METHODS.door
 

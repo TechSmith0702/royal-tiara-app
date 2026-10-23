@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { adminAdvanceOrder, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
-import { fmtDate, R, waLinkTo } from '../../lib/format.js'
+import { fmtDate, fmtPhone, R, telLink, waLinkTo } from '../../lib/format.js'
 import { deliveryLines, deliveryMethod, orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
@@ -125,6 +125,26 @@ function SaleCard({ order, phone, onDone, onProblem }) {
   const st = orderState(order, 'admin')
   const trackingChanged = courier.trim() !== order.courier || tracking.trim() !== order.trackingNumber
   const pickup = deliveryMethod(order).pickup
+  const [copied, setCopied] = useState(false)
+
+  // Everything a courier booking form asks for, ready to paste.
+  const copyDelivery = async () => {
+    const other = order.deliverTo === 'other'
+    const text = [
+      other ? order.recipientName : order.business || order.customer,
+      fmtPhone(other ? order.recipientPhone : phone),
+      other ? order.recipientEmail : '',
+      ...deliveryLines(order),
+      'Order ' + order.id,
+    ].filter(Boolean).join('\n')
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      onProblem('Could not copy here. Select the details and copy them by hand.')
+    }
+  }
 
   const pay = st.cancelled
     ? { label: st.waybill, cls: 'pay-waiting' }
@@ -250,7 +270,10 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       <div className="row between start gap-10">
         <div className="min0">
           <div className="sale-id">{order.id} &middot; {order.business || order.customer}</div>
-          <div className="row-sub">{fmtDate(order.createdAt)}</div>
+          <div className="row-sub row center gap-8">
+            {fmtDate(order.createdAt)}
+            <span className={'ship-badge ship-' + order.deliveryMethod}>{deliveryMethod(order).badge}</span>
+          </div>
         </div>
         <span className="sale-total">{R(order.total)}</span>
       </div>
@@ -270,13 +293,18 @@ function SaleCard({ order, phone, onDone, onProblem }) {
             </div>
           ))}
           <div className="deliver-to">
-            <span className="kicker muted">Deliver to</span>
+            <div className="row between center gap-10">
+              <span className="kicker muted">Deliver to</span>
+              <button type="button" className="copy-btn" onClick={copyDelivery}>
+                {copied ? 'Copied ✓' : 'Copy details'}
+              </button>
+            </div>
             <div>{order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}</div>
             <div className={pickup ? 'pickup-line' : 'muted-sm'}>{deliveryLines(order).join(', ')}</div>
             {order.deliverTo === 'other' && (
               <>
                 <div className="muted-sm">
-                  <a className="link-inline" href={'tel:' + order.recipientPhone.replace(/[^0-9+]/g, '')}>{order.recipientPhone}</a>
+                  <a className="link-inline" href={telLink(order.recipientPhone)}>{fmtPhone(order.recipientPhone)}</a>
                   {' · '}
                   <a className="link-inline" href={waLinkTo(order.recipientPhone, 'Hi, this is Royal Tiara about a delivery for you (order ' + order.id + ').')} target="_blank" rel="noreferrer">
                     WhatsApp
@@ -293,7 +321,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
             )}
             {phone && (
               <div className="muted-sm">
-                <a className="link-inline" href={'tel:' + phone.replace(/\s/g, '')}>{phone}</a>
+                <a className="link-inline" href={telLink(phone)}>{fmtPhone(phone)}</a>
                 {' · '}
                 <a className="link-inline" href={waLinkTo(phone, 'Hi, this is Royal Tiara about order ' + order.id + '.')} target="_blank" rel="noreferrer">
                   WhatsApp

@@ -1,7 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { fetchOrders } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
-import { fmtDate, R, WHATSAPP_DISPLAY } from '../lib/format.js'
+import { fmtDate, fmtPhone, R, WHATSAPP_DISPLAY } from '../lib/format.js'
 import { deliveryLines, orderState } from '../lib/orders.js'
 import { isNativeApp } from '../lib/platform.js'
 import { BackButton, Loading } from '../components/ui.jsx'
@@ -52,7 +52,7 @@ export default function InvoiceView() {
               {order.deliverTo === 'other' ? (
                 <>
                   <div className="kicker muted mt-10">Deliver to</div>
-                  <div className="muted-sm">{order.recipientName} · {order.recipientPhone}</div>
+                  <div className="muted-sm">{order.recipientName} · {fmtPhone(order.recipientPhone)}</div>
                   {order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
                 </>
               ) : null}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { adminDecideApplication, adminMarkJoiningPaid, adminPersonDetails, adminSetMembership, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
-import { R, fmtDate, timeAgo, waLinkTo } from '../../lib/format.js'
+import { R, fmtDate, fmtPhone, timeAgo, waLinkTo } from '../../lib/format.js'
 import { Avatar, BackButton, ErrorNote, Loading, StatusChip } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
@@ -151,7 +151,7 @@ export default function Person() {
               rel="noreferrer"
               href={waLinkTo(p.phone, 'Hi ' + p.name + ', this is Royal Tiara.')}
             >
-              {p.phone} (WhatsApp)
+              {fmtPhone(p.phone)} (WhatsApp)
             </a>
           </Line>
           <Line label="Delivery">{p.address.line1}</Line>

@@ -5,7 +5,7 @@ import { replaceCart } from '../lib/cart.js'
 import { attachProof, cancelOrder, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
-import { fmtDate, R } from '../lib/format.js'
+import { fmtDate, fmtPhone, R } from '../lib/format.js'
 import { deliveryLines, orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
@@ -260,7 +260,7 @@ export default function OrderDetail() {
           <div className="addr-name">
             {order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}
           </div>
-          {order.deliverTo === 'other' && <div className="muted-sm">{order.recipientPhone}</div>}
+          {order.deliverTo === 'other' && <div className="muted-sm">{fmtPhone(order.recipientPhone)}</div>}
           {order.deliverTo === 'other' && order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
           <div className="addr-lines">
             {deliveryLines(order).map((line, i) => <div key={i}>{line}</div>)}

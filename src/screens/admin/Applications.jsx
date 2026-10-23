@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { adminDecideApplication, fetchApplications } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
-import { timeAgo, waLinkTo } from '../../lib/format.js'
+import { fmtPhone, timeAgo, waLinkTo } from '../../lib/format.js'
 import { ErrorNote, Loading, StatusChip } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
@@ -135,7 +135,7 @@ function PersonCard({ person: p, children }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {p.phone}
+                  {fmtPhone(p.phone)}
                 </a>
               </>
             )}

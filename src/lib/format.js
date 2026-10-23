@@ -52,6 +52,17 @@ export function toIntlPhone(phone) {
   return digits
 }
 
+/** South African numbers shown one way: +27665368661 / 0665368661 -> 066 536 8661. Others unchanged. */
+export function fmtPhone(phone) {
+  const intl = toIntlPhone(phone)
+  if (!/^27[0-9]{9}$/.test(intl)) return phone || ''
+  const local = '0' + intl.slice(2)
+  return local.slice(0, 3) + ' ' + local.slice(3, 6) + ' ' + local.slice(6)
+}
+
+/** A tap-to-call link for any number as typed. */
+export const telLink = phone => 'tel:' + String(phone || '').replace(/[^0-9+]/g, '')
+
 /** A WhatsApp link to someone else's number (not Royal Tiara's). */
 export function waLinkTo(phone, text) {
   const number = toIntlPhone(phone)

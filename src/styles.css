@@ -467,6 +467,9 @@ p { margin: 0; }
 .grow { flex: 1; }
 .min0 { min-width: 0; }
 .flex-wrap { flex-wrap: wrap; }
+.ship-badge { height: 20px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; letter-spacing: .05em; background: var(--tint); color: var(--accent-deep); }
+.ship-pudo { background: #e3edf8; color: #1f4f86; }
+.ship-paxi { background: #fde8d2; color: #a14a06; }
 .pickup-line { font-size: 13.5px; font-weight: 600; color: var(--accent-deep); }
 .tracking-line { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); padding: 10px 14px; border-radius: 14px; background: var(--ground); border: 1px solid var(--line); }
 .tracking-line strong { color: var(--ink); }
