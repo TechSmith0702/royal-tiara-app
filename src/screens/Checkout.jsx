@@ -29,7 +29,7 @@ const PICKUP = {
   pudo: {
     label: 'PUDO locker location',
     short: 'the PUDO locker',
-    placeholder: 'e.g. Meyerton Mall',
+    placeholder: 'e.g. Town Square at Newmarket, Alberton',
   },
   paxi: {
     label: 'PAXI point location',
