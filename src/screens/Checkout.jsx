@@ -3,11 +3,10 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { clearCart, useCart } from '../lib/cart.js'
 import { DELIVERY_FEE, fetchActiveProducts, fetchFees, placeOrder } from '../lib/db.js'
-import { uploadProof } from '../lib/files.js'
 import { goToPayfast, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
-import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx'
+import { BackButton, Loading, Segmented } from '../components/ui.jsx'
 
 // Someone else receiving the order: the courier needs their name, number and address.
 const PERSON_FIELDS = [
@@ -52,7 +51,6 @@ export default function Checkout() {
   const cart = useCart(user.id, products, fees ? fees.delivery : DELIVERY_FEE)
   const placed = useRef(false)
   const [method, setMethod] = useState('eft')
-  const [proof, setProof] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [deliverTo, setDeliverTo] = useState('me')
@@ -65,11 +63,6 @@ export default function Checkout() {
 
   const first = cart.lines[0] ? cart.lines[0].product.name : ''
   const itemsLabel = cart.lines.length > 1 ? first + ' + ' + (cart.lines.length - 1) + ' more' : first
-
-  const attach = async file => {
-    const stored = await uploadProof(user.id, file)
-    setProof(stored)
-  }
 
   const field = f => (
     <label key={f.key} className="field-label">
@@ -129,7 +122,7 @@ export default function Checkout() {
     }
     setBusy(true)
     try {
-      const order = await placeOrder(cart.items, method, method === 'eft' ? proof : null, deliver)
+      const order = await placeOrder(cart.items, method, null, deliver)
       placed.current = true
       clearCart(user.id)
       if (method === 'card') {
@@ -233,23 +226,7 @@ export default function Checkout() {
             </p>
           )}
 
-          {method === 'eft' ? (
-            proof ? (
-              <div className="proof-ok">
-                <span className="check-sm">&#10003;</span>
-                <div className="grow min0">
-                  <div className="proof-ok-name">{proof.name}</div>
-                  <div className="proof-ok-sub">Attached &middot; Royal Tiara verifies once it reflects</div>
-                </div>
-                <button type="button" className="text-btn" onClick={() => setProof(null)}>Remove</button>
-              </div>
-            ) : (
-              <FilePicker className="upload-box" onPicked={attach}>
-                <span className="upload-title">Upload proof of payment</span>
-                <span className="upload-sub">Photo or PDF &middot; you can also add it later</span>
-              </FilePicker>
-            )
-          ) : (
+          {method === 'card' && (
             <div className="payfast-note">
               <span className="payfast-badge">Pay<span>Fast</span></span>
               <span className="grow">
