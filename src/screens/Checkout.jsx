@@ -11,15 +11,35 @@ import BankDetails from '../components/BankDetails.jsx'
 import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx'
 
 // Someone else receiving the order: the courier needs their name, number and address.
-const DELIVER_FIELDS = [
+const PERSON_FIELDS = [
   { key: 'name', label: 'Their name', short: 'their name', autoComplete: 'off' },
   { key: 'phone', label: 'Their phone number', short: 'their phone number', type: 'tel', inputMode: 'tel', autoComplete: 'off' },
+]
+// To their door, by The Courier Guy.
+const ADDRESS_FIELDS = [
   { key: 'line1', label: 'Street address', short: 'the street address', autoComplete: 'off' },
   { key: 'suburb', label: 'Suburb', short: 'the suburb', autoComplete: 'off' },
   { key: 'city', label: 'City / Town', short: 'the city or town', autoComplete: 'off' },
   { key: 'province', label: 'Province', short: 'the province', autoComplete: 'off' },
   { key: 'postal', label: 'Postal code', short: 'the postal code', inputMode: 'numeric', maxLength: 4, autoComplete: 'off' },
 ]
+// Or collected from a pickup point they choose on the service's own map.
+const PICKUP = {
+  pudo: {
+    label: 'Which PUDO locker?',
+    short: 'the PUDO locker',
+    finder: 'https://www.pudo.co.za',
+    find: 'Find a PUDO locker',
+    hint: "Type the locker's name as it shows on the PUDO map.",
+  },
+  paxi: {
+    label: 'Which PAXI point?',
+    short: 'the PAXI point',
+    finder: 'https://www.paxi.co.za/paxi-points',
+    find: 'Find a PAXI point',
+    hint: 'Type the store (PEP or Tekkie Town) and its PAXI point code, shown on the sign in the store window.',
+  },
+}
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
 const POSTAL_OK = /^[0-9]{4}$/
 
@@ -35,7 +55,9 @@ export default function Checkout() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [deliverTo, setDeliverTo] = useState('me')
-  const [other, setOther] = useState({ name: '', phone: '', line1: '', suburb: '', city: '', province: '', postal: '' })
+  const [other, setOther] = useState({ name: '', phone: '', line1: '', suburb: '', city: '', province: '', postal: '', point: '' })
+  const [way, setWay] = useState('door')          // 'door' or 'branch'
+  const [service, setService] = useState('pudo')  // which branch service
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (!cart.lines.length && !placed.current) return <Navigate to="/cart" replace />
@@ -48,13 +70,31 @@ export default function Checkout() {
     setProof(stored)
   }
 
+  const field = f => (
+    <label key={f.key} className="field-label">
+      {f.label}
+      <input
+        className="field field-sm"
+        type={f.type || 'text'}
+        inputMode={f.inputMode}
+        maxLength={f.maxLength}
+        autoComplete={f.autoComplete}
+        value={other[f.key]}
+        onChange={e => setOther(prev => ({ ...prev, [f.key]: e.target.value }))}
+      />
+    </label>
+  )
+
   const place = async () => {
     setError('')
     let deliver = null
     if (deliverTo === 'other') {
       const typed = {}
-      DELIVER_FIELDS.forEach(f => { typed[f.key] = other[f.key].trim() })
-      const missing = DELIVER_FIELDS.filter(f => !typed[f.key]).map(f => f.short)
+      Object.keys(other).forEach(k => { typed[k] = other[k].trim() })
+      const needed = way === 'door'
+        ? [...PERSON_FIELDS, ...ADDRESS_FIELDS]
+        : [...PERSON_FIELDS, { key: 'point', short: PICKUP[service].short }]
+      const missing = needed.filter(f => !typed[f.key]).map(f => f.short)
       if (missing.length) {
         setError('Please fill in ' + missing.join(', ') + ' for the delivery.')
         return
@@ -63,17 +103,20 @@ export default function Checkout() {
         setError('That phone number does not look right.')
         return
       }
-      if (!POSTAL_OK.test(typed.postal)) {
+      if (way === 'door' && !POSTAL_OK.test(typed.postal)) {
         setError('The postal code must be 4 digits.')
         return
       }
-      // Stored as two lines, like the address on an account: "Roodekop, Germiston, Gauteng, 1401".
-      deliver = {
-        name: typed.name,
-        phone: typed.phone,
-        line1: typed.line1,
-        line2: [typed.suburb, typed.city, typed.province, typed.postal].join(', '),
-      }
+      deliver = way === 'door'
+        ? {
+          name: typed.name,
+          phone: typed.phone,
+          method: 'door',
+          line1: typed.line1,
+          // Stored as two lines, like the address on an account: "Roodekop, Germiston, Gauteng, 1401".
+          line2: [typed.suburb, typed.city, typed.province, typed.postal].join(', '),
+        }
+        : { name: typed.name, phone: typed.phone, method: service, point: typed.point }
     } else if (!(user.address && user.address.line1)) {
       setError('Your account has no delivery address. Add it under Account, or choose "Anyone else".')
       return
@@ -130,20 +173,43 @@ export default function Checkout() {
             </div>
           ) : (
             <div className="stack gap-10">
-              {DELIVER_FIELDS.map(f => (
-                <label key={f.key} className="field-label">
-                  {f.label}
-                  <input
-                    className="field field-sm"
-                    type={f.type || 'text'}
-                    inputMode={f.inputMode}
-                    maxLength={f.maxLength}
-                    autoComplete={f.autoComplete}
-                    value={other[f.key]}
-                    onChange={e => setOther(prev => ({ ...prev, [f.key]: e.target.value }))}
+              {PERSON_FIELDS.map(field)}
+              <div className="field-label">How should it get there?</div>
+              <Segmented
+                value={way}
+                onChange={setWay}
+                options={[{ value: 'door', label: 'To their door' }, { value: 'branch', label: 'Collect at a branch' }]}
+              />
+              {way === 'door' ? (
+                <>
+                  <p className="hint mb-0">Delivered by The Courier Guy.</p>
+                  {ADDRESS_FIELDS.map(field)}
+                </>
+              ) : (
+                <>
+                  <Segmented
+                    value={service}
+                    onChange={setService}
+                    options={[{ value: 'pudo', label: 'PUDO locker' }, { value: 'paxi', label: 'PAXI point' }]}
                   />
-                </label>
-              ))}
+                  <label className="field-label">
+                    {PICKUP[service].label}
+                    <input
+                      className="field field-sm"
+                      autoComplete="off"
+                      maxLength={160}
+                      value={other.point}
+                      onChange={e => setOther(prev => ({ ...prev, point: e.target.value }))}
+                    />
+                  </label>
+                  <p className="hint mb-0">
+                    {PICKUP[service].hint}{' '}
+                    <a className="link-inline" href={PICKUP[service].finder} target="_blank" rel="noreferrer">
+                      {PICKUP[service].find}
+                    </a>
+                  </p>
+                </>
+              )}
             </div>
           )}
         </section>

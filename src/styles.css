@@ -467,6 +467,7 @@ p { margin: 0; }
 .grow { flex: 1; }
 .min0 { min-width: 0; }
 .flex-wrap { flex-wrap: wrap; }
+.pickup-line { font-size: 13.5px; font-weight: 600; color: var(--accent-deep); }
 .tracking-line { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); padding: 10px 14px; border-radius: 14px; background: var(--ground); border: 1px solid var(--line); }
 .tracking-line strong { color: var(--ink); }
 .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-9 { gap: 9px; } .gap-10 { gap: 10px; } .gap-11 { gap: 11px; }

@@ -1,5 +1,21 @@
 import { fmtDate } from './format.js'
 
+// How an order travels. "door" is The Courier Guy; the others are collected
+// from a pickup point the distributor typed at checkout.
+export const DELIVERY_METHODS = {
+  door: { courier: 'The Courier Guy', pickup: false },
+  pudo: { courier: 'PUDO', pickup: true, place: 'PUDO locker' },
+  paxi: { courier: 'PAXI', pickup: true, place: 'PAXI point' },
+}
+export const deliveryMethod = order => DELIVERY_METHODS[order.deliveryMethod] || DELIVERY_METHODS.door
+
+/** Where it goes, as lines to show: an address, or the pickup point. */
+export function deliveryLines(order) {
+  const m = deliveryMethod(order)
+  if (m.pickup) return ['Collect from ' + m.place + ': ' + order.pickupPoint]
+  return [order.address.line1, order.address.line2].filter(Boolean)
+}
+
 /**
  * Everything the distributor and admin screens show about an order is worked
  * out here, so the tracking always mirrors what the admin has done.

@@ -4,12 +4,12 @@ import { adminAdvanceOrder, adminSetTracking, cancelOrder, fetchApplications, fe
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { fmtDate, R, waLinkTo } from '../../lib/format.js'
-import { orderState, unitsIn } from '../../lib/orders.js'
+import { deliveryLines, deliveryMethod, orderState, unitsIn } from '../../lib/orders.js'
 import { ErrorNote, Loading } from '../../components/ui.jsx'
 import { useConfirm } from '../../components/ConfirmDialog.jsx'
 
 // Suggestions only: any courier name can be typed.
-const COURIERS = ['The Courier Guy', 'PUDO', 'Pargo', 'PostNet', 'Aramex', 'RAM', 'DSV']
+const COURIERS = ['The Courier Guy', 'PUDO', 'PAXI']
 
 // Which list an order belongs in. "Active" is everything still needing work.
 const FILTERS = [
@@ -117,11 +117,14 @@ export default function Sales() {
 function SaleCard({ order, phone, onDone, onProblem }) {
   const [busy, setBusy] = useState(false)
   const [ask, dialog] = useConfirm()
-  const [courier, setCourier] = useState(order.courier)
+  // Filled in from how the order travels; any courier name can still be typed.
+  const startCourier = order.courier || deliveryMethod(order).courier
+  const [courier, setCourier] = useState(startCourier)
   const [tracking, setTracking] = useState(order.trackingNumber)
   const [editTracking, setEditTracking] = useState(false)
   const st = orderState(order, 'admin')
   const trackingChanged = courier.trim() !== order.courier || tracking.trim() !== order.trackingNumber
+  const pickup = deliveryMethod(order).pickup
 
   const pay = st.cancelled
     ? { label: st.waybill, cls: 'pay-waiting' }
@@ -269,9 +272,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
           <div className="deliver-to">
             <span className="kicker muted">Deliver to</span>
             <div>{order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}</div>
-            <div className="muted-sm">
-              {order.address.line1}{order.address.line2 ? ', ' + order.address.line2 : ''}
-            </div>
+            <div className={pickup ? 'pickup-line' : 'muted-sm'}>{deliveryLines(order).join(', ')}</div>
             {order.deliverTo === 'other' && (
               <>
                 <div className="muted-sm">
@@ -338,7 +339,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
                 type="button"
                 className="btn btn-outline btn-44 grow"
                 disabled={busy}
-                onClick={() => { setCourier(order.courier); setTracking(order.trackingNumber); setEditTracking(false) }}
+                onClick={() => { setCourier(startCourier); setTracking(order.trackingNumber); setEditTracking(false) }}
               >
                 Cancel
               </button>

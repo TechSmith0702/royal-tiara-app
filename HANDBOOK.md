@@ -228,6 +228,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 18. `migration-minimum-and-featured.sql`
 19. `migration-person-details.sql`
 20. `migration-deliver-to-and-tracking.sql`
+21. `migration-pickup-points.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:
@@ -535,10 +536,16 @@ Live at https://royaltiara.netlify.app and working end to end, with real money:
 
 Checkout has a "Deliver to" choice: **Me** (the address on the account,
 not changeable at checkout; it can still be changed under Account) or
-**Anyone else** (name, phone and address typed for that order). Admin Sales
-and the invoice show who it goes to, and who ordered it.
+**Anyone else** (their name and phone, then either **to their door** by The
+Courier Guy, with street, suburb, city, province and postal code, or
+**collect at a branch**: a PUDO locker or PAXI point they type in, with links
+to PUDO's and PAXI's own maps). Admin Sales and the invoice show who it goes
+to and who ordered it, and the tracking box fills in the courier (The Courier
+Guy, PUDO or PAXI). One delivery fee for every option. The app does not book
+the courier: the admin books it on the courier's website and types the
+tracking number in Sales.
 
-All 20 migrations have been run on the live database (check with section 7
+All 21 migrations have been run on the live database (check with section 7
 if in doubt).
 
 ### Still to do

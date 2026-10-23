@@ -105,6 +105,8 @@ const mapOrder = row => ({
   deliverTo: row.deliver_to || 'me',
   recipientName: row.recipient_name || '',
   recipientPhone: row.recipient_phone || '',
+  deliveryMethod: row.delivery_method || 'door',
+  pickupPoint: row.pickup_point || '',
   courier: row.courier || '',
   trackingNumber: row.tracking_number || '',
   createdAt: row.created_at,

@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom'
 import { fetchOrders } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { fmtDate, R, WHATSAPP_DISPLAY } from '../lib/format.js'
-import { orderState } from '../lib/orders.js'
+import { deliveryLines, orderState } from '../lib/orders.js'
 import { isNativeApp } from '../lib/platform.js'
 import { BackButton, Loading } from '../components/ui.jsx'
 import BankDetails from '../components/BankDetails.jsx'
@@ -55,8 +55,7 @@ export default function InvoiceView() {
                   <div className="muted-sm">{order.recipientName} · {order.recipientPhone}</div>
                 </>
               ) : null}
-              <div className="muted-sm">{order.address.line1}</div>
-              <div className="muted-sm">{order.address.line2}</div>
+              {deliveryLines(order).map((line, i) => <div key={i} className="muted-sm">{line}</div>)}
             </div>
             <div className="right">
               <div className="kicker muted">Order</div>

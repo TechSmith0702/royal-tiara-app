@@ -6,7 +6,7 @@ import { attachProof, cancelOrder, confirmReceipt, fetchOrders, switchToEft } fr
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
 import { fmtDate, R } from '../lib/format.js'
-import { orderState } from '../lib/orders.js'
+import { deliveryLines, orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 import BankDetails, { Copyable } from '../components/BankDetails.jsx'
@@ -262,8 +262,7 @@ export default function OrderDetail() {
           </div>
           {order.deliverTo === 'other' && <div className="muted-sm">{order.recipientPhone}</div>}
           <div className="addr-lines">
-            {order.address.line1}
-            {order.address.line2 && <><br />{order.address.line2}</>}
+            {deliveryLines(order).map((line, i) => <div key={i}>{line}</div>)}
           </div>
         </section>
 
