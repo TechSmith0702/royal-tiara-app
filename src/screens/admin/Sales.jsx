@@ -283,6 +283,44 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         <span className={'pay-label ' + pay.cls}>{pay.label}</span>
       </div>
 
+      <div className="deliver-to">
+        <div className="row between center gap-10">
+          <span className="kicker muted">Deliver to</span>
+          <button type="button" className="copy-btn" onClick={copyDelivery}>
+            {copied ? 'Copied ✓' : 'Copy details'}
+          </button>
+        </div>
+        <div>{order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}</div>
+        <div className={pickup ? 'pickup-line' : 'muted-sm'}>{deliveryLines(order).join(', ')}</div>
+        {order.deliverTo === 'other' && (
+          <>
+            <div className="muted-sm">
+              <a className="link-inline" href={telLink(order.recipientPhone)}>{fmtPhone(order.recipientPhone)}</a>
+              {' · '}
+              <a className="link-inline" href={waLinkTo(order.recipientPhone, 'Hi, this is Royal Tiara about a delivery for you (order ' + order.id + ').')} target="_blank" rel="noreferrer">
+                WhatsApp
+              </a>
+            </div>
+            {order.recipientEmail && (
+              <div className="muted-sm">
+                <a className="link-inline" href={'mailto:' + order.recipientEmail}>{order.recipientEmail}</a>
+              </div>
+            )}
+            <span className="kicker muted mt-10">Ordered by</span>
+            <div>{order.business || order.customer}</div>
+          </>
+        )}
+        {phone && (
+          <div className="muted-sm">
+            <a className="link-inline" href={telLink(phone)}>{fmtPhone(phone)}</a>
+            {' · '}
+            <a className="link-inline" href={waLinkTo(phone, 'Hi, this is Royal Tiara about order ' + order.id + '.')} target="_blank" rel="noreferrer">
+              WhatsApp
+            </a>
+          </div>
+        )}
+      </div>
+
       <details className="items-details">
         <summary>Items to pack &middot; {unitsIn(order)} units</summary>
         <div className="stack gap-6 mt-10">
@@ -292,43 +330,6 @@ function SaleCard({ order, phone, onDone, onProblem }) {
               <strong>&times;{l.qty}</strong>
             </div>
           ))}
-          <div className="deliver-to">
-            <div className="row between center gap-10">
-              <span className="kicker muted">Deliver to</span>
-              <button type="button" className="copy-btn" onClick={copyDelivery}>
-                {copied ? 'Copied ✓' : 'Copy details'}
-              </button>
-            </div>
-            <div>{order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}</div>
-            <div className={pickup ? 'pickup-line' : 'muted-sm'}>{deliveryLines(order).join(', ')}</div>
-            {order.deliverTo === 'other' && (
-              <>
-                <div className="muted-sm">
-                  <a className="link-inline" href={telLink(order.recipientPhone)}>{fmtPhone(order.recipientPhone)}</a>
-                  {' · '}
-                  <a className="link-inline" href={waLinkTo(order.recipientPhone, 'Hi, this is Royal Tiara about a delivery for you (order ' + order.id + ').')} target="_blank" rel="noreferrer">
-                    WhatsApp
-                  </a>
-                </div>
-                {order.recipientEmail && (
-                  <div className="muted-sm">
-                    <a className="link-inline" href={'mailto:' + order.recipientEmail}>{order.recipientEmail}</a>
-                  </div>
-                )}
-                <span className="kicker muted mt-10">Ordered by</span>
-                <div>{order.business || order.customer}</div>
-              </>
-            )}
-            {phone && (
-              <div className="muted-sm">
-                <a className="link-inline" href={telLink(phone)}>{fmtPhone(phone)}</a>
-                {' · '}
-                <a className="link-inline" href={waLinkTo(phone, 'Hi, this is Royal Tiara about order ' + order.id + '.')} target="_blank" rel="noreferrer">
-                  WhatsApp
-                </a>
-              </div>
-            )}
-          </div>
         </div>
       </details>
 
