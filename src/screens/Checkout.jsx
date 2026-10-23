@@ -29,7 +29,7 @@ const PICKUP = {
   pudo: {
     label: 'PUDO locker location',
     short: 'the PUDO locker',
-    placeholder: 'e.g. Town Square at Newmarket, Alberton',
+    placeholder: 'e.g. The Courier Guy Lifestyle Centre Benoni Locker',
     finder: 'https://www.pudo.co.za',
     find: 'Find a PUDO locker',
   },
