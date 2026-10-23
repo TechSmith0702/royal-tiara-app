@@ -272,7 +272,9 @@ function SaleCard({ order, phone, onDone, onProblem }) {
           <div className="sale-id">{order.id} &middot; {order.business || order.customer}</div>
           <div className="row-sub row center gap-8">
             {fmtDate(order.createdAt)}
-            <span className={'ship-badge ship-' + order.deliveryMethod}>{deliveryMethod(order).badge}</span>
+            {order.deliverTo === 'other' && (
+              <span className={'ship-badge ship-' + order.deliveryMethod}>{deliveryMethod(order).badge}</span>
+            )}
           </div>
         </div>
         <span className="sale-total">{R(order.total)}</span>
