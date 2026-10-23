@@ -29,10 +29,12 @@ const PICKUP = {
   pudo: {
     label: 'PUDO locker location',
     short: 'the PUDO locker',
+    placeholder: 'e.g. Engen Roodekop locker',
   },
   paxi: {
     label: 'PAXI point location',
     short: 'the PAXI point',
+    placeholder: 'e.g. PEP Germiston Mall',
   },
 }
 const PHONE_OK = /^\+?[0-9 ()-]{9,20}$/
@@ -198,6 +200,7 @@ export default function Checkout() {
                       className="field field-sm"
                       autoComplete="off"
                       maxLength={160}
+                      placeholder={PICKUP[service].placeholder}
                       value={other.point}
                       onChange={e => setOther(prev => ({ ...prev, point: e.target.value }))}
                     />
