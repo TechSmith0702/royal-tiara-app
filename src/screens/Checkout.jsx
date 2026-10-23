@@ -24,20 +24,16 @@ const ADDRESS_FIELDS = [
   { key: 'province', label: 'Province', short: 'the province', autoComplete: 'off' },
   { key: 'postal', label: 'Postal code', short: 'the postal code', inputMode: 'numeric', maxLength: 4, autoComplete: 'off' },
 ]
-// Or collected from a pickup point they choose on the service's own map.
+// Or collected from a PUDO locker or PAXI point they type in.
 const PICKUP = {
   pudo: {
-    label: 'Which PUDO locker?',
+    label: 'PUDO locker location',
     short: 'the PUDO locker',
-    finder: 'https://www.pudo.co.za',
-    find: 'Find a PUDO locker',
     hint: "Type the locker's name as it shows on the PUDO map.",
   },
   paxi: {
-    label: 'Which PAXI point?',
+    label: 'PAXI point location',
     short: 'the PAXI point',
-    finder: 'https://www.paxi.co.za/paxi-points',
-    find: 'Find a PAXI point',
     hint: 'Type the store (PEP or Tekkie Town) and its PAXI point code, shown on the sign in the store window.',
   },
 }
@@ -208,12 +204,7 @@ export default function Checkout() {
                       onChange={e => setOther(prev => ({ ...prev, point: e.target.value }))}
                     />
                   </label>
-                  <p className="hint mb-0">
-                    {PICKUP[service].hint}{' '}
-                    <a className="link-inline" href={PICKUP[service].finder} target="_blank" rel="noreferrer">
-                      {PICKUP[service].find}
-                    </a>
-                  </p>
+                  <p className="hint mb-0">{PICKUP[service].hint}</p>
                 </>
               )}
             </div>
