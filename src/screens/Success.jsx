@@ -3,6 +3,7 @@ import { fetchOrders } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
 import { Loading } from '../components/ui.jsx'
+import BankDetails from '../components/BankDetails.jsx'
 
 export default function Success() {
   const { id } = useParams()
@@ -17,7 +18,7 @@ export default function Success() {
     ? 'Royal Tiara will confirm your card payment and start packing.'
     : order.proof
       ? 'Your proof of payment is with us - we will confirm as soon as it reflects.'
-      : 'Pay by bank transfer using ' + order.id + ' as the reference, then upload your proof of payment. The bank details are on the order page.'
+      : 'Pay by bank transfer with the details below, using ' + order.id + ' as the reference. Then tap View Order to upload your proof of payment.'
 
   return (
     <div className="screen screen-dark">
@@ -27,6 +28,7 @@ export default function Success() {
           <h2 className="success-title">Order placed</h2>
           <p className="success-lede">Order {order.id} &middot; {R(order.total)}. {note}</p>
         </div>
+        {order.payMethod === 'eft' && !order.proof && order.payStatus !== 'verified' && <BankDetails amount={order.total} reference={order.id} />}
         <div className="invoice-strip">
           <span>Invoice</span><strong>{order.invoice} &middot; issued</strong>
         </div>

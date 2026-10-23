@@ -24,8 +24,8 @@ export function Copyable({ value }) {
 }
 
 /**
- * Where to send a bank transfer. Without a reference yet (at checkout), it
- * says the order number will be the reference.
+ * Where to send a bank transfer, with the order number as the reference.
+ * Without a reference it says the order number will be the reference.
  */
 export default function BankDetails({ amount, reference }) {
   const { data: bank, loading } = useLive(fetchBankDetails, [], [])

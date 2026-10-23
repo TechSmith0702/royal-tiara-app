@@ -347,7 +347,7 @@ p { margin: 0; }
 
 /* ---------- success ---------- */
 .screen-dark { background: var(--ink); color: var(--cream); padding: calc(var(--top) + 40px) 26px calc(var(--bottom) + 30px); }
-.success-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.success-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; justify-content: safe center; gap: 20px; }
 .check-big { width: 82px; height: 82px; border-radius: 999px; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 36px; color: #fff; }
 .success-title { font-size: 32px; line-height: 1.08; margin-bottom: 8px; }
 .success-lede { font-size: 15px; line-height: 1.6; color: rgba(245, 234, 216, .72); }

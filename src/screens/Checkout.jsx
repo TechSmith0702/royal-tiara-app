@@ -7,7 +7,6 @@ import { uploadProof } from '../lib/files.js'
 import { goToPayfast, isPayfastSandbox } from '../lib/payfast.js'
 import { useLive } from '../lib/live.js'
 import { R } from '../lib/format.js'
-import BankDetails from '../components/BankDetails.jsx'
 import { BackButton, FilePicker, Loading, Segmented } from '../components/ui.jsx'
 
 // Someone else receiving the order: the courier needs their name, number and address.
@@ -228,9 +227,10 @@ export default function Checkout() {
             options={[{ value: 'eft', label: 'Bank transfer' }, { value: 'card', label: 'Card' }]}
           />
 
-          {method === 'eft' && <BankDetails amount={cart.total} />}
           {method === 'eft' && (
-            <p className="hint mb-0">You will see your order number, your payment reference, once you place the order.</p>
+            <p className="hint mb-0">
+              You'll get Royal Tiara's bank details and your payment reference as soon as you place the order.
+            </p>
           )}
 
           {method === 'eft' ? (
