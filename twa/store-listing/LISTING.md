@@ -26,7 +26,7 @@ Order Royal Tiara hair care at trade prices, pay securely and track deliveries.
 Royal Tiara Trade is the ordering app for Royal Tiara's approved distributors and resellers. Order our hair-care range at distributor prices, pay securely, and follow every order until it reaches your door.
 
 HOW IT WORKS
-1. Apply for a trade account in the app. It only takes a few minutes.
+1. Sign up as a distributor in the app. It only takes a few minutes.
 2. Royal Tiara reviews applications within one working day.
 3. Pay the once-off joining fee by card or bank transfer. There are no monthly fees.
 4. Start ordering at distributor prices.
@@ -53,7 +53,7 @@ YOUR ACCOUNT, YOUR DATA
 • Your details are only used to run your trade account and deliver your orders, and are never sold
 • Delete your account at any time from the app
 
-Royal Tiara Trade is for trade customers in South Africa. Not a distributor yet? Download the app and tap "Apply for a trade account".
+Royal Tiara Trade is for trade customers in South Africa. Not a distributor yet? Download the app and tap "Sign up as a distributor".
 
 Questions? Email info@royaltiara.co.za or WhatsApp 075 222 5629.
 ```
@@ -101,7 +101,7 @@ https://royaltiara.netlify.app/privacy
 - Any other information:
 
 ```
-Royal Tiara Trade is a private ordering app for approved trade customers. Sign in with the test distributor account above to see the catalogue, cart, orders, invoices and chat. Card payments go to PayFast (real payments); there is no need to complete a payment to review the app. New users can tap "Apply for a trade account" to see the application form; applications are approved by Royal Tiara.
+Royal Tiara Trade is a private ordering app for approved trade customers. Sign in with the test distributor account above to see the catalogue, cart, orders, invoices and chat. Card payments go to PayFast (real payments); there is no need to complete a payment to review the app. New users can tap "Sign up as a distributor" to see the application form; applications are approved by Royal Tiara.
 ```
 
 **Content rating:** start the questionnaire.
@@ -174,7 +174,7 @@ account.
 ## Release notes for version 1.0.0 (max 500)
 
 ```
-First release of Royal Tiara Trade: apply for a trade account, order the Royal Tiara range at distributor prices, pay by card or bank transfer, track deliveries, view invoices and chat with Royal Tiara.
+First release of Royal Tiara Trade: sign up as a distributor, order the Royal Tiara range at distributor prices, pay by card or bank transfer, track deliveries, view invoices and chat with Royal Tiara.
 ```
 
 ---

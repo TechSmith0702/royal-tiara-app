@@ -82,7 +82,7 @@ export default function SignIn() {
           <button type="button" className="text-btn center-self" onClick={reset}>Forgot password?</button>
         </form>
 
-        <Link to="/apply" className="btn btn-sage">Apply for a trade account</Link>
+        <Link to="/apply" className="btn btn-sage">Sign up as a distributor</Link>
 
         <InstallCard />
       </div>

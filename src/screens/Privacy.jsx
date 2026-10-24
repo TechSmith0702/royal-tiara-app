@@ -53,7 +53,7 @@ export default function Privacy() {
 
       <h3>What we collect</h3>
       <ul>
-        <li><strong>Your account details:</strong> name, business name, email address, phone number and delivery address, which you give us when you apply for a trade account.</li>
+        <li><strong>Your account details:</strong> name, business name, email address, phone number and delivery address, which you give us when you sign up as a distributor.</li>
         <li><strong>Your password,</strong> stored in scrambled form. Nobody at {BUSINESS} can see it.</li>
         <li><strong>Your orders:</strong> what you ordered, the amounts, dates, delivery address and the order's progress.</li>
         <li><strong>Proof of payment</strong> files you upload for bank transfers.</li>
