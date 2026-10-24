@@ -11,7 +11,8 @@ export default function Pending() {
   const [params] = useSearchParams()
   const justConfirmed = params.get('confirmed') === '1'
   const { data: fees } = useLive(fetchFees, [], [])
-  const payJoiningByEft = user && !declined && user.joinPay === 'eft'
+  // Nothing to pay while the admin has the joining fee at R0.
+  const payJoiningByEft = user && !declined && user.joinPay === 'eft' && !(fees && fees.joining === 0)
   // Bank references allow about 20 characters.
   const joinReference = user ? ('JOIN ' + user.name).toUpperCase().slice(0, 20) : ''
 

@@ -39,7 +39,7 @@ All four use the same code (`src/`) and the same database.
 - mark orders packed, collected and delivered, and add the courier and tracking number (Sales: type them in before tapping "Mark collected by courier", or add/change them later). The distributor sees "Your tracking number is ..." on the order
 - chat with distributors
 - add products, change prices and photos, mark items out of stock
-- change the delivery fee and the joining fee (Admin → menu → Settings)
+- change the delivery fee and the joining fee (Admin → menu → Settings). **Joining fee 0 switches it off**: applicants see no fee anywhere and are unlocked as soon as they are approved. Put the amount back to switch it on for new applicants
 - change the bank details distributors pay into (Admin → menu → Settings → Bank details; every change notifies all admins)
 - set the monthly minimum a distributor must order to keep their discount (Admin → menu → Settings → Monthly minimum; 0 means none). New applicants tick that they accept it
 - choose and order the "Moving fast" products on the distributor home screen (Admin → Catalogue: the star on each product, and the arrows in the Moving fast list)

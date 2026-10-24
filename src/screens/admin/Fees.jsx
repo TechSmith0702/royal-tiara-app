@@ -77,6 +77,9 @@ export default function Fees() {
       <p className="hint mb-0">
         Now: {R(Number(form.delivery) || 0)} delivery &middot; {R(Number(form.joining) || 0)} to join.
         {Number(form.delivery) === 0 ? ' Delivery is free.' : ''}
+        {form.joining !== '' && Number(form.joining) === 0
+          ? ' No joining fee: applicants do not see one, and are unlocked as soon as you approve them.'
+          : ' Set the joining fee to 0 to switch it off; put the amount back to switch it on again.'}
       </p>
 
       {problem && <p className="form-error" role="alert">{problem}</p>}

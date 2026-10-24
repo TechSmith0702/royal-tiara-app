@@ -61,11 +61,21 @@ export default function JoinFee() {
         <div className="success-card stack gap-12">
           <h2 className="h3">Welcome, {first}!</h2>
           <p className="success-text mb-0">
-            Your trade account is approved. Pay the once-off joining fee to start ordering at distributor prices.
+            {fee === 0
+              ? 'Your trade account is approved. Royal Tiara will unlock ordering for you shortly.'
+              : 'Your trade account is approved. Pay the once-off joining fee to start ordering at distributor prices.'}
           </p>
         </div>
 
-        {confirming ? (
+        {fee === 0 ? (
+          <section className="card card-pad stack gap-10">
+            <div className="kicker muted">No joining fee</div>
+            <p className="body-muted mb-0">
+              There is no joining fee at the moment, so there is nothing to pay. If ordering is not unlocked soon, chat to
+              Royal Tiara.
+            </p>
+          </section>
+        ) : confirming ? (
           <section className="card card-pad stack gap-12" role="status">
             <div className="row center gap-10">
               <span className="spinner" aria-hidden="true" />
@@ -99,7 +109,7 @@ export default function JoinFee() {
           </section>
         )}
 
-        <details className="card card-pad items-details">
+        {fee !== 0 && <details className="card card-pad items-details">
           <summary>Prefer to pay by bank transfer?</summary>
           <div className="stack gap-10 mt-10">
             <p className="body-muted mb-0">
@@ -108,7 +118,7 @@ export default function JoinFee() {
             </p>
             <BankDetails amount={fee} reference={reference} />
           </div>
-        </details>
+        </details>}
 
         <div className="card card-pad stack gap-10">
           <div className="kicker muted">Questions?</div>

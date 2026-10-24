@@ -26,6 +26,8 @@ export default function Apply() {
   const { data: fees, error: feesError } = useLive(fetchFees, ['settings'], [])
   // Shown once the real amount has loaded; the built-in amount is only a fallback if it cannot load.
   const joiningFee = fees ? fees.joining : feesError ? JOINING_FEE : null
+  // The admin sets the joining fee to R0 to switch it off: nothing about it shows.
+  const noFee = joiningFee === 0
   // The monthly minimum is set by the admin (Settings). When there is one, it is
   // part of the single "I agree" tick box, and its wording is stored with the login.
   const minimumClause = fees && fees.monthlyMin > 0
@@ -107,9 +109,9 @@ export default function Apply() {
     try {
       // Stored as the account's second address line, e.g. "Roodekop, Germiston, Gauteng, 1401".
       const town = [clean.suburb, clean.city, clean.province, clean.postal].join(', ')
-      const result = await signUp({ ...clean, town, joinPay, termsVersion: TERMS_VERSION, monthlyMinimum: minimumText })
+      const result = await signUp({ ...clean, town, joinPay: noFee ? 'eft' : joinPay, termsVersion: TERMS_VERSION, monthlyMinimum: minimumText })
       // Kept in memory only, to sign them in once they have confirmed their email.
-      setDone({ joinPay, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
+      setDone({ joinPay, noFee, needsEmailConfirmation: result.needsEmailConfirmation, email: clean.email, password: clean.password })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -134,11 +136,11 @@ export default function Apply() {
                 ? 'Please confirm your email address first - we sent you a link. After that, Royal Tiara reviews trade accounts within one working day.'
                 : 'Royal Tiara reviews trade accounts within one working day. You can chat to us in the app in the meantime.'}
             </p>
-            <p className="success-text">
+            {!done.noFee && <p className="success-text">
               {done.joinPay === 'card'
                 ? 'Your ' + R(joiningFee ?? JOINING_FEE) + ' joining fee is payable once your account is approved.'
                 : 'Send your ' + R(joiningFee ?? JOINING_FEE) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
-            </p>
+            </p>}
             {done.needsEmailConfirmation && (
               <>
                 <button type="button" className="btn btn-primary" disabled={checking} onClick={() => trySignIn(true)}>
@@ -176,7 +178,7 @@ export default function Apply() {
               </label>
             ))}
 
-            <div className="card-dark stack gap-12 mt-4">
+            {!noFee && <div className="card-dark stack gap-12 mt-4">
               <div className="row between baseline gap-12">
                 <span className="kicker on-dark">Once-off joining fee</span>
                 <span className="fee">{joiningFee == null ? '…' : R(joiningFee)}</span>
@@ -195,7 +197,7 @@ export default function Apply() {
                   ? 'You will pay securely on PayFast once your account is approved.'
                   : 'Transfer the fee and send proof on WhatsApp - we activate once it reflects.'}
               </div>
-            </div>
+            </div>}
 
             <label className="agree-row">
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />

@@ -46,12 +46,19 @@ export default function Terms() {
       </ul>
 
       <h3>2. Joining fee</h3>
-      <p>
-        A once-off joining fee, shown on the application, activates your account. There are no monthly fees.
-        {JOINING_FEE_REFUNDABLE
-          ? ' If your application is not approved, the fee is refunded in full.'
-          : ' The joining fee is not refundable once your account has been approved. If your application is not approved, any joining fee you paid is refunded in full.'}
-      </p>
+      {fees && fees.joining === 0 ? (
+        <p>
+          There is currently no joining fee, and there are no monthly fees. If {BUSINESS} introduces a joining fee, it
+          is shown on the application and applies only to new applicants.
+        </p>
+      ) : (
+        <p>
+          A once-off joining fee, shown on the application, activates your account. There are no monthly fees.
+          {JOINING_FEE_REFUNDABLE
+            ? ' If your application is not approved, the fee is refunded in full.'
+            : ' The joining fee is not refundable once your account has been approved. If your application is not approved, any joining fee you paid is refunded in full.'}
+        </p>
+      )}
 
       <h3>3. Prices</h3>
       <ul>
