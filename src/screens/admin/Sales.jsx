@@ -13,6 +13,7 @@ const COURIERS = ['The Courier Guy', 'PUDO', 'PAXI']
 
 // Which list an order belongs in. "Active" is everything still needing work.
 const FILTERS = [
+  { value: 'all', label: 'All', test: () => true },
   { value: 'active', label: 'Active', test: o => o.fulfil !== 'delivered' && o.fulfil !== 'cancelled' },
   { value: 'verify', label: 'To verify', test: o => o.payStatus !== 'verified' && !!o.proof && o.fulfil !== 'cancelled' },
   { value: 'pack', label: 'To pack', test: o => o.payStatus === 'verified' && !o.fulfil },
