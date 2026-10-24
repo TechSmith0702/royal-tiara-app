@@ -36,6 +36,7 @@ All four use the same code (`src/`) and the same database.
 
 - approve or decline trade applications, put a distributor on hold
 - verify bank-transfer payments (card payments verify themselves)
+- open, print or save as PDF the invoice of any order (Sales → **Invoice** on the card; the same invoice the distributor sees, including cancelled ones marked Cancelled). Distributors don't see invoices for cancelled orders
 - mark orders packed, collected and delivered, and add the courier and tracking number (Sales: type them in before tapping "Mark collected by courier", or add/change them later). The distributor sees "Your tracking number is ..." on the order
 - chat with distributors
 - add products, change prices and photos, mark items out of stock

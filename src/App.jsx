@@ -154,6 +154,7 @@ export default function App() {
           <Route path="/admin/person/:id" element={<Person />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/chat/:id" element={<AdminConversation />} />
+          <Route path="/admin/invoice/:id" element={<InvoiceView admin />} />
         </Route>
 
         <Route path="*" element={<Navigate to={home} replace />} />

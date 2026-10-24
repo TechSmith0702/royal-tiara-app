@@ -15,7 +15,8 @@ export default function Invoices() {
   const { data: orders, loading, error, refresh } = useLive(fetchOrders, ['orders'], [])
   const [problem, setProblem] = useState('')
 
-  const list = orders || []
+  // A cancelled order owes nothing, so it has no invoice here (it stays under Orders).
+  const list = (orders || []).filter(o => o.fulfil !== 'cancelled')
   const unpaid = list.filter(o => o.payStatus !== 'verified' && o.fulfil !== 'cancelled')
   const outstanding = unpaid.reduce((t, o) => t + o.total, 0)
 

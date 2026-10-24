@@ -336,9 +336,12 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         </div>
       </details>
 
-      {order.proof && (
-        <button type="button" className="btn btn-outline btn-44" onClick={view}>View proof of payment</button>
-      )}
+      <div className="row gap-9">
+        <Link to={'/admin/invoice/' + order.id} className="btn btn-outline btn-44 grow">Invoice</Link>
+        {order.proof && (
+          <button type="button" className="btn btn-outline btn-44 grow" onClick={view}>View proof</button>
+        )}
+      </div>
       {!st.verified && (
         <button type="button" className="btn btn-sage btn-46" disabled={busy} onClick={() => advance('verify')}>
           {st.cancelled ? 'Payment arrived - verify and restore' : 'Verify payment'}

@@ -7,21 +7,24 @@ import { isNativeApp } from '../lib/platform.js'
 import { BackButton, Loading } from '../components/ui.jsx'
 import BankDetails from '../components/BankDetails.jsx'
 
-export default function InvoiceView() {
+/** The invoice. The admin opens the same one from Sales (admin), including cancelled ones. */
+export default function InvoiceView({ admin = false }) {
   const { id } = useParams()
   const { data: orders, loading } = useLive(fetchOrders, ['orders'], [])
 
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
 
   const order = (orders || []).find(o => o.id === id)
-  if (!order) return <Navigate to="/invoices" replace />
+  if (!order) return <Navigate to={admin ? '/admin?tab=sales' : '/invoices'} replace />
 
-  const st = orderState(order)
+  const st = orderState(order, admin ? 'admin' : undefined)
+  // Distributors have no invoice for a cancelled order; the order page says it was cancelled.
+  if (!admin && st.cancelled) return <Navigate to={'/orders/' + order.id} replace />
 
   return (
     <div className="screen">
       <div className="page-top row between center no-print">
-        <BackButton to="/invoices" />
+        <BackButton to={admin ? '/admin?tab=sales' : '/invoices'} />
         {/* Android's in-app browser has no print dialog, so the button would do nothing there. */}
         {!isNativeApp && (
           <button type="button" className="btn btn-dark btn-sm btn-inline" onClick={() => window.print()}>
@@ -94,7 +97,7 @@ export default function InvoiceView() {
             <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
           </div>
 
-          {order.payMethod === 'eft' && !st.verified && !st.cancelled && (
+          {!admin && order.payMethod === 'eft' && !st.verified && !st.cancelled && (
             <div className="stack gap-8">
               <div className="kicker muted">Payment details</div>
               <BankDetails amount={order.total} reference={order.id} />

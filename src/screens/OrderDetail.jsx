@@ -293,7 +293,7 @@ export default function OrderDetail() {
             // Still on its way: reordering makes no sense yet, so offer the way back.
             <Link to="/home" className="btn btn-primary btn-52 grow">Back to home</Link>
           )}
-          <Link to={'/invoices/' + order.id} className="btn btn-outline btn-52 grow">Invoice</Link>
+          {!st.cancelled && <Link to={'/invoices/' + order.id} className="btn btn-outline btn-52 grow">Invoice</Link>}
         </div>
       </div>
     </div>
