@@ -117,7 +117,7 @@ export default function Checkout() {
         }
         : { name: typed.name, phone: typed.phone, email: typed.email, method: service, point: typed.point }
     } else if (!(user.address && user.address.line1)) {
-      setError('Your account has no delivery address. Add it under Account, or choose "Anyone else".')
+      setError('Your account has no delivery address. Add it under Account, or choose "Someone else".')
       return
     }
     setBusy(true)
@@ -155,7 +155,7 @@ export default function Checkout() {
           <Segmented
             value={deliverTo}
             onChange={setDeliverTo}
-            options={[{ value: 'me', label: 'Me' }, { value: 'other', label: 'Anyone else' }]}
+            options={[{ value: 'me', label: 'Me' }, { value: 'other', label: 'Someone else' }]}
           />
           {deliverTo === 'me' ? (
             <div>
@@ -176,7 +176,7 @@ export default function Checkout() {
               <Segmented
                 value={way}
                 onChange={setWay}
-                options={[{ value: 'door', label: 'To their door' }, { value: 'branch', label: 'Collect at a branch' }]}
+                options={[{ value: 'door', label: 'To their door' }, { value: 'branch', label: 'Collect' }]}
               />
               {way === 'door' ? (
                 <>
