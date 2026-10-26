@@ -246,6 +246,19 @@ export async function switchToEft(orderId) {
 }
 
 /**
+ * Changes where an order goes, until it is packed. deliver: null for the 
+ * distributor's own address or the same object checkout sends to someone else
+ */
+export async function changeDelivery(orderId, deliver) {
+  const {data , error} = await supabase.rpc('change_delivery', {
+    p_order_id: orderId,
+    p_deliver: deliver || null,
+  })
+  if (error) fail(error)
+  return mapOrder(Array.isArray(data) ? data[0] : data)
+}
+
+/**
  * Admin only: details kept with a distributor's login rather than their
  * profile. Null if the database has not been updated for it yet.
  */
