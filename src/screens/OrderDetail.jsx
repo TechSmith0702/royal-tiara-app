@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
-import { attachProof, cancelOrder, changeDelivery, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
+import { attachProof, cancelOrder, changeDelivery, confirmReceipt, fetchOrders, switchToEft, withdrawOrderChange } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
 import { fmtDate, fmtPhone, R } from '../lib/format.js'
@@ -11,6 +11,8 @@ import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 import BankDetails, { Copyable } from '../components/BankDetails.jsx'
 import { useDeliveryForm } from '../components/DeliveryForm.jsx'
+import ItemEditor from '../components/ItemEditor.jsx'
+import { useConfirm } from '../components/ConfirmDialog.jsx'
 
 // PayFast confirms a card payment within seconds of the distributor coming
 // back. If nothing has arrived this long after they open the order, the
@@ -28,13 +30,17 @@ export default function OrderDetail() {
   const [busy, setBusy] = useState(false)
   const [askCancel, setAskCancel] = useState(false)
   const [changingDelivery, setChangingDelivery] = useState(false)
+  const [editingItems, setEditingItems] = useState(false)
+  const [ask, dialog] = useConfirm()
   // Coming from "Payment cancelled" we know the payment did not happen.
   const [params] = useSearchParams()
   const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
   const [openedAt] = useState(() => Date.now())
   const [now, setNow] = useState(openedAt)
   const order = (orders || []).find(o => o.id === id)
-  const recent = order && openedAt - new Date(order.createdAt).getTime() < RECENT_ORDER_MS
+  // Placed (or changed, for a balance) recently enough to still be waiting on PayFast.
+  const lastChange = order && (order.events.items_changed || order.createdAt)
+  const recent = order && openedAt - new Date(lastChange).getTime() < RECENT_ORDER_MS
   const waitLeft = recent ? openedAt + CONFIRM_WINDOW_MS - now : 0
 
   // Re-check when the waiting window ends, so the page moves on by itself.
@@ -116,6 +122,38 @@ export default function OrderDetail() {
     }
   }
 
+  // Changes are only possible until the order is packed for collection.
+  const explainChanges = kind => ask({
+    title: 'Changing your order',
+    body: 'You can change your order until it is packed for collection by the courier. After that it can no longer be changed.'
+      + (kind === 'request'
+        ? ' This order is paid, so Royal Tiara approves item changes first. If the new total is higher you pay the difference; if it is lower, they refund you.'
+        : ''),
+    yes: 'Continue',
+    no: 'Not now',
+  })
+
+  const startChangingDelivery = async () => {
+    if (await explainChanges('delivery')) setChangingDelivery(true)
+  }
+
+  const startEditingItems = async () => {
+    if (await explainChanges(st.canRequestChange ? 'request' : 'edit')) setEditingItems(true)
+  }
+
+  const withdraw = async () => {
+    setError('')
+    setBusy(true)
+    try {
+      await withdrawOrderChange(order.id)
+      refresh()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const reorder = () => {
     replaceCart(user.id, order.lines.map(l => ({ productId: l.productId, variant: l.variant, qty: l.qty })))
     navigate('/cart')
@@ -123,6 +161,7 @@ export default function OrderDetail() {
 
   return (
     <div className="screen">
+      {dialog}
       <div className="page-top row center gap-12">
         <BackButton to="/orders" />
         <h2 className="title-sm">{order.id}</h2>
@@ -161,9 +200,10 @@ export default function OrderDetail() {
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
-              Pay {R(order.total)} by bank transfer using <strong>{order.id}</strong> as your reference, then upload your proof here.
+              {st.balance ? 'Your order changed. Pay the balance of ' : 'Pay '}{R(st.due)} by bank transfer using{' '}
+              <strong>{order.id}</strong> as your reference, then upload your proof here.
             </p>
-            <BankDetails amount={order.total} reference={order.id} />
+            <BankDetails amount={st.due} reference={order.id} />
             <FilePicker className="upload-box" onPicked={attach}>
               <span className="upload-title">Upload proof of payment</span>
               <span className="upload-sub">Photo or PDF</span>
@@ -195,16 +235,51 @@ export default function OrderDetail() {
           <section className="card card-pad stack gap-12">
             <div className="kicker muted">Payment</div>
             <p className="body-muted">
-              We have not received your card payment yet. If you have just paid, wait a minute before paying
-              again - this page updates by itself as soon as PayFast confirms. If the payment was cancelled or did not go through, try again or pay by bank transfer.
+              {st.balance
+                ? 'Your order changed, so there is a balance of ' + R(st.due) + ' to pay. Pay it by card, or by bank transfer.'
+                : 'We have not received your card payment yet. If you have just paid, wait a minute before paying again - this page updates by itself as soon as PayFast confirms. If the payment was cancelled or did not go through, try again or pay by bank transfer.'}
             </p>
             <button type="button" className="btn btn-primary" disabled={busy} onClick={payByCard}>
-              Pay {R(order.total)} by card
+              Pay {R(st.due)} by card
             </button>
             <button type="button" className="btn btn-outline" disabled={busy} onClick={payByEft}>
               {busy ? 'Switching...' : 'Pay by bank transfer instead'}
             </button>
             {error && <p className="form-error" role="alert">{error}</p>}
+          </section>
+        )}
+
+        {st.refundDue > 0 && !st.cancelled && (
+          <section className="card card-pad stack gap-8">
+            <div className="kicker muted">Refund due</div>
+            <p className="body-muted mb-0">
+              Your order changed to a smaller total, so Royal Tiara owes you {R(st.refundDue)}. They will pay it back to you.
+            </p>
+          </section>
+        )}
+
+        {order.changeRequest && !st.cancelled && (
+          <section className="card card-pad stack gap-10">
+            <div className="kicker muted">Change request sent</div>
+            <p className="body-muted mb-0">
+              Waiting for Royal Tiara to approve. Your order stays as it is until then.
+            </p>
+            <div className="stack gap-6">
+              {order.changeRequest.lines.map(l => (
+                <div key={l.productId + '-' + l.variant} className="item-line">
+                  <span className="grow">{l.name} <span className="muted-sm">{l.size}</span></span>
+                  <span className="muted">&times;{l.qty}</span>
+                  <strong className="item-amt">{R(l.total)}</strong>
+                </div>
+              ))}
+              <div className="sum-row"><span>New total</span><strong>{R(order.changeRequest.total)}</strong></div>
+            </div>
+            {!order.fulfil && (
+              <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={withdraw}>
+                Withdraw request
+              </button>
+            )}
+            {error && <p className="form-error mb-0" role="alert">{error}</p>}
           </section>
         )}
 
@@ -277,7 +352,7 @@ export default function OrderDetail() {
             </div>
             {/* Until it is packed: after that the parcel may already be labelled. */}
             {!order.fulfil && (
-              <button type="button" className="btn btn-outline btn-44 mt-6" onClick={() => setChangingDelivery(true)}>
+              <button type="button" className="btn btn-outline btn-44 mt-6" onClick={startChangingDelivery}>
                 Change delivery
               </button>
             )}
@@ -299,17 +374,28 @@ export default function OrderDetail() {
           </div>
           <div className="divider" />
           <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
-          {/* Changing items alters the total, so Royal Tiara does it after agreeing on any payment difference. */}
-          {!order.fulfil && (
-            <button
-              type="button"
-              className="btn btn-outline btn-44 mt-6"
-              onClick={() => navigate('/chat?text=' + encodeURIComponent('Change request for ' + order.id + ': '))}
-            >
-              Request a change to items
+          {/* Until packed: straight away while unpaid, as a request Royal Tiara approves once paid. */}
+          {!editingItems && (st.canEditItems || st.canRequestChange) && (
+            <button type="button" className="btn btn-outline btn-44 mt-6" onClick={startEditingItems}>
+              {st.canEditItems ? 'Change items' : 'Request a change to items'}
             </button>
           )}
+          {!order.fulfil && !st.verified && order.proof && !order.changeRequest && (
+            <p className="hint mb-0 mt-6">
+              Royal Tiara is checking your payment. Once it is verified, you can request a change to the items.
+            </p>
+          )}
         </section>
+
+        {editingItems && (
+          <ItemEditor
+            order={order}
+            request={st.canRequestChange}
+            paid={st.paid}
+            onCancel={() => setEditingItems(false)}
+            onDone={() => { setEditingItems(false); refresh() }}
+          />
+        )}
 
         <div className="row gap-10">
           {st.delivered || st.cancelled ? (

@@ -467,6 +467,12 @@ p { margin: 0; }
 .grow { flex: 1; }
 .min0 { min-width: 0; }
 .flex-wrap { flex-wrap: wrap; }
+.change-box { border: 1px solid rgba(198, 113, 57, .45); background: var(--peach); border-radius: 16px; padding: 12px 14px; font-size: 13.5px; }
+.change-box .kicker { color: var(--accent-deep); }
+.edit-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.edit-name { font-weight: 600; }
+.diff-up strong { color: var(--accent-deep); }
+.diff-down strong { color: var(--sage-mid); }
 .ship-badge { height: 20px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; letter-spacing: .05em; background: var(--tint); color: var(--accent-deep); }
 .ship-pudo { background: #e3edf8; color: #1f4f86; }
 .ship-paxi { background: #fde8d2; color: #a14a06; }

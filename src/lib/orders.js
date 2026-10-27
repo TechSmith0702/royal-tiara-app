@@ -1,4 +1,6 @@
-import { fmtDate } from './format.js'
+import { fmtDate, R } from './format.js'
+
+const cents = n => Math.round(n * 100) / 100
 
 // How an order travels. "door" is The Courier Guy; the others are collected
 // from a pickup point the distributor typed at checkout.
@@ -30,15 +32,26 @@ export function orderState(order, audience) {
   const collected = ['collected', 'delivered'].includes(order.fulfil)
   const delivered = order.fulfil === 'delivered'
   const cancelled = order.fulfil === 'cancelled'
+  // What has been paid so far. After an approved change it can be less than
+  // the total (a balance to pay) or more (a refund to make).
+  const paid = order.paidAmount || 0
+  const due = verified ? 0 : Math.max(0, cents(order.total - paid))
+  const balance = !verified && paid > 0
+  const refundDue = Math.max(0, cents(paid - order.total))
   // A distributor can cancel until the order is paid or they upload a proof
   // (after that they may already have paid). The admin can cancel any unpaid order.
-  const canCancel = !verified && !order.fulfil && (forAdmin || !order.proof)
+  const canCancel = !verified && paid === 0 && !order.fulfil && (forAdmin || !order.proof)
+  // Items can change until the order is packed: directly while nothing is
+  // paid, otherwise as a request Royal Tiara approves.
+  const canEditItems = !order.fulfil && !verified && paid === 0 && !order.proof && !order.changeRequest
+  const canRequestChange = !order.fulfil && (verified || paid > 0) && !(!verified && order.proof) && !order.changeRequest
 
   const status = cancelled ? 'Cancelled'
     : delivered ? 'Delivered'
     : collected ? 'In transit'
-    : packed ? 'Packed & ready'
+    : packed ? 'Packed for collection'
     : verified ? 'Payment verified'
+    : balance ? (order.proof ? 'Balance under review' : 'Balance due')
     : byCard ? 'Awaiting card payment'
     : hasProof ? 'Payment under review'
     : 'Awaiting payment'
@@ -47,8 +60,9 @@ export function orderState(order, audience) {
     ? (order.events.cancelled_by === 'admin' ? 'Cancelled by Royal Tiara' : forAdmin ? 'Cancelled by the distributor' : 'You cancelled this order') + ' - nothing is owed'
     : delivered ? 'Delivered - thank you!'
     : collected ? 'Collected by courier - on the way to you'
-    : packed ? 'Packed & ready for collection'
+    : packed ? 'Packed for collection by the courier'
     : verified ? 'Payment verified - being packed'
+    : balance ? (order.proof ? 'Balance payment under review' : 'Your order changed - ' + R(due) + ' still to pay')
     : byCard ? 'Waiting for the card payment to be confirmed'
     : hasProof ? 'Payment under review'
     : 'Awaiting proof of payment'
@@ -76,7 +90,7 @@ export function orderState(order, audience) {
             : 'Awaiting upload',
       },
     { label: 'Payment verified', done: verified, when: verified ? 'Confirmed' : 'Pending review' },
-    { label: 'Packed & ready', done: packed, when: packed ? 'Ready to collect' : '-' },
+    { label: 'Packed for collection', done: packed, when: packed ? 'Waiting for the courier' : '-' },
     {
       label: 'Collected by courier',
       done: collected,
@@ -91,8 +105,12 @@ export function orderState(order, audience) {
 
   const invoice = cancelled
     ? { label: 'Cancelled', tone: 'grey' }
+    : refundDue > 0
+      ? { label: 'Refund due', tone: 'sage' }
     : verified
       ? { label: 'Paid', tone: 'sage' }
+    : balance && !order.proof
+      ? { label: 'Balance due', tone: 'peach' }
       : order.proof
         ? { label: 'Under review', tone: 'sage' }
         : { label: byCard ? 'Awaiting card payment' : 'Awaiting proof', tone: 'peach' }
@@ -106,6 +124,12 @@ export function orderState(order, audience) {
     delivered,
     cancelled,
     canCancel,
+    canEditItems,
+    canRequestChange,
+    paid,
+    due,
+    balance,
+    refundDue,
     status,
     waybill,
     steps,

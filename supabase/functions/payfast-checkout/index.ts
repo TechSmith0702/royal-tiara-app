@@ -99,7 +99,7 @@ Deno.serve(async req => {
   } else {
     const { data: order } = await db
       .from('orders')
-      .select('id, user_id, total, pay_method, pay_status, proof, fulfil')
+      .select('id, user_id, total, paid_amount, pay_method, pay_status, proof, fulfil')
       .eq('id', String(orderId ?? ''))
       .maybeSingle()
     if (!order || order.user_id !== user.id) return reply(404, { error: 'That order was not found.' })
@@ -111,9 +111,14 @@ Deno.serve(async req => {
     if (order.pay_method !== 'card' && order.proof) {
       return reply(409, { error: 'You have already uploaded a proof of payment for this order.' })
     }
-    paymentId = order.id
-    amount = Number(order.total)
-    itemName = 'Royal Tiara order ' + order.id
+    // Usually the whole order. After an approved change it is only the balance:
+    // the amount still due, under its own payment ID (payfast-notify strips the
+    // "-B..." part again), so PayFast never sees the same ID twice.
+    const paid = Number(order.paid_amount ?? 0)
+    amount = Math.round((Number(order.total) - paid) * 100) / 100
+    if (!(amount > 0)) return reply(409, { error: 'There is nothing to pay on this order.' })
+    paymentId = paid > 0 ? order.id + '-B' + Math.round(paid * 100) : order.id
+    itemName = (paid > 0 ? 'Balance for Royal Tiara order ' : 'Royal Tiara order ') + order.id
   }
 
   const names = (profile?.name ?? '').trim().split(/\s+/)

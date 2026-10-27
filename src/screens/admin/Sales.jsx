@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { adminAdvanceOrder, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
+import { adminAdvanceOrder, adminDecideChange, adminMarkRefunded, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { fmtDate, fmtPhone, R, telLink, waLinkTo } from '../../lib/format.js'
@@ -15,6 +15,7 @@ const COURIERS = ['The Courier Guy', 'PUDO', 'PAXI']
 const FILTERS = [
   { value: 'all', label: 'All', test: () => true },
   { value: 'active', label: 'Active', test: o => o.fulfil !== 'delivered' && o.fulfil !== 'cancelled' },
+  { value: 'changes', label: 'Change requests', test: o => Boolean(o.changeRequest) && o.fulfil !== 'cancelled' },
   { value: 'verify', label: 'To verify', test: o => o.payStatus !== 'verified' && !!o.proof && o.fulfil !== 'cancelled' },
   { value: 'pack', label: 'To pack', test: o => o.payStatus === 'verified' && !o.fulfil },
   { value: 'unpaid', label: 'Awaiting payment', test: o => o.payStatus !== 'verified' && !o.proof && o.fulfil !== 'cancelled' },
@@ -149,8 +150,14 @@ function SaleCard({ order, phone, onDone, onProblem }) {
 
   const pay = st.cancelled
     ? { label: st.waybill, cls: 'pay-waiting' }
+    : st.refundDue > 0
+      ? { label: 'Paid - refund of ' + R(st.refundDue) + ' due', cls: 'pay-review' }
     : st.verified
       ? { label: order.payMethod === 'card' ? 'Card payment confirmed' : 'Payment verified', cls: 'pay-ok' }
+    : st.balance
+      ? order.proof
+        ? { label: 'Balance proof received (' + R(st.due) + ') - verify', cls: 'pay-review' }
+        : { label: 'Order changed - balance of ' + R(st.due) + ' not paid yet', cls: 'pay-waiting' }
       : order.proof
         ? { label: 'Proof received - verify', cls: 'pay-review' }
         : order.payMethod === 'card'
@@ -169,7 +176,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
     if (step === 'verify' && !order.proof) {
       const ok = await ask({
         title: 'Verify ' + order.id + ' without a proof?',
-        body: 'No proof was uploaded. Only verify if ' + R(order.total) + ' has reflected in the Royal Tiara account.',
+        body: 'No proof was uploaded. Only verify if ' + R(st.due) + ' has reflected in the Royal Tiara account.',
         yes: 'It has reflected - verify',
       })
       if (!ok) return
@@ -189,6 +196,56 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       // Saved first, so the "on its way" message includes the number.
       if (step === 'collected' && trackingChanged) await adminSetTracking(order.id, courier, tracking)
       await adminAdvanceOrder(order.id, step)
+      onDone()
+    } catch (e) {
+      onProblem(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const decideChange = async approve => {
+    const r = order.changeRequest
+    const diff = Math.round((r.total - st.paid) * 100) / 100
+    const ok = await ask(approve
+      ? {
+        title: 'Approve the change to ' + order.id + '?',
+        body: 'The order becomes ' + R(r.total) + '. '
+          + (diff > 0 ? 'The distributor is asked to pay the balance of ' + R(diff) + ' before you pack it.'
+            : diff < 0 ? 'You will owe them a refund of ' + R(-diff) + '.'
+              : 'Nothing more to pay.'),
+        yes: 'Approve',
+      }
+      : {
+        title: 'Decline the change to ' + order.id + '?',
+        body: 'The order stays as it is, and the distributor is told.',
+        yes: 'Decline',
+        danger: true,
+      })
+    if (!ok) return
+    setBusy(true)
+    onProblem('')
+    try {
+      await adminDecideChange(order.id, approve)
+      onDone()
+    } catch (e) {
+      onProblem(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const refunded = async () => {
+    const ok = await ask({
+      title: 'Refund of ' + R(st.refundDue) + ' paid?',
+      body: 'Only tap this once you have paid ' + R(st.refundDue) + ' back to ' + (order.business || order.customer) + '.',
+      yes: 'Yes, it is refunded',
+    })
+    if (!ok) return
+    setBusy(true)
+    onProblem('')
+    try {
+      await adminMarkRefunded(order.id)
       onDone()
     } catch (e) {
       onProblem(e.message)
@@ -286,6 +343,51 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         <span className={'pay-label ' + pay.cls}>{pay.label}</span>
       </div>
 
+      {order.changeRequest && !st.cancelled && (
+        <div className="change-box stack gap-8">
+          <div className="kicker">Change requested</div>
+          <div className="stack gap-4">
+            {order.changeRequest.lines.map(l => {
+              const before = order.lines.find(o => o.productId === l.productId && o.variant === l.variant)
+              return (
+                <div key={l.productId + '-' + l.variant} className="item-line">
+                  <span className="grow">{l.name} <span className="muted-sm">{l.size}</span></span>
+                  <strong>{before && before.qty !== l.qty ? before.qty + ' \u2192 ' : before ? '' : 'new '}&times;{l.qty}</strong>
+                </div>
+              )
+            })}
+            {order.lines
+              .filter(o => !order.changeRequest.lines.some(l => l.productId === o.productId && l.variant === o.variant))
+              .map(o => (
+                <div key={'gone-' + o.productId + '-' + o.variant} className="item-line muted">
+                  <span className="grow">{o.name} <span className="muted-sm">{o.size}</span></span>
+                  <strong>removed</strong>
+                </div>
+              ))}
+          </div>
+          <div className="sum-row">
+            <span>{R(order.total)} &rarr; {R(order.changeRequest.total)}</span>
+            <strong>
+              {order.changeRequest.total - st.paid > 0
+                ? 'pays ' + R(order.changeRequest.total - st.paid) + ' more'
+                : order.changeRequest.total - st.paid < 0
+                  ? 'refund ' + R(st.paid - order.changeRequest.total)
+                  : 'no difference'}
+            </strong>
+          </div>
+          <div className="row gap-9">
+            <button type="button" className="btn btn-sage btn-44 grow" disabled={busy} onClick={() => decideChange(true)}>Approve</button>
+            <button type="button" className="btn btn-outline btn-44 grow" disabled={busy} onClick={() => decideChange(false)}>Decline</button>
+          </div>
+        </div>
+      )}
+
+      {st.refundDue > 0 && !st.cancelled && (
+        <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={refunded}>
+          Refund of {R(st.refundDue)} paid back
+        </button>
+      )}
+
       <div className="deliver-to">
         <div className="row between center gap-10">
           <span className="kicker muted">Deliver to</span>
@@ -344,7 +446,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       </div>
       {!st.verified && (
         <button type="button" className="btn btn-sage btn-46" disabled={busy} onClick={() => advance('verify')}>
-          {st.cancelled ? 'Payment arrived - verify and restore' : 'Verify payment'}
+          {st.cancelled ? 'Payment arrived - verify and restore' : st.balance ? 'Verify balance of ' + R(st.due) : 'Verify payment'}
         </button>
       )}
       {st.canCancel && (
@@ -354,7 +456,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
       )}
       {st.verified && !st.packed && (
         <button type="button" className="btn btn-primary btn-46" disabled={busy} onClick={() => advance('packed')}>
-          Mark packed &amp; ready
+          Mark packed for collection
         </button>
       )}
       {st.packed && !st.collected && (

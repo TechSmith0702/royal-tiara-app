@@ -95,12 +95,20 @@ export default function InvoiceView({ admin = false }) {
             <div className="sum-row"><span>Delivery Fee</span><strong>{R(order.delivery)}</strong></div>
             <div className="divider" />
             <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
+            {/* After an approved change: what was paid, and the balance or refund. */}
+            {st.balance && <div className="sum-row"><span>Paid</span><strong>{R(st.paid)}</strong></div>}
+            {st.balance && <div className="sum-row"><span>Balance due</span><strong>{R(st.due)}</strong></div>}
+            {st.refundDue > 0 && <div className="sum-row"><span>Paid</span><strong>{R(st.paid)}</strong></div>}
+            {st.refundDue > 0 && <div className="sum-row"><span>Refund due</span><strong>{R(st.refundDue)}</strong></div>}
+            {order.events.refund_amount && !(st.refundDue > 0) && (
+              <div className="sum-row"><span>Refunded</span><strong>{R(Number(order.events.refund_amount))}</strong></div>
+            )}
           </div>
 
           {!admin && order.payMethod === 'eft' && !st.verified && !st.cancelled && (
             <div className="stack gap-8">
               <div className="kicker muted">Payment details</div>
-              <BankDetails amount={order.total} reference={order.id} />
+              <BankDetails amount={st.due} reference={order.id} />
             </div>
           )}
         </article>

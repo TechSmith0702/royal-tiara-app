@@ -18,7 +18,8 @@ export default function Invoices() {
   // A cancelled order owes nothing, so it has no invoice here (it stays under Orders).
   const list = (orders || []).filter(o => o.fulfil !== 'cancelled')
   const unpaid = list.filter(o => o.payStatus !== 'verified' && o.fulfil !== 'cancelled')
-  const outstanding = unpaid.reduce((t, o) => t + o.total, 0)
+  // Only what is still owed: after an approved change, just the balance.
+  const outstanding = unpaid.reduce((t, o) => t + orderState(o).due, 0)
 
   const attachTo = orderId => async file => {
     setProblem('')

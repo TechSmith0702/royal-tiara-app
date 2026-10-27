@@ -117,7 +117,8 @@ Deno.serve(async req => {
       p_reference: reference,
     })
     : await supabase.rpc('payfast_mark_paid', {
-      p_order_id: orderId,
+      // A balance payment is "RT-2010-B21600"; the order is "RT-2010".
+      p_order_id: orderId.replace(/-B\d+$/, ''),
       p_amount: amount,
       p_reference: reference,
     })

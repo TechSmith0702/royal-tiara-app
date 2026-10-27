@@ -120,6 +120,16 @@ const mapOrder = row => ({
   payStatus: row.pay_status,
   fulfil: row.fulfil,
   events: row.events || {},
+  // Paid so far; differs from total after an approved change (balance or refund).
+  paidAmount: Number(row.paid_amount ?? (row.pay_status === 'verified' ? row.total : 0)),
+  changeRequest: row.change_request
+    ? {
+      ...row.change_request,
+      lines: (row.change_request.lines || []).map(l => ({ ...l, price: Number(l.price), total: Number(l.total) })),
+      subtotal: Number(row.change_request.subtotal),
+      total: Number(row.change_request.total),
+    }
+    : null,
 })
 
 const mapPerson = row => ({
@@ -249,6 +259,35 @@ export async function switchToEft(orderId) {
  * Changes where an order goes, until it is packed. deliver: null for the 
  * distributor's own address or the same object checkout sends to someone else
  */
+/** Unpaid order: replace its items. items: [{ productId, variant, qty }] */
+export async function editOrderItems(orderId, items) {
+  const { error } = await supabase.rpc('edit_order_items', { p_order_id: orderId, p_items: items })
+  if (error) fail(error)
+}
+
+/** Paid order: ask Royal Tiara to change the items (they approve or decline). */
+export async function requestOrderChange(orderId, items) {
+  const { error } = await supabase.rpc('request_order_change', { p_order_id: orderId, p_items: items })
+  if (error) fail(error)
+}
+
+export async function withdrawOrderChange(orderId) {
+  const { error } = await supabase.rpc('withdraw_order_change', { p_order_id: orderId })
+  if (error) fail(error)
+}
+
+/** Admin: approve or decline a distributor's change request. */
+export async function adminDecideChange(orderId, approve) {
+  const { error } = await supabase.rpc('admin_decide_change', { p_order_id: orderId, p_approve: approve })
+  if (error) fail(error)
+}
+
+/** Admin: the refund owed after a smaller change has been paid back. */
+export async function adminMarkRefunded(orderId) {
+  const { error } = await supabase.rpc('admin_mark_refunded', { p_order_id: orderId })
+  if (error) fail(error)
+}
+
 export async function changeDelivery(orderId, deliver) {
   const {data , error} = await supabase.rpc('change_delivery', {
     p_order_id: orderId,
