@@ -21,6 +21,10 @@ export default function Checkout() {
   const [busy, setBusy] = useState(false)
   const delivery = useDeliveryForm(user)
 
+  // Money Royal Tiara owes this distributor comes off the order automatically.
+  const credit = Math.min(user.credit || 0, cart.total)
+  const due = Math.round((cart.total - credit) * 100) / 100
+
   if (loading) return <div className="screen"><div className="scroll page"><Loading /></div></div>
   if (!cart.lines.length && !placed.current) return <Navigate to="/cart" replace />
 
@@ -39,7 +43,7 @@ export default function Checkout() {
       const order = await placeOrder(cart.items, method, null, deliver)
       placed.current = true
       clearCart(user.id)
-      if (method === 'card') {
+      if (method === 'card' && order.payStatus !== 'verified') {
         try {
           await goToPayfast(order)   // leaves the app for PayFast
         } catch {
@@ -69,7 +73,7 @@ export default function Checkout() {
           {delivery.form}
         </section>
 
-        <section className="card card-pad stack gap-14">
+        {due > 0 ? <section className="card card-pad stack gap-14">
           <div className="kicker muted">Payment method</div>
           <Segmented
             value={method}
@@ -94,13 +98,20 @@ export default function Checkout() {
               </span>
             </div>
           )}
-        </section>
+        </section> : (
+          <section className="card card-pad">
+            <p className="body-muted mb-0">The amount payable to you covers this whole order, so there is nothing to pay.</p>
+          </section>
+        )}
 
         <section className="summary">
           <div className="sum-row"><span className="ellipsis">{itemsLabel}</span><strong>{R(cart.subtotal)}</strong></div>
           <div className="sum-row"><span>Delivery Fee</span><strong>{R(cart.delivery)}</strong></div>
+          {credit > 0 && (
+            <div className="sum-row credit-row"><span>Amount payable to you</span><strong>-{R(credit)}</strong></div>
+          )}
           <div className="divider" />
-          <div className="sum-total"><span>Due</span><span className="sum-big">{R(cart.total)}</span></div>
+          <div className="sum-total"><span>Due</span><span className="sum-big">{R(due)}</span></div>
         </section>
 
         {error && <p className="form-error" role="alert">{error}</p>}
@@ -110,8 +121,8 @@ export default function Checkout() {
         <button type="button" className="btn btn-primary" onClick={place} disabled={busy}>
           {busy
             ? 'Placing order...'
-            : method === 'card'
-              ? 'Pay ' + R(cart.total) + ' with card'
+            : method === 'card' && due > 0
+              ? 'Pay ' + R(due) + ' with card'
               : 'Place order'}
         </button>
       </div>

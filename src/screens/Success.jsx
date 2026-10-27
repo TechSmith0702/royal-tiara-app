@@ -25,7 +25,9 @@ export default function Success() {
   const awaitingTransfer = order.payMethod === 'eft' && !order.proof && order.payStatus !== 'verified'
   const st = orderState(order)
 
-  const note = order.payMethod === 'card'
+  const note = st.paidFromCredit
+    ? 'Paid from the amount payable to you - there is nothing to pay. Royal Tiara will pack your order.'
+    : order.payMethod === 'card'
     ? 'Royal Tiara will confirm your card payment and start packing.'
     : order.proof
       ? 'Your proof of payment is with us - we will confirm as soon as it reflects.'

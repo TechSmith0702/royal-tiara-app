@@ -35,16 +35,21 @@ export function orderState(order, audience) {
   // What has been paid so far. After an approved change it can be less than
   // the total (a balance to pay) or more (a refund to make).
   const paid = order.paidAmount || 0
+  // Paid from money Royal Tiara owed the distributor ("amount payable to you").
+  const creditUsed = order.creditUsed || 0
+  // Money actually paid by card or bank transfer.
+  const realPaid = cents(paid - creditUsed)
   const due = verified ? 0 : Math.max(0, cents(order.total - paid))
-  const balance = !verified && paid > 0
-  const refundDue = Math.max(0, cents(paid - order.total))
-  // A distributor can cancel until the order is paid or they upload a proof
+  // Part-paid after an approved change: a balance is still to pay.
+  const balance = !verified && realPaid > 0
+  const paidFromCredit = verified && creditUsed > 0 && realPaid <= 0
+  // A distributor can cancel until money is paid or they upload a proof
   // (after that they may already have paid). The admin can cancel any unpaid order.
-  const canCancel = !verified && paid === 0 && !order.fulfil && (forAdmin || !order.proof)
-  // Items can change until the order is packed: directly while nothing is
+  const canCancel = realPaid <= 0 && !order.fulfil && (forAdmin || !order.proof)
+  // Items can change until the order is packed: directly while no money is
   // paid, otherwise as a request Royal Tiara approves.
-  const canEditItems = !order.fulfil && !verified && paid === 0 && !order.proof && !order.changeRequest
-  const canRequestChange = !order.fulfil && (verified || paid > 0) && !(!verified && order.proof) && !order.changeRequest
+  const canEditItems = !order.fulfil && realPaid <= 0 && !order.proof && !order.changeRequest
+  const canRequestChange = !order.fulfil && realPaid > 0 && !(!verified && order.proof) && !order.changeRequest
 
   const status = cancelled ? 'Cancelled'
     : delivered ? 'Delivered'
@@ -85,9 +90,11 @@ export function orderState(order, audience) {
         done: hasProof || verified,
         when: hasProof
           ? fmtDate(order.events.proof || order.createdAt)
-          : verified
-            ? 'Confirmed by Royal Tiara'
-            : 'Awaiting upload',
+          : paidFromCredit
+            ? 'From the amount payable to you'
+            : verified
+              ? 'Confirmed by Royal Tiara'
+              : 'Awaiting upload',
       },
     { label: 'Payment verified', done: verified, when: verified ? 'Confirmed' : 'Pending review' },
     { label: 'Packed for collection', done: packed, when: packed ? 'Waiting for the courier' : '-' },
@@ -105,8 +112,6 @@ export function orderState(order, audience) {
 
   const invoice = cancelled
     ? { label: 'Cancelled', tone: 'grey' }
-    : refundDue > 0
-      ? { label: 'Refund due', tone: 'sage' }
     : verified
       ? { label: 'Paid', tone: 'sage' }
     : balance && !order.proof
@@ -127,9 +132,11 @@ export function orderState(order, audience) {
     canEditItems,
     canRequestChange,
     paid,
+    creditUsed,
+    realPaid,
+    paidFromCredit,
     due,
     balance,
-    refundDue,
     status,
     waybill,
     steps,

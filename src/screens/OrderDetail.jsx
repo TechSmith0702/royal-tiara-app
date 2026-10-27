@@ -202,6 +202,7 @@ export default function OrderDetail() {
             <p className="body-muted">
               {st.balance ? 'Your order changed. Pay the balance of ' : 'Pay '}{R(st.due)} by bank transfer using{' '}
               <strong>{order.id}</strong> as your reference, then upload your proof here.
+              {st.creditUsed > 0 && !st.balance && ' (' + R(st.creditUsed) + ' already came off from the amount payable to you.)'}
             </p>
             <BankDetails amount={st.due} reference={order.id} />
             <FilePicker className="upload-box" onPicked={attach}>
@@ -246,15 +247,6 @@ export default function OrderDetail() {
               {busy ? 'Switching...' : 'Pay by bank transfer instead'}
             </button>
             {error && <p className="form-error" role="alert">{error}</p>}
-          </section>
-        )}
-
-        {st.refundDue > 0 && !st.cancelled && (
-          <section className="card card-pad stack gap-8">
-            <div className="kicker muted">Refund due</div>
-            <p className="body-muted mb-0">
-              Your order changed to a smaller total, so Royal Tiara owes you {R(st.refundDue)}. They will pay it back to you.
-            </p>
           </section>
         )}
 
@@ -374,6 +366,12 @@ export default function OrderDetail() {
           </div>
           <div className="divider" />
           <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
+          {st.creditUsed > 0 && (
+            <div className="item-line">
+              <span className="grow muted">Paid from amount payable to you</span>
+              <strong className="item-amt">-{R(st.creditUsed)}</strong>
+            </div>
+          )}
           {/* Until packed: straight away while unpaid, as a request Royal Tiara approves once paid. */}
           {!editingItems && (st.canEditItems || st.canRequestChange) && (
             <button type="button" className="btn btn-outline btn-44 mt-6" onClick={startEditingItems}>

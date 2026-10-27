@@ -98,10 +98,14 @@ export default function InvoiceView({ admin = false }) {
             {/* After an approved change: what was paid, and the balance or refund. */}
             {st.balance && <div className="sum-row"><span>Paid</span><strong>{R(st.paid)}</strong></div>}
             {st.balance && <div className="sum-row"><span>Balance due</span><strong>{R(st.due)}</strong></div>}
-            {st.refundDue > 0 && <div className="sum-row"><span>Paid</span><strong>{R(st.paid)}</strong></div>}
-            {st.refundDue > 0 && <div className="sum-row"><span>Refund due</span><strong>{R(st.refundDue)}</strong></div>}
-            {order.events.refund_amount && !(st.refundDue > 0) && (
-              <div className="sum-row"><span>Refunded</span><strong>{R(Number(order.events.refund_amount))}</strong></div>
+            {st.creditUsed > 0 && (
+              <div className="sum-row"><span>Paid from amount payable to you</span><strong>-{R(st.creditUsed)}</strong></div>
+            )}
+            {!st.verified && st.creditUsed > 0 && !st.balance && (
+              <div className="sum-row"><span>Still to pay</span><strong>{R(st.due)}</strong></div>
+            )}
+            {order.events.credit_added && (
+              <div className="sum-row"><span>Payable to you after a change (next order)</span><strong>{R(Number(order.events.credit_added))}</strong></div>
             )}
           </div>
 

@@ -467,6 +467,10 @@ p { margin: 0; }
 .grow { flex: 1; }
 .min0 { min-width: 0; }
 .flex-wrap { flex-wrap: wrap; }
+.credit-card { background: var(--sage-light); border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+.credit-card .kicker { color: var(--sage-deep); }
+.credit-value { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--sage-deep); }
+.credit-row strong { color: var(--sage-mid); }
 .change-box { border: 1px solid rgba(198, 113, 57, .45); background: var(--peach); border-radius: 16px; padding: 12px 14px; font-size: 13.5px; }
 .change-box .kicker { color: var(--accent-deep); }
 .edit-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }

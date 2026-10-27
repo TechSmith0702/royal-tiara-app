@@ -188,6 +188,7 @@ export default function Person() {
                 ? 'Not paid yet - they cannot order until it is'
                 : p.joinPay === 'card' ? 'By card once approved' : 'Bank transfer - proof on WhatsApp'}
           </Line>
+          {p.credit > 0 && <Line label="Payable to them">{R(p.credit)} &middot; comes off their next order</Line>}
           <Line label="Orders">
             {orderList.loading ? 'Loading...' : orders.length === 0 ? 'None yet' : orders.length + ' · ' + R(spent) + ' paid'}
           </Line>

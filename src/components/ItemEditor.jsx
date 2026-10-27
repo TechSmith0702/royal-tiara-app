@@ -112,7 +112,7 @@ export default function ItemEditor({ order, request, paid, onDone, onCancel }) {
           <div className={'sum-row ' + (diff > 0 ? 'diff-up' : 'diff-down')}>
             <span>
               {request
-                ? diff > 0 ? 'You will pay the difference' : 'Royal Tiara will refund you'
+                ? diff > 0 ? 'You will pay the difference' : 'Payable to you (off your next order)'
                 : diff > 0 ? 'More than before' : 'Less than before'}
             </span>
             <strong>{R(Math.abs(diff))}</strong>

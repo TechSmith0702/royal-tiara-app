@@ -233,6 +233,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 22. `migration-recipient-email.sql`
 23. `migration-change-delivery.sql`
 24. `migration-order-changes.sql`
+25. `migration-store-credit.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:
@@ -555,15 +556,20 @@ explanation dialog:
   (the order cannot be packed while one waits). On approval the order takes
   the new items and total. If more is owed, it goes back to awaiting payment
   for **the balance only** (card or bank transfer; card balances reach PayFast
-  as "RT-xxxx-B..." and payfast-notify strips the suffix). If less, Sales shows
-  "refund due", and the admin taps **Refund … paid back** once it is repaid.
+  as "RT-xxxx-B..." and payfast-notify strips the suffix). If less, nothing is refunded:
+  the difference becomes **"Amount payable to you"** (`profiles.credit`), shown
+  on the distributor's Home screen and their page in Applications, and it
+  comes off their next order automatically (`orders.credit_used`). If it
+  covers a whole order, that order is paid straight away; cancelling an
+  unpaid order gives the credit back. Distributors cannot change their credit
+  (profiles only grants update on name, business, phone and address).
   `orders.paid_amount` holds what has been paid so far. Items already on the
   order keep the price they were bought at; an out-of-stock item can stay or
   shrink but not grow. Orders with any payment cannot be cancelled in the app. The app does not book
 the courier: the admin books it on the courier's website and types the
 tracking number in Sales.
 
-All 24 migrations have been run on the live database (check with section 7
+All 25 migrations have been run on the live database (check with section 7
 if in doubt).
 
 ### Still to do

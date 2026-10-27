@@ -20,6 +20,8 @@ export const mapProfile = row => ({
   // has not been updated for joining fees yet.
   joinFeeDue: row.role === 'distributor' && row.status === 'approved' && row.join_fee_paid_at === null,
   memberSince: row.created_at,
+  // Owed to the distributor ("amount payable to you"); comes off their next order.
+  credit: Number(row.credit || 0),
 })
 
 export function AuthProvider({ children }) {

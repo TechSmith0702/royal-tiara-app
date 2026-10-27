@@ -122,6 +122,8 @@ const mapOrder = row => ({
   events: row.events || {},
   // Paid so far; differs from total after an approved change (balance or refund).
   paidAmount: Number(row.paid_amount ?? (row.pay_status === 'verified' ? row.total : 0)),
+  // Part of paidAmount that came from the amount payable to the distributor.
+  creditUsed: Number(row.credit_used || 0),
   changeRequest: row.change_request
     ? {
       ...row.change_request,
@@ -134,6 +136,7 @@ const mapOrder = row => ({
 
 const mapPerson = row => ({
   id: row.id,
+  credit: Number(row.credit || 0),
   role: row.role,
   status: row.status,
   name: row.name,
@@ -279,12 +282,6 @@ export async function withdrawOrderChange(orderId) {
 /** Admin: approve or decline a distributor's change request. */
 export async function adminDecideChange(orderId, approve) {
   const { error } = await supabase.rpc('admin_decide_change', { p_order_id: orderId, p_approve: approve })
-  if (error) fail(error)
-}
-
-/** Admin: the refund owed after a smaller change has been paid back. */
-export async function adminMarkRefunded(orderId) {
-  const { error } = await supabase.rpc('admin_mark_refunded', { p_order_id: orderId })
   if (error) fail(error)
 }
 

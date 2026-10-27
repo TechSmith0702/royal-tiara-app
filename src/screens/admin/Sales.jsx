@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { adminAdvanceOrder, adminDecideChange, adminMarkRefunded, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
+import { adminAdvanceOrder, adminDecideChange, adminSetTracking, cancelOrder, fetchApplications, fetchOrders } from '../../lib/db.js'
 import { openProof } from '../../lib/files.js'
 import { useLive } from '../../lib/live.js'
 import { fmtDate, fmtPhone, R, telLink, waLinkTo } from '../../lib/format.js'
@@ -150,8 +150,8 @@ function SaleCard({ order, phone, onDone, onProblem }) {
 
   const pay = st.cancelled
     ? { label: st.waybill, cls: 'pay-waiting' }
-    : st.refundDue > 0
-      ? { label: 'Paid - refund of ' + R(st.refundDue) + ' due', cls: 'pay-review' }
+    : st.paidFromCredit
+      ? { label: 'Paid from the amount owed to them', cls: 'pay-ok' }
     : st.verified
       ? { label: order.payMethod === 'card' ? 'Card payment confirmed' : 'Payment verified', cls: 'pay-ok' }
     : st.balance
@@ -212,7 +212,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         title: 'Approve the change to ' + order.id + '?',
         body: 'The order becomes ' + R(r.total) + '. '
           + (diff > 0 ? 'The distributor is asked to pay the balance of ' + R(diff) + ' before you pack it.'
-            : diff < 0 ? 'You will owe them a refund of ' + R(-diff) + '.'
+            : diff < 0 ? R(-diff) + ' becomes payable to them and comes off their next order.'
               : 'Nothing more to pay.'),
         yes: 'Approve',
       }
@@ -227,25 +227,6 @@ function SaleCard({ order, phone, onDone, onProblem }) {
     onProblem('')
     try {
       await adminDecideChange(order.id, approve)
-      onDone()
-    } catch (e) {
-      onProblem(e.message)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const refunded = async () => {
-    const ok = await ask({
-      title: 'Refund of ' + R(st.refundDue) + ' paid?',
-      body: 'Only tap this once you have paid ' + R(st.refundDue) + ' back to ' + (order.business || order.customer) + '.',
-      yes: 'Yes, it is refunded',
-    })
-    if (!ok) return
-    setBusy(true)
-    onProblem('')
-    try {
-      await adminMarkRefunded(order.id)
       onDone()
     } catch (e) {
       onProblem(e.message)
@@ -371,7 +352,7 @@ function SaleCard({ order, phone, onDone, onProblem }) {
               {order.changeRequest.total - st.paid > 0
                 ? 'pays ' + R(order.changeRequest.total - st.paid) + ' more'
                 : order.changeRequest.total - st.paid < 0
-                  ? 'refund ' + R(st.paid - order.changeRequest.total)
+                  ? R(st.paid - order.changeRequest.total) + ' payable to them'
                   : 'no difference'}
             </strong>
           </div>
@@ -382,10 +363,8 @@ function SaleCard({ order, phone, onDone, onProblem }) {
         </div>
       )}
 
-      {st.refundDue > 0 && !st.cancelled && (
-        <button type="button" className="btn btn-outline btn-44" disabled={busy} onClick={refunded}>
-          Refund of {R(st.refundDue)} paid back
-        </button>
+      {st.creditUsed > 0 && !st.cancelled && (
+        <div className="muted-sm">{R(st.creditUsed)} of this order was paid from the amount owed to them.</div>
       )}
 
       <div className="deliver-to">

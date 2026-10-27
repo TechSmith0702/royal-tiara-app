@@ -46,6 +46,14 @@ export default function Home() {
           </div>
         </header>
 
+        {user.credit > 0 && (
+          <section className="credit-card">
+            <div className="kicker">Amount payable to you</div>
+            <div className="credit-value">{R(user.credit)}</div>
+            <div className="muted-sm">Comes off your next order automatically.</div>
+          </section>
+        )}
+
         <section className="card-dark stack gap-14">
           <div className="row between center">
             <span className="kicker on-dark">Trade account</span>
