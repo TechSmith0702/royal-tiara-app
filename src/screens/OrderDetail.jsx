@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { replaceCart } from '../lib/cart.js'
-import { attachProof, cancelOrder, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
+import { attachProof, cancelOrder, changeDelivery, confirmReceipt, fetchOrders, switchToEft } from '../lib/db.js'
 import { uploadProof } from '../lib/files.js'
 import { useLive } from '../lib/live.js'
 import { fmtDate, fmtPhone, R } from '../lib/format.js'
@@ -10,6 +10,7 @@ import { deliveryLines, orderState } from '../lib/orders.js'
 import { goToPayfast } from '../lib/payfast.js'
 import { BackButton, FilePicker, Loading } from '../components/ui.jsx'
 import BankDetails, { Copyable } from '../components/BankDetails.jsx'
+import { useDeliveryForm } from '../components/DeliveryForm.jsx'
 
 // PayFast confirms a card payment within seconds of the distributor coming
 // back. If nothing has arrived this long after they open the order, the
@@ -26,6 +27,7 @@ export default function OrderDetail() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [askCancel, setAskCancel] = useState(false)
+  const [changingDelivery, setChangingDelivery] = useState(false)
   // Coming from "Payment cancelled" we know the payment did not happen.
   const [params] = useSearchParams()
   const [showRetry, setShowRetry] = useState(params.get('retry') === '1')
@@ -255,17 +257,32 @@ export default function OrderDetail() {
           </section>
         )}
 
-        <section className="card card-pad stack gap-6">
-          <div className="kicker muted">Deliver to</div>
-          <div className="addr-name">
-            {order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}
-          </div>
-          {order.deliverTo === 'other' && <div className="muted-sm">{fmtPhone(order.recipientPhone)}</div>}
-          {order.deliverTo === 'other' && order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
-          <div className="addr-lines">
-            {deliveryLines(order).map((line, i) => <div key={i}>{line}</div>)}
-          </div>
-        </section>
+        {changingDelivery ? (
+          <ChangeDelivery
+            user={user}
+            order={order}
+            onCancel={() => setChangingDelivery(false)}
+            onDone={() => { setChangingDelivery(false); refresh() }}
+          />
+        ) : (
+          <section className="card card-pad stack gap-6">
+            <div className="kicker muted">Deliver to</div>
+            <div className="addr-name">
+              {order.deliverTo === 'other' ? order.recipientName : order.business || order.customer}
+            </div>
+            {order.deliverTo === 'other' && <div className="muted-sm">{fmtPhone(order.recipientPhone)}</div>}
+            {order.deliverTo === 'other' && order.recipientEmail && <div className="muted-sm">{order.recipientEmail}</div>}
+            <div className="addr-lines">
+              {deliveryLines(order).map((line, i) => <div key={i}>{line}</div>)}
+            </div>
+            {/* Until it is packed: after that the parcel may already be labelled. */}
+            {!order.fulfil && (
+              <button type="button" className="btn btn-outline btn-44 mt-6" onClick={() => setChangingDelivery(true)}>
+                Change delivery
+              </button>
+            )}
+          </section>
+        )}
 
         <section className="card card-pad stack gap-11">
           <div className="kicker muted">Items</div>
@@ -297,5 +314,46 @@ export default function OrderDetail() {
         </div>
       </div>
     </div>
+  )
+}
+
+
+/** The delivery form, filled in with the order's current delivery. */
+function ChangeDelivery({ user, order, onDone, onCancel }) {
+  const delivery = useDeliveryForm(user, order)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  const save = async () => {
+    setError('')
+    const { deliver, problem } = delivery.build()
+    if (problem) {
+      setError(problem)
+      return
+    }
+    setBusy(true)
+    try {
+      await changeDelivery(order.id, deliver)
+      onDone()
+    } catch (e) {
+      setError(e.message)
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="card card-pad stack gap-12">
+      <div className="kicker muted">Change delivery</div>
+      {delivery.form}
+      {error && <p className="form-error mb-0" role="alert">{error}</p>}
+      <div className="row gap-10">
+        <button type="button" className="btn btn-primary btn-46 grow" disabled={busy} onClick={save}>
+          {busy ? 'Saving...' : 'Save delivery'}
+        </button>
+        <button type="button" className="btn btn-outline btn-46 grow" disabled={busy} onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </section>
   )
 }
