@@ -299,6 +299,16 @@ export default function OrderDetail() {
           </div>
           <div className="divider" />
           <div className="sum-total"><span className="h-17">Total</span><span className="sum-mid">{R(order.total)}</span></div>
+          {/* Changing items alters the total, so Royal Tiara does it after agreeing on any payment difference. */}
+          {!order.fulfil && (
+            <button
+              type="button"
+              className="btn btn-outline btn-44 mt-6"
+              onClick={() => navigate('/chat?text=' + encodeURIComponent('Change request for ' + order.id + ': '))}
+            >
+              Request a change to items
+            </button>
+          )}
         </section>
 
         <div className="row gap-10">

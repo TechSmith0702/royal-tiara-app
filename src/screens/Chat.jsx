@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchThread, markThreadRead, sendMessage } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
@@ -18,7 +18,10 @@ export default function Chat() {
     ['messages'],
     [user.id],
   )
-  const [text, setText] = useState('')
+  // Other screens can open the chat with a message already started, e.g. a change request (?text=...).
+  const [params] = useSearchParams()
+  const [started] = useState(() => params.get('text') || '')
+  const [text, setText] = useState(started)
   const [sending, setSending] = useState(false)
   const [problem, setProblem] = useState('')
   const marked = useRef(false)
@@ -84,6 +87,7 @@ export default function Chat() {
             placeholder="Write a message..."
             aria-label="Message"
             maxLength={2000}
+            autoFocus={Boolean(started)}
           />
           <button type="submit" className="send-btn" disabled={sending || !text.trim()} aria-label="Send message">
             <SendIcon />

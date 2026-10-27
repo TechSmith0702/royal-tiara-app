@@ -231,6 +231,7 @@ top and is **safe to run more than once**. To run one: Supabase dashboard →
 20. `migration-deliver-to-and-tracking.sql`
 21. `migration-pickup-points.sql`
 22. `migration-recipient-email.sql`
+23. `migration-change-delivery.sql`
 
 Then deploy both Edge Functions and set their secrets (section 8), sign up in
 the app, and make that account the admin:
@@ -543,11 +544,15 @@ Courier Guy, with street, suburb, city, province and postal code, or
 **collect at a branch**: a PUDO locker or PAXI point they type in, with "Find a PUDO locker" /
 "Find a PAXI point" links to each service's own map). Admin Sales and the invoice show who it goes
 to and who ordered it, and the tracking box fills in the courier (The Courier
-Guy, PUDO or PAXI). One delivery fee for every option. The app does not book
+Guy, PUDO or PAXI). One delivery fee for every option. Until an order is packed, the
+distributor can **Change delivery** on the order page (the same form, filled
+in; the admins are notified) and **Request a change to items**, which opens
+the chat with "Change request for RT-…:" started. Item changes are made by
+Royal Tiara, who agrees any extra payment or refund with the distributor. The app does not book
 the courier: the admin books it on the courier's website and types the
 tracking number in Sales.
 
-All 22 migrations have been run on the live database (check with section 7
+All 23 migrations have been run on the live database (check with section 7
 if in doubt).
 
 ### Still to do
