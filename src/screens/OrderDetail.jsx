@@ -372,6 +372,11 @@ export default function OrderDetail() {
               <strong className="item-amt">-{R(st.creditUsed)}</strong>
             </div>
           )}
+          {order.events.credit_added && (
+            <p className="hint mb-0">
+              After your change, {R(Number(order.events.credit_added))} became payable to you. It comes off your next order.
+            </p>
+          )}
           {/* Until packed: straight away while unpaid, as a request Royal Tiara approves once paid. */}
           {!editingItems && (st.canEditItems || st.canRequestChange) && (
             <button type="button" className="btn btn-outline btn-44 mt-6" onClick={startEditingItems}>
