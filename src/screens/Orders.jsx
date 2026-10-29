@@ -38,7 +38,7 @@ export default function Orders() {
               </div>
               <div className="row between center">
                 <span className="order-total">{R(o.total)}</span>
-                <span className="order-cta">{st.cancelled ? 'View' : st.hasProof ? 'Track' : 'Upload proof'} &rsaquo;</span>
+                <span className="order-cta">{st.cancelled ? 'View' : st.hasProof || st.verified ? 'Track' : 'Upload proof'} &rsaquo;</span>
               </div>
             </Link>
           )
