@@ -633,14 +633,21 @@ if in doubt).
    joined before the terms existed; the custom address `app.royaltiara.co.za`;
    an iPhone version (Apple $99/year plus Codemagic, section 11).
 
-### Moving to app.royaltiara.co.za (prepared, not done yet)
+### Moving to app.royaltiara.co.za (on hold)
 
-The app will move from `royaltiara.netlify.app` to **`app.royaltiara.co.za`**.
-The main website at royaltiara.co.za is not touched. The website code needs no
-change: sign-in and password emails use whatever address the app is opened
-from, and payfast-checkout already accepts any `*.royaltiara.co.za` return
-address. **Do it before the first Google Play upload**: the Play app has the
-address built in, so changing it later means a new app version.
+**Decision (29 Oct 2026): the app stays on `royaltiara.netlify.app`**, and the
+Play app launches with that address. Reason: royaltiara.co.za is registered to
+"HVS Hosting" (the web developer's hosting reseller), not to Royal Tiara, and
+only he can change its DNS at Webway. Revisit once the domain is in Dinah's
+name, or use a domain bought in her own name instead (the steps below are the
+same with that name). The domain renews 14 May 2027; info@ and orders@ email
+depend on it too.
+
+If it is done later: the main website at royaltiara.co.za is not touched. The
+website code needs no change: sign-in and password emails use whatever address
+the app is opened from, and payfast-checkout already accepts any
+`*.royaltiara.co.za` return address. The Play app has the address built in, so
+the switch means a new app version (Play updates phones automatically).
 
 **Order matters.** Do not add the domain in Netlify before step 1 is done:
 Netlify may start sending visitors to the new address, which must already work.
@@ -662,7 +669,7 @@ Netlify may start sending visitors to the new address, which must already work.
    maskableIconUrl, webManifestUrl, fullScopeUrl). In `twa`, run
    `npx @bubblewrap/cli@1.24.1 update`, **re-add `allowChromeToReadSplash()`**
    to LauncherActivity.java (section 11), build, and sign (`sign-app.cmd`).
-   Version can stay 1.0.0 (code 1) if it was never uploaded to Play.
+   Raise the version (twa-manifest appVersionName/appVersionCode) if it was already uploaded to Play.
    `public/.well-known/assetlinks.json` needs no change: the same file is served
    on the new address. Check it opens at
    `https://app.royaltiara.co.za/.well-known/assetlinks.json`.
