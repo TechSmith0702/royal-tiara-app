@@ -633,6 +633,49 @@ if in doubt).
    joined before the terms existed; the custom address `app.royaltiara.co.za`;
    an iPhone version (Apple $99/year plus Codemagic, section 11).
 
+### Moving to app.royaltiara.co.za (prepared, not done yet)
+
+The app will move from `royaltiara.netlify.app` to **`app.royaltiara.co.za`**.
+The main website at royaltiara.co.za is not touched. The website code needs no
+change: sign-in and password emails use whatever address the app is opened
+from, and payfast-checkout already accepts any `*.royaltiara.co.za` return
+address. **Do it before the first Google Play upload**: the Play app has the
+address built in, so changing it later means a new app version.
+
+**Order matters.** Do not add the domain in Netlify before step 1 is done:
+Netlify may start sending visitors to the new address, which must already work.
+
+1. **DNS (the web developer, who controls royaltiara.co.za at Webway):** add
+   one record: type **CNAME**, name **`app`**, value **`royaltiara.netlify.app`**
+   (TTL default). Check it with
+   `nslookup app.royaltiara.co.za` - it should mention `royaltiara.netlify.app`.
+2. **Netlify:** Domain management → **Add a domain** → `app.royaltiara.co.za` →
+   confirm. Wait until HTTPS shows a certificate (usually minutes), then make
+   it the **primary domain**. `royaltiara.netlify.app` keeps working and
+   forwards to it.
+3. **Supabase → Authentication → URL Configuration:** Site URL
+   `https://app.royaltiara.co.za`; Redirect URLs: add
+   `https://app.royaltiara.co.za/**` (keep the netlify.app and localhost ones).
+   Without this, confirmation and password-reset links open the wrong site.
+4. **Google Play app (twa/):** in `twa-manifest.json` replace every
+   `royaltiara.netlify.app` with `app.royaltiara.co.za` (host, iconUrl,
+   maskableIconUrl, webManifestUrl, fullScopeUrl). In `twa`, run
+   `npx @bubblewrap/cli@1.24.1 update`, **re-add `allowChromeToReadSplash()`**
+   to LauncherActivity.java (section 11), build, and sign (`sign-app.cmd`).
+   Version can stay 1.0.0 (code 1) if it was never uploaded to Play.
+   `public/.well-known/assetlinks.json` needs no change: the same file is served
+   on the new address. Check it opens at
+   `https://app.royaltiara.co.za/.well-known/assetlinks.json`.
+5. **Other places that mention the address:** `.env.native` (VITE_SITE_URL),
+   `capacitor.config.json` (allowNavigation), the store listing
+   (`twa/store-listing/LISTING.md`: privacy and delete-account links) and this
+   handbook.
+6. **Test:** sign in, password reset email link, a card payment's return page,
+   the PWA install button, and the rebuilt app on a phone (opens full screen,
+   no address bar).
+7. **Tell distributors** who installed the app from Chrome to install it again
+   from the new address (the old one still opens, then forwards).
+
 ### Rules for anyone changing the app (people and AI assistants)
 
 - **Never change product prices, the delivery fee, the joining fee or the
