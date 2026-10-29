@@ -7,7 +7,7 @@ const BUSINESS = 'Royal Tiara'
 const CONTACT_EMAIL = 'info@royaltiara.co.za'
 const INFORMATION_OFFICER = 'Dinah Smith'
 const BUSINESS_ADDRESS = 'Meyerton, Midvaal, Gauteng' // from royaltiara.co.za; add the street address if wanted
-const EFFECTIVE = '13 October 2026'
+const EFFECTIVE = '29 October 2026'
 
 /** A plain page that works signed in or out, opened in the app or from a link. */
 export function PolicyPage({ title, children }) {
@@ -55,7 +55,12 @@ export default function Privacy() {
       <ul>
         <li><strong>Your account details:</strong> name, business name, email address, phone number and delivery address, which you give us when you sign up as a distributor.</li>
         <li><strong>Your password,</strong> stored in scrambled form. Nobody at {BUSINESS} can see it.</li>
-        <li><strong>Your orders:</strong> what you ordered, the amounts, dates, delivery address and the order's progress.</li>
+        <li><strong>Your orders:</strong> what you ordered, the amounts, dates, delivery address and the order's progress, and any amount payable to you after an order change.</li>
+        <li>
+          <strong>Details of someone else receiving an order,</strong> if you send an order to another person: their
+          name, phone number, email address (optional), and their delivery address or the PUDO locker or PAXI point
+          they collect from. Please only give us someone's details with their permission.
+        </li>
         <li><strong>Proof of payment</strong> files you upload for bank transfers.</li>
         <li><strong>Your chat messages</strong> with {BUSINESS}.</li>
         <li><strong>A notification address for your device,</strong> only if you turn on phone notifications.</li>
@@ -82,7 +87,10 @@ export default function Privacy() {
         <li><strong>PayFast:</strong> processes card payments.</li>
         <li><strong>Your phone or browser's notification service</strong> (for example Google or Apple): delivers notifications you have turned on.</li>
         <li><strong>Our email provider:</strong> sends sign-up and password emails.</li>
-        <li><strong>Our courier:</strong> receives your name, phone number and delivery address to deliver your order.</li>
+        <li>
+          <strong>Couriers (The Courier Guy, PUDO and PAXI):</strong> receive the name, phone number and delivery
+          address or pickup point of the person receiving the order, and sometimes their email address, to deliver it.
+        </li>
       </ul>
       <p>
         Some of these providers store information outside South Africa, including in the European Union and the
@@ -99,8 +107,9 @@ export default function Privacy() {
       <ul>
         <li>Your account details, chat and notifications: until you delete your account or ask us to.</li>
         <li>
-          Orders, invoices and proofs of payment: for as long as tax and company law requires us to keep sales
-          records (generally at least five years), even after an account is deleted. After that they are deleted.
+          Orders, invoices and proofs of payment, including the details of anyone an order was sent to: for as long
+          as tax and company law requires us to keep sales records (generally at least five years), even after an
+          account is deleted. After that they are deleted.
         </li>
       </ul>
 
