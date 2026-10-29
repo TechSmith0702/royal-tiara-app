@@ -1,11 +1,10 @@
 import { useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { signOut, useAuth } from '../../lib/auth.jsx'
-import { Avatar } from '../../components/ui.jsx'
 import NotificationBell from '../../components/NotificationBell.jsx'
 import AppMenu from '../../components/AppMenu.jsx'
 import { BagIcon, ChatIcon, ReceiptIcon, UserIcon } from '../../components/Icons.jsx'
-import { fetchApplications } from '../../lib/db.js'
+import { fetchApplications, fetchThreads } from '../../lib/db.js'
 import { useLive } from '../../lib/live.js'
 import Applications from './Applications.jsx'
 import Sales from './Sales.jsx'
@@ -30,6 +29,9 @@ export default function Admin() {
   const scrollRef = useRef(null)
   const { data: people } = useLive(fetchApplications, ['profiles'], [])
   const pending = (people || []).filter(p => p.status === 'pending').length
+  // Messages from distributors the admin has not read yet, across every chat.
+  const { data: threads } = useLive(() => fetchThreads(user.id), ['messages', 'profiles'], [user.id])
+  const unread = (threads || []).reduce((t, x) => t + x.unread, 0)
   const requested = params.get('tab')
   const tab = TABS.some(t => t.value === requested) ? requested : 'apps'
 
@@ -68,7 +70,7 @@ export default function Admin() {
       <nav className="tabbar" aria-label="Admin sections">
         {TABS.map(({ value, label, Icon }) => {
           const active = value === tab
-          const badge = value === 'apps' ? pending : 0
+          const badge = value === 'apps' ? pending : value === 'chat' ? unread : 0
           return (
             <button
               key={value}
