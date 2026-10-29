@@ -79,7 +79,9 @@ Deno.serve(async req => {
       await webpush.sendNotification(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
         JSON.stringify(push),
-        { TTL: 60 * 60 * 24 },
+        // "high": Android delivers it at once, even when the phone is idle.
+        // Without it, idle phones batch notifications and they arrive minutes late.
+        { TTL: 60 * 60 * 24, urgency: 'high' },
       )
     } catch (e) {
       const status = (e as { statusCode?: number }).statusCode
