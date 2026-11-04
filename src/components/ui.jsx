@@ -38,6 +38,22 @@ export function PasswordInput({ className = 'field', ...props }) {
   )
 }
 
+/** The emailed sign-up or password code. Digits only; phones offer it from the email. */
+export function CodeInput({ value, onChange, ...props }) {
+  return (
+    <input
+      {...props}
+      className="field code-field"
+      inputMode="numeric"
+      autoComplete="one-time-code"
+      placeholder="000000"
+      maxLength={10}
+      value={value}
+      onChange={e => onChange(e.target.value.replace(/\D/g, ''))}
+    />
+  )
+}
+
 export function ActiveDot({ label = 'Active' }) {
   return <span className="active-dot"><span className="dot" />{label}</span>
 }

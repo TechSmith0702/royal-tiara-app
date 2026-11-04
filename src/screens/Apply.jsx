@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { signIn, signUp } from '../lib/auth.jsx'
+import { resendSignUpCode, signIn, signUp, verifySignUpCode } from '../lib/auth.jsx'
 import { JOINING_FEE, fetchFees, monthlyMinLabel } from '../lib/db.js'
 import { useLive } from '../lib/live.js'
 import { R, WHATSAPP_DISPLAY } from '../lib/format.js'
-import { BackButton, PasswordInput, Segmented } from '../components/ui.jsx'
+import { BackButton, CodeInput, PasswordInput, Segmented } from '../components/ui.jsx'
 import { TERMS_VERSION } from './Terms.jsx'
 
 const FIELDS = [
@@ -43,6 +43,8 @@ export default function Apply() {
   const [done, setDone] = useState(null)
   const [checking, setChecking] = useState(false)
   const [confirmError, setConfirmError] = useState('')
+  const [confirmNote, setConfirmNote] = useState('')
+  const [code, setCode] = useState('')
   const lastTry = useRef(0)
 
   // Once the email is confirmed (often in the email app, not here), signing in
@@ -74,6 +76,37 @@ export default function Apply() {
       window.removeEventListener('focus', back)
     }
   }, [done, trySignIn])
+
+  // The emailed code confirms the email and signs them in, so the app moves on
+  // to the waiting screen without leaving for a browser.
+  const confirmCode = async e => {
+    e.preventDefault()
+    setConfirmError('')
+    setConfirmNote('')
+    if (code.length < 6) {
+      setConfirmError('Type the code from the email.')
+      return
+    }
+    setChecking(true)
+    try {
+      await verifySignUpCode(done.email, code)
+    } catch (err) {
+      setConfirmError(err.message)
+      setChecking(false)
+    }
+  }
+
+  const resendCode = async () => {
+    setConfirmError('')
+    setConfirmNote('')
+    try {
+      await resendSignUpCode(done.email)
+      setCode('')
+      setConfirmNote('We sent a new code to ' + done.email + '.')
+    } catch (err) {
+      setConfirmError(err.message)
+    }
+  }
 
   const submit = async e => {
     e.preventDefault()
@@ -133,7 +166,7 @@ export default function Apply() {
             <h3 className="h3">Application received</h3>
             <p className="success-text">
               {done.needsEmailConfirmation
-                ? 'Please confirm your email address first - we sent you a link. After that, Royal Tiara reviews trade accounts within one working day.'
+                ? 'Please confirm your email address first: we emailed a code to ' + done.email + '. After that, Royal Tiara reviews trade accounts within one working day.'
                 : 'Royal Tiara reviews trade accounts within one working day. You can chat to us in the app in the meantime.'}
             </p>
             {!done.noFee && <p className="success-text">
@@ -142,12 +175,18 @@ export default function Apply() {
                 : 'Send your ' + R(joiningFee ?? JOINING_FEE) + ' joining-fee proof on WhatsApp (' + WHATSAPP_DISPLAY + ') so we can activate your account.'}
             </p>}
             {done.needsEmailConfirmation && (
-              <>
-                <button type="button" className="btn btn-primary" disabled={checking} onClick={() => trySignIn(true)}>
-                  {checking ? 'Checking...' : "I've confirmed my email"}
-                </button>
+              <form className="stack gap-12" onSubmit={confirmCode} noValidate>
+                <label className="field-label">
+                  Code from the email
+                  <CodeInput value={code} onChange={setCode} />
+                </label>
                 {confirmError && <p className="form-error mb-0" role="alert">{confirmError}</p>}
-              </>
+                {confirmNote && <p className="form-note mb-0" role="status">{confirmNote}</p>}
+                <button type="submit" className="btn btn-primary" disabled={checking}>
+                  {checking ? 'Checking...' : 'Confirm my email'}
+                </button>
+                <button type="button" className="text-btn center-self" onClick={resendCode}>Send a new code</button>
+              </form>
             )}
             <Link to="/signin" className={done.needsEmailConfirmation ? 'btn btn-outline' : 'btn btn-sage'}>Back to sign in</Link>
           </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { sendPasswordReset, signIn, wasJustDeleted } from '../lib/auth.jsx'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import InstallCard from '../components/InstallCard.jsx'
@@ -10,6 +10,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
   const [note, setNote] = useState(() => (wasJustDeleted() ? 'Your account has been deleted.' : ''))
 
   const submit = async e => {
@@ -35,7 +36,7 @@ export default function SignIn() {
     }
     try {
       await sendPasswordReset(email)
-      setNote('Check your email. The link opens a page where you choose a new password.')
+      navigate('/new-password', { state: { email: email.trim() } })
     } catch (err) {
       setError(err.message)
     }

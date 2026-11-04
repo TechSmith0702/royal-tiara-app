@@ -103,6 +103,7 @@ as members so the business never depends on one person.**
 | iPhone cloud builds | Codemagic, connected to the GitHub repo | Free monthly Mac minutes |
 | Royal Tiara's domain and email | Webway (cPanel), `royaltiara.co.za` | Mail server `mail.royaltiara.co.za` |
 | Emails the app sends (sign-up, password reset) | Supabase → Authentication → Emails → SMTP Settings | Currently Thando's Gmail (smtp.gmail.com, a Google App Password called "Royal Tiara app"), because mail from `info@royaltiara.co.za` was accepted but never delivered (section 17) |
+| Wording of the sign-up and password emails | Supabase → Authentication → Emails → Templates ("Confirm signup", "Reset Password") | Copies in `supabase/email-templates/`. They must keep `{{ .Token }}`: the app asks for that code so nobody leaves the app. Email OTP length (Authentication → Providers → Email) is 6 |
 
 **Settings the website needs** (Netlify → Project configuration → Environment
 variables; the same names go in a local `.env` file, see `.env.example`):

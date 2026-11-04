@@ -1,0 +1,39 @@
+<!-- Supabase -> Authentication -> Email Templates -> Confirm signup.
+     Subject: Your Royal Tiara confirmation code
+     The app asks for the code; the link is a backup that opens the website. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5ead8;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#201e1d;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:32px 28px;">
+        <tr>
+          <td align="center" style="padding-bottom:20px;">
+            <img src="https://royaltiara.netlify.app/logo.png" width="180" alt="Royal Tiara" style="display:block;border:0;width:180px;height:auto;">
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size:22px;font-weight:bold;padding-bottom:10px;">Confirm your email</td>
+        </tr>
+        <tr>
+          <td style="font-size:15px;line-height:1.5;padding-bottom:20px;">
+            Thank you for signing up as a Royal Tiara distributor. Type this code in the app to confirm your email address:
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding-bottom:20px;">
+            <div style="display:inline-block;background:#f5ead8;border-radius:14px;padding:14px 24px;font-size:32px;font-weight:bold;letter-spacing:8px;color:#201e1d;">{{ .Token }}</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;line-height:1.5;color:#6b6866;padding-bottom:18px;">
+            The code works once and expires after an hour. After that, Royal Tiara reviews your application within one working day. If you did not sign up, ignore this email.
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;line-height:1.5;color:#6b6866;border-top:1px solid #eee3d3;padding-top:16px;">
+            Not using the app? <a href="{{ .ConfirmationURL }}" style="color:#c67139;font-weight:bold;">Confirm on the website instead</a>.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

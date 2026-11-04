@@ -80,6 +80,8 @@ function friendly(message) {
   const m = (message || '').toLowerCase()
   if (m.includes('invalid login')) return 'That email or password is not right.'
   if (m.includes('email not confirmed')) return 'Please confirm your email address first - check your inbox.'
+  if (m.includes('expired or is invalid')) return 'That code is not right, or it has expired. Check the email, or ask for a new code.'
+  if (m.includes('for security purposes')) return 'Please wait a minute before asking for another code.'
   if (m.includes('already registered')) return 'That email already has an account. Try signing in instead.'
   if (m.includes('password')) return 'Your password must be at least 6 characters.'
   return message || 'Something went wrong. Please try again.'
@@ -116,7 +118,32 @@ export async function signUp(form) {
   return { needsEmailConfirmation: !data.session }
 }
 
-/** Used by the "forgot password" link, and by Account later on. */
+// The confirmation and reset emails carry a code as well as a link. Typing the
+// code keeps the distributor inside the app; the link opens a browser tab.
+const cleanCode = code => code.replace(/\D/g, '')
+
+/** Confirms a new account with the emailed code, which also signs them in. */
+export async function verifySignUpCode(email, code) {
+  const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: cleanCode(code), type: 'signup' })
+  if (error) throw new Error(friendly(error.message))
+}
+
+export async function resendSignUpCode(email) {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email: email.trim(),
+    options: { emailRedirectTo: publicUrl('/pending?confirmed=1') },
+  })
+  if (error) throw new Error(friendly(error.message))
+}
+
+/** Checks the "forgot password" code and signs them in to choose a new password. */
+export async function verifyResetCode(email, code) {
+  const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: cleanCode(code), type: 'recovery' })
+  if (error) throw new Error(friendly(error.message))
+}
+
+/** Used by the "forgot password" screen, and by Account later on. */
 export async function setNewPassword(password) {
   const { error } = await supabase.auth.updateUser({ password })
   if (error) throw new Error(friendly(error.message))
