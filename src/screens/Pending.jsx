@@ -3,6 +3,7 @@ import { signOut, useAuth } from '../lib/auth.jsx'
 import { fetchFees } from '../lib/db.js'
 import { WHATSAPP_DISPLAY, waLink } from '../lib/format.js'
 import { useLive } from '../lib/live.js'
+import { canOpenPlayApp, playAppLink } from '../lib/platform.js'
 import BankDetails from '../components/BankDetails.jsx'
 
 export default function Pending() {
@@ -22,6 +23,9 @@ export default function Pending() {
         <div className="signin-logo"><img className="logo-img logo-sm" src="/logo.webp" alt="Royal Tiara" width="640" height="351" /></div>
 
         {justConfirmed && !declined && <p className="form-note mb-0" role="status">Your email is confirmed.</p>}
+        {justConfirmed && canOpenPlayApp() && (
+          <a className="btn btn-primary" href={playAppLink('/pending')}>Open the Royal Tiara app</a>
+        )}
 
         <div className={declined ? 'card card-pad stack gap-12' : 'success-card stack gap-12'}>
           <h2 className="h3">{declined ? 'Application not approved' : 'Application under review'}</h2>

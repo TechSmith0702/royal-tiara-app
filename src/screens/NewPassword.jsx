@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setNewPassword, useAuth } from '../lib/auth.jsx'
 import { PasswordInput } from '../components/ui.jsx'
+import { canOpenPlayApp, playAppLink } from '../lib/platform.js'
 
 /**
  * Where the "forgot password" email link lands. Supabase signs the person in
@@ -14,6 +15,9 @@ export default function NewPassword() {
   const [again, setAgain] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // Set once saved, when the reset link opened in a browser tab but the
+  // distributor uses the Google Play app: offer to go back to it.
+  const [doneNext, setDoneNext] = useState('')
 
   const save = async e => {
     e.preventDefault()
@@ -29,7 +33,9 @@ export default function NewPassword() {
     setBusy(true)
     try {
       await setNewPassword(password)
-      navigate(user.role === 'admin' ? '/admin' : '/account?saved=password', { replace: true })
+      const next = user.role === 'admin' ? '/admin' : '/account?saved=password'
+      if (canOpenPlayApp()) setDoneNext(next)
+      else navigate(next, { replace: true })
     } catch (err) {
       setError(err.message)
       setBusy(false)
@@ -43,7 +49,16 @@ export default function NewPassword() {
       </div>
 
       <div className="signin-body">
-        {!user ? (
+        {doneNext ? (
+          <div className="stack gap-14">
+            <div>
+              <h1 className="title-sm mb-2">Password changed</h1>
+              <p className="hint mb-0">You are signed in with your new password.</p>
+            </div>
+            <a className="btn btn-primary" href={playAppLink(doneNext)}>Open the Royal Tiara app</a>
+            <Link className="btn btn-outline" to={doneNext} replace>Continue here</Link>
+          </div>
+        ) : !user ? (
           <div className="stack gap-14">
             <p className="lede mb-0">That link has expired.</p>
             <p className="hint mb-0">
