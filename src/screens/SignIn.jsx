@@ -11,6 +11,7 @@ export default function SignIn() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const [sending, setSending] = useState(false)
   const [note, setNote] = useState(() => (wasJustDeleted() ? 'Your account has been deleted.' : ''))
 
   const submit = async e => {
@@ -34,11 +35,14 @@ export default function SignIn() {
       setError('Type your email address first, then tap this again.')
       return
     }
+    // Sending the email takes a few seconds.
+    setSending(true)
     try {
       await sendPasswordReset(email)
       navigate('/new-password', { state: { email: email.trim() } })
     } catch (err) {
       setError(err.message)
+      setSending(false)
     }
   }
 
@@ -80,7 +84,9 @@ export default function SignIn() {
           <button type="submit" className="btn btn-dark" disabled={busy}>
             {busy ? 'Signing in...' : 'Sign in'}
           </button>
-          <button type="button" className="text-btn center-self" onClick={reset}>Forgot password?</button>
+          <button type="button" className="text-btn center-self" onClick={reset} disabled={sending}>
+            {sending ? 'Sending a code...' : 'Forgot password?'}
+          </button>
         </form>
 
         <Link to="/apply" className="btn btn-sage">Sign up as a distributor</Link>

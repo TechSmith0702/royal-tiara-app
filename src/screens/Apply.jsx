@@ -98,12 +98,13 @@ export default function Apply() {
 
   const resendCode = async () => {
     setConfirmError('')
-    setConfirmNote('')
+    setConfirmNote('Sending a new code...')
     try {
       await resendSignUpCode(done.email)
       setCode('')
       setConfirmNote('We sent a new code to ' + done.email + '.')
     } catch (err) {
+      setConfirmNote('')
       setConfirmError(err.message)
     }
   }

@@ -57,11 +57,13 @@ export default function NewPassword() {
       setError('Type the email address of your account first.')
       return
     }
+    setNote('Sending a new code...')
     try {
       await sendPasswordReset(email)
       setCode('')
       setNote('We sent a new code to ' + email.trim() + '.')
     } catch (err) {
+      setNote('')
       setError(err.message)
     }
   }
