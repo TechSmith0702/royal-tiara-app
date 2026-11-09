@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+  Shown by sw.js when a page is opened with no internet connection, instead of
+  the browser's own "no internet" page. Self-contained: only this file and
+  /logo.webp are stored on the phone. It reloads by itself once the
+  connection is back.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5ead8" />
+  <title>Royal Tiara - offline</title>
+  <style>
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: #f5ead8;
+      color: #201e1d;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    main { max-width: 340px; width: 100%; }
+    img { width: 220px; max-width: 70%; height: auto; margin-bottom: 28px; }
+    h1 { font-size: 24px; margin: 0 0 10px; }
+    p { font-size: 15.5px; line-height: 1.5; color: rgba(32, 30, 29, .7); margin: 0 0 28px; }
+    button {
+      width: 100%;
+      height: 54px;
+      border: 0;
+      border-radius: 999px;
+      background: #c67139;
+      color: #fff;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:active { background: #b2622d; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/logo.webp" alt="Royal Tiara" width="640" height="351" />
+    <h1>You're offline</h1>
+    <p>Royal Tiara needs an internet connection. Check your mobile data or Wi-Fi, then try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+  </main>
+  <script>
+    // Come back by itself as soon as the phone is online again.
+    window.addEventListener('online', () => location.reload())
+  </script>
+</body>
+</html>

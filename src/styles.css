@@ -48,6 +48,13 @@ p { margin: 0; }
 
 /* ---------- app shell ---------- */
 .app { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: var(--ground); position: relative; }
+/* Floats over the top of the screen, so the full-height screens keep their layout. */
+.offline-banner {
+  position: fixed; top: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; z-index: 60;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+  background: var(--ink); color: var(--cream);
+  font-size: 13.5px; font-weight: 600; text-align: center;
+}
 @media (min-width: 520px) { .app { box-shadow: 0 0 60px rgba(32, 30, 29, .12); } }
 
 .screen { height: 100dvh; display: flex; flex-direction: column; background: var(--ground); animation: rtfade .22s ease; }

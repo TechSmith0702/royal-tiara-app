@@ -27,6 +27,7 @@ import AdminSettings from './screens/admin/Settings.jsx'
 import AdminConversation from './screens/admin/AdminConversation.jsx'
 import ProductEditor from './screens/admin/ProductEditor.jsx'
 import InstallApp from './screens/InstallApp.jsx'
+import OfflineBanner from './components/OfflineBanner.jsx'
 import DeleteAccount from './screens/DeleteAccount.jsx'
 import Privacy, { DeleteAccountHelp } from './screens/Privacy.jsx'
 import Terms from './screens/Terms.jsx'
@@ -100,6 +101,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <OfflineBanner />
       <Routes>
         <Route path="/" element={<Navigate to={home} replace />} />
         <Route path="/signin" element={user ? <Navigate to={home} replace /> : <SignIn />} />
