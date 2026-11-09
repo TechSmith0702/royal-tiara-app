@@ -17,13 +17,13 @@ Royal Tiara
 **Short description** (max 80)
 
 ```
-Order Royal Tiara hair care at trade prices, pay securely and track deliveries.
+Order Royal Tiara products at distributor prices, pay securely and track orders.
 ```
 
 **Full description** (max 4000)
 
 ```
-Royal Tiara is the ordering app for Royal Tiara's approved distributors and resellers. Order our hair-care range at distributor prices, pay securely, and follow every order until it reaches your door.
+Royal Tiara is the ordering app for Royal Tiara's approved distributors and resellers. Order the full Royal Tiara range at distributor prices, pay securely, and follow every order until it reaches your door.
 
 HOW IT WORKS
 1. Sign up as a distributor in the app. It only takes a few minutes.
@@ -32,7 +32,7 @@ HOW IT WORKS
 4. Start ordering at distributor prices.
 
 ORDER IN A FEW TAPS
-• The full Royal Tiara range with photos, sizes and your trade prices
+• The full Royal Tiara range with photos, sizes and your distributor prices
 • See what is moving fast and what is out of stock
 • Your cart is saved, and totals with delivery are worked out for you
 
