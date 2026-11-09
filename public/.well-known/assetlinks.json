@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "za.co.royaltiara.trade",
       "sha256_cert_fingerprints": [
-        "F5:AD:E6:C5:C5:CB:B6:37:A9:47:F9:3D:E4:FF:45:22:1A:31:FB:52:38:4A:F9:CC:D4:1E:4F:EA:1E:FD:26:ED"
+        "F5:AD:E6:C5:C5:CB:B6:37:A9:47:F9:3D:E4:FF:45:22:1A:31:FB:52:38:4A:F9:CC:D4:1E:4F:EA:1E:FD:26:ED",
+        "EC:C1:FF:77:7B:4B:57:1E:07:3D:64:C2:DD:35:8F:6F:ED:9D:08:69:E4:F4:02:80:D9:31:A7:4C:14:EB:C6:B6"
       ]
     }
   }

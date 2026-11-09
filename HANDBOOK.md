@@ -602,12 +602,14 @@ if in doubt).
       which can take a while to get) skips that.
    2. Create the app, then upload `RoyalTiara.aab` to a testing track.
       Let Google manage the app signing key (Play App Signing).
-   3. **Straight after the first upload:** Play Console → Test and release →
-      App integrity → App signing → copy the **SHA-256** of the app signing
-      key, add it as a second entry in `sha256_cert_fingerprints` in
-      `public/.well-known/assetlinks.json` (keep the existing one), push and
-      Trigger deploy. Without this, the copy installed from Play shows an
-      address bar at the top.
+   3. **Straight after the first upload:** Play Console → Protected with Play
+      → Play Store protection → Manage Play app signing → copy the **SHA-256**
+      of the **app signing key** (not the upload key), add it as a second entry
+      in `sha256_cert_fingerprints` in `public/.well-known/assetlinks.json`
+      (keep the existing one), push and Trigger deploy. Without this, the copy
+      installed from Play shows an address bar at the top. **Done 9 Nov 2026:**
+      Google's key is `EC:C1:FF:…:C6:B6` (account "iTee Solutions", Thando's
+      Gmail; app created, internal test release 1 (1.0.0) uploaded).
    4. Store listing: app name, short description (80 characters), full
       description, 512×512 icon (`public/splash-logo-512.png`, or
       `public/app-icon.png` resized), 1024×500 feature graphic, at least two
