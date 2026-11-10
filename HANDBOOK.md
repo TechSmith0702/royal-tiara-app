@@ -388,10 +388,23 @@ Still to do, in order:
 2. **Apple Developer Program** ($99/year) at developer.apple.com. As an
    individual, Apple shows the owner's legal name as the seller; a business
    name needs a registered company with a D-U-N-S number.
-3. **Native push notifications** (Apple push key + `@capacitor/push-notifications`
-   + sending from the `notify` Edge Function). Without them the app says
-   "notifications are not available in this version", and an app that only
-   shows a website is the most common reason Apple rejects apps (guideline 4.2).
+3. **Native push notifications.** Code done (10 Nov 2026): the iPhone app
+   asks Apple for a token (`src/lib/push.js`, `@capacitor/push-notifications`,
+   `ios/App/App/App.entitlements`), saves it in `native_push_tokens`
+   (`supabase/migration-native-push.sql`), and `push-send` sends to it through
+   APNs next to Web Push. An app that only shows a website is the most common
+   reason Apple rejects apps (guideline 4.2); this is the main native feature.
+   Left to switch it on, once the developer account exists:
+   - Run `migration-native-push.sql` in the Supabase SQL Editor.
+   - developer.apple.com → Certificates, IDs & Profiles → **Identifiers**:
+     register `za.co.royaltiara.trade` with **Push Notifications** ticked.
+   - **Keys** → new key with **Apple Push Notifications service (APNs)** →
+     download the `.p8` (only downloadable once; keep it with the keystore
+     backup). Note the Key ID and the Team ID (top right of the page).
+   - Supabase secrets: `APNS_KEY` (the whole .p8 file), `APNS_KEY_ID`,
+     `APNS_TEAM_ID`. Then deploy: `supabase functions deploy push-send --no-verify-jwt`.
+   - Test from TestFlight on an iPhone: Notifications → gear → Turn on
+     notifications, then send a chat message from the admin side.
 4. **Joining fee:** Apple may treat a paid membership as something that must
    use its in-app purchase (15-30% fee). Products paid through PayFast are
    fine. Safest: in the iPhone app, take the joining fee outside the app (EFT

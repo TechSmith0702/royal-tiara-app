@@ -74,8 +74,9 @@ export default function PushCard({ audience = 'distributor' }) {
 
       {status === 'blocked' && (
         <p className="body-muted mb-0">
-          Notifications are blocked for Royal Tiara. To allow them, open your phone or browser settings, find this
-          site or app, and switch notifications on.
+          {isNativeApp
+            ? <>Notifications are switched off for Royal Tiara. To allow them, open <strong>Settings</strong> on your phone, tap <strong>Royal Tiara</strong>, then <strong>Notifications</strong>.</>
+            : 'Notifications are blocked for Royal Tiara. To allow them, open your phone or browser settings, find this site or app, and switch notifications on.'}
         </p>
       )}
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import { useAuth } from './lib/auth.jsx'
-import { resumePush } from './lib/push.js'
+import { onNotificationTap, resumePush } from './lib/push.js'
 import { isSupabaseConfigured } from './lib/supabase.js'
 import SignIn from './screens/SignIn.jsx'
 import Apply from './screens/Apply.jsx'
@@ -88,6 +88,10 @@ function RequireSignedIn() {
 export default function App() {
   const { user, ready } = useAuth()
   const userId = user ? user.id : null
+  const navigate = useNavigate()
+
+  // App Store app: tapping a notification opens the page it is about.
+  useEffect(() => onNotificationTap(link => navigate(link)), [navigate])
 
   // A phone that already allows notifications is linked to whoever signs in.
   useEffect(() => {
