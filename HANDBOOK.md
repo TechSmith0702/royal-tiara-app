@@ -364,6 +364,45 @@ real iPhones needs Apple's Developer Program ($99/year), then TestFlight and
 the App Store. On iPhone, PayFast returns via `public/app-return.html`
 because PayFast only accepts `https://` return addresses.
 
+Unlike the Google Play app, the iPhone app carries its own copy of the app
+code (`npm run ios:build`), so website changes only reach it with a new
+App Store build. Codemagic runs `ios:build` itself, so a build always uses the
+latest code on GitHub.
+
+**iPhone App Store: where it stands (10 Nov 2026)**
+
+Done (free):
+- Capacitor project in `ios/`, bundle ID `za.co.royaltiara.trade` (same as Play).
+- Name "Royal Tiara", icon 1024x1024 with no transparency, cream splash.
+- iPhone only, portrait only (like the Play app). iPads still run it, and
+  Apple does not ask for iPad screenshots.
+- Camera and photo permission texts (proof of payment), encryption question
+  answered (`ITSAppUsesNonExemptEncryption` = false).
+- Account deletion in the app, privacy policy and terms pages, reviewer account
+  (John Doe), email codes that keep sign-up and password reset in the app.
+
+Still to do, in order:
+1. **Decide:** enough iPhone distributors to justify $99 a year? Until then,
+   iPhone users add the website to their home screen (Safari → Share → Add to
+   Home Screen), which also gets notifications on iOS 16.4+.
+2. **Apple Developer Program** ($99/year) at developer.apple.com. As an
+   individual, Apple shows the owner's legal name as the seller; a business
+   name needs a registered company with a D-U-N-S number.
+3. **Native push notifications** (Apple push key + `@capacitor/push-notifications`
+   + sending from the `notify` Edge Function). Without them the app says
+   "notifications are not available in this version", and an app that only
+   shows a website is the most common reason Apple rejects apps (guideline 4.2).
+4. **Joining fee:** Apple may treat a paid membership as something that must
+   use its in-app purchase (15-30% fee). Products paid through PayFast are
+   fine. Safest: in the iPhone app, take the joining fee outside the app (EFT
+   proof on WhatsApp) or keep it at R0.
+5. **Codemagic signing workflow:** add the App Store Connect API key in
+   Codemagic, then a workflow that signs the build and uploads it to
+   TestFlight. Test on a real iPhone through TestFlight.
+6. **App Store Connect listing:** reuse `twa/store-listing` texts; iPhone
+   screenshots (6.9" size); privacy answers (same as Play's data safety);
+   reviewer sign-in details.
+
 **Icons and splash screens:** `python scripts/generate-app-icons.py`
 (needs Pillow) after changing `public/app-icon.png` or `public/logo.png`.
 
