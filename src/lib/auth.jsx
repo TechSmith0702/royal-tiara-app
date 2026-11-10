@@ -89,7 +89,14 @@ function friendly(message) {
 
 export async function signIn(email, password) {
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-  if (error) throw new Error(friendly(error.message))
+  if (error) {
+    const err = new Error(friendly(error.message))
+    // Signed up but never typed the emailed code: the sign-in screen offers it again.
+    if (error.code === 'email_not_confirmed' || /email not confirmed/i.test(error.message || '')) {
+      err.unconfirmed = true
+    }
+    throw err
+  }
 }
 
 export async function signUp(form) {
