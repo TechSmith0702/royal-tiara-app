@@ -38,3 +38,52 @@ workflows:
             build
     artifacts:
       - build/Build/Products/Debug-iphonesimulator/*.app
+
+  # Signs the iPhone app and uploads it to TestFlight (App Store Connect).
+  # Needs, once (see HANDBOOK section 11):
+  #   - Codemagic: Team/Personal settings -> Integrations -> Developer Portal ->
+  #     add the App Store Connect API key with the name below.
+  #   - The app ID za.co.royaltiara.trade (with Push Notifications) on
+  #     developer.apple.com, and the app created in App Store Connect.
+  # Codemagic makes the signing certificate and profile itself.
+  ios-release:
+    name: iPhone release (TestFlight)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Royal Tiara App Store Connect
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: za.co.royaltiara.trade
+      vars:
+        VITE_SUPABASE_URL: https://zfeqbhoqdcrrcxfwrctb.supabase.co
+        VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_w6HyULBcrgrbF7Uf2ape5w_V4XedmCO
+        # Real payments, like the live website.
+        VITE_PAYFAST_MODE: live
+    scripts:
+      - name: Install packages
+        script: npm ci
+      - name: Build the app and copy it into the iPhone project
+        script: npm run ios:build
+      - name: Use the signing profile Codemagic made
+        script: xcode-project use-profiles
+      - name: Build the signed app
+        # Each upload needs a higher build number; Codemagic's build counter
+        # goes up by one every build. The version people see stays in
+        # MARKETING_VERSION in the Xcode project (1.0 for now).
+        script: |
+          xcode-project build-ipa \
+            --project ios/App/App.xcodeproj \
+            --scheme App \
+            --archive-xcargs "CURRENT_PROJECT_VERSION=$BUILD_NUMBER"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Shows up in TestFlight for internal testers after Apple's quick
+        # automatic check (no App Store review for internal testers).
+        submit_to_testflight: true

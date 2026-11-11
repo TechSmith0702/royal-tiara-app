@@ -409,12 +409,22 @@ Still to do, in order:
    use its in-app purchase (15-30% fee). Products paid through PayFast are
    fine. Safest: in the iPhone app, take the joining fee outside the app (EFT
    proof on WhatsApp) or keep it at R0.
-5. **Codemagic signing workflow:** add the App Store Connect API key in
-   Codemagic, then a workflow that signs the build and uploads it to
-   TestFlight. Test on a real iPhone through TestFlight.
-6. **App Store Connect listing:** reuse `twa/store-listing` texts; iPhone
-   screenshots (6.9" size); privacy answers (same as Play's data safety);
-   reviewer sign-in details.
+5. **Codemagic signing workflow:** written (`codemagic.yaml`, workflow
+   "iPhone release (TestFlight)"). To make it work:
+   - App Store Connect → Users and Access → **Integrations** → App Store
+     Connect API → Team Keys → generate a key with **App Manager** access.
+     Download the `.p8` (once only), note the Issuer ID and Key ID.
+   - Codemagic → Personal settings → **Integrations** → Developer Portal →
+     Manage keys → add it with the name **Royal Tiara App Store Connect**
+     (must match `codemagic.yaml`).
+   - Start the "iPhone release (TestFlight)" build. Codemagic creates the
+     signing certificate and profile, builds and uploads to TestFlight.
+   - TestFlight → add your mum as an internal tester → she installs
+     **TestFlight** on her iPhone and taps the invite.
+6. **App Store Connect listing:** all texts and answers are in
+   `ios/store-listing/APP-STORE.md` (description, keywords, privacy answers,
+   reviewer notes). Still needed: iPhone screenshots (6.9", 1320 x 2868).
+   Enrolment paid 11 Nov 2026 (Apple said up to 2 business days).
 
 **Icons and splash screens:** `python scripts/generate-app-icons.py`
 (needs Pillow) after changing `public/app-icon.png` or `public/logo.png`.
