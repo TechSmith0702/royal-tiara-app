@@ -417,8 +417,17 @@ Still to do, in order:
    - Codemagic → Personal settings → **Integrations** → Developer Portal →
      Manage keys → add it with the name **Royal Tiara App Store Connect**
      (must match `codemagic.yaml`).
-   - Start the "iPhone release (TestFlight)" build. Codemagic creates the
-     signing certificate and profile, builds and uploads to TestFlight.
+   - Signing files (done 13 Nov 2026; renew yearly, the certificate expires
+     13 Nov 2027): Codemagic → Personal settings → codemagic.yaml settings →
+     Code signing identities → **iOS certificates → Generate certificate**
+     (Apple Distribution, key above; the .p12 and its password are kept with
+     the keystore backup). Then developer.apple.com → Profiles → + →
+     **App Store Connect** → `za.co.royaltiara.trade` → that certificate →
+     name `Royal Tiara App Store`. Then back in Codemagic → **iOS
+     provisioning profiles → Fetch profiles** → download it. Without these
+     the build stops with "No matching profiles found".
+   - Start the "iPhone release (TestFlight)" build. It builds, signs and
+     uploads to TestFlight.
    - TestFlight → add your mum as an internal tester → she installs
      **TestFlight** on her iPhone and taps the invite.
 6. **App Store Connect listing:** all texts and answers are in
