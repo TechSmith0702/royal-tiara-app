@@ -14,8 +14,6 @@ export default function Account() {
   const savedPassword = params.get('saved') === 'password'
   const { data: orders } = useLive(fetchOrders, ['orders'], [])
   const count = (orders || []).length
-  // Not packed yet (packed, delivered and cancelled orders all have a fulfil value).
-  const openOrders = (orders || []).filter(o => !o.fulfil)
 
   return (
     <div className="screen">
@@ -42,7 +40,7 @@ export default function Account() {
           </div>
         </section>
 
-        <AddressCard user={user} title="Delivery address" openOrders={openOrders} />
+        <AddressCard user={user} title="Delivery address" />
 
         <nav className="menu">
           <Link to="/orders" className="menu-row">

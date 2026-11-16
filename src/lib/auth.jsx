@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { publicUrl } from './platform.js'
 import { disablePush } from './push.js'
 import { supabase } from './supabase.js'
 
-const AuthContext = createContext({ session: null, user: null, ready: false, refreshUser: async () => {} })
+const AuthContext = createContext({ session: null, user: null, ready: false })
 
 export const mapProfile = row => ({
   id: row.id,
@@ -32,9 +32,6 @@ export function AuthProvider({ children }) {
   // anyone as signed out - otherwise a page opened directly at a deep link
   // (a notification, or PayFast sending the buyer back) bounces to sign-in.
   const [sessionChecked, setSessionChecked] = useState(false)
-  // Reloads the profile now, e.g. right after the distributor saves it, instead
-  // of waiting for the live update (which can be slow or missed on a weak connection).
-  const loadProfile = useRef(async () => {})
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -59,26 +56,21 @@ export function AuthProvider({ children }) {
     let alive = true
     setReady(false)
     const load = async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
+      const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
       if (!alive) return
-      // A failed reload (weak signal) keeps the profile we already have.
-      if (error) { setReady(true); return }
       setUser(data ? mapProfile(data) : null)
       setReady(true)
     }
-    loadProfile.current = load
     load()
     // Follow our own profile so approval by the admin takes effect immediately.
     const channel = supabase
       .channel('my-profile-' + uid)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: 'id=eq.' + uid }, load)
       .subscribe()
-    return () => { alive = false; loadProfile.current = async () => {}; supabase.removeChannel(channel) }
+    return () => { alive = false; supabase.removeChannel(channel) }
   }, [uid, sessionChecked])
 
-  const refreshUser = () => loadProfile.current()
-
-  return <AuthContext.Provider value={{ session, user, ready, refreshUser }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ session, user, ready }}>{children}</AuthContext.Provider>
 }
 
 export const useAuth = () => useContext(AuthContext)
